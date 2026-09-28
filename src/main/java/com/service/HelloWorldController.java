@@ -8,6 +8,6 @@ public class HelloWorldController {
 
     @RequestMapping("/helloWorld.do")
     public String helloWorld() {
-        return "forward:/WEB-INF/jsp/egovframework/cmm/helloWorld.jsp";
+        return "forward:/WEB-INF/jsp/helloWorld.jsp";
     }
 }
