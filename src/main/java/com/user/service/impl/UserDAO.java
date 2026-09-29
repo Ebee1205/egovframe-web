@@ -5,6 +5,7 @@ import java.util.List;
 import org.egovframe.rte.psl.dataaccess.EgovAbstractMapper;
 import org.springframework.stereotype.Repository;
 
+import com.user.service.UserFilterVO;
 import com.user.service.UserVO;
 
 @Repository
@@ -14,8 +15,12 @@ public class UserDAO extends EgovAbstractMapper {
 		return selectOne("userDAO.selectUser", userVO);
 	}
 
-	public List<UserVO> selectUserList(UserVO userVO) throws Exception {
-		return selectList("userDAO.selectUserList", userVO);
+	public List<UserVO> selectUserList(UserFilterVO filterVO) throws Exception {
+		return selectList("userDAO.selectUserList", filterVO);
+	}
+
+	public int selectUserListCnt(UserFilterVO filterVO) throws Exception {
+		return selectOne("userDAO.selectUserListCnt", filterVO);
 	}
 
 	public void insertUser(UserVO userVO) throws Exception {

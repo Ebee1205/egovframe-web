@@ -4,8 +4,8 @@ import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.user.service.UserFilterVO;
 import com.user.service.UserService;
-import com.user.service.UserVO;
 
 @Controller
 public class UserController {
@@ -17,8 +17,11 @@ public class UserController {
 	}
 
 	@RequestMapping("/userList.do")
-	public String userList(Model model) throws Exception {
-		model.addAttribute("users", userService.selectUserList(new UserVO()));
+	public String userList(UserFilterVO filterVO, Model model) throws Exception {
+		model.addAttribute("users", userService.selectUserList(filterVO));
+		model.addAttribute("filterVO", filterVO);
+		model.addAttribute("totalPage", filterVO.getTotalCnt() == 0 ? 0
+				: (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize());
 		return "forward:/WEB-INF/jsp/user/UserList.jsp";
 	}
 }

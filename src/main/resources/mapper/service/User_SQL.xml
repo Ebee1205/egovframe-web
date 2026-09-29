@@ -24,21 +24,32 @@
         WHERE uid = #{uid}
     </select>
 
-    <select id="selectUserList" parameterType="UserVO" resultMap="userResultMap">
+    <select id="selectUserList" parameterType="UserFilterVO" resultMap="userResultMap">
         SELECT <include refid="userColumns"/>
         FROM tb_users
         <where>
             <if test="email != null and email != ''">
-                AND email = #{email}
+                AND email LIKE '%' || #{email} || '%'
             </if>
-            <if test="status != null and status != ''">
-                AND status = #{status}
-            </if>
-            <if test="rid != null">
-                AND rid = #{rid}
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE '%' || #{nickname} || '%'
             </if>
         </where>
         ORDER BY uid DESC
+        LIMIT #{pageSize} OFFSET #{firstIndex}
+    </select>
+
+    <select id="selectUserListCnt" parameterType="UserFilterVO" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_users
+        <where>
+            <if test="email != null and email != ''">
+                AND email LIKE '%' || #{email} || '%'
+            </if>
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE '%' || #{nickname} || '%'
+            </if>
+        </where>
     </select>
 
     <insert id="insertUser" parameterType="UserVO">

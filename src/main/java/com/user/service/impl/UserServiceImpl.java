@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.user.service.UserFilterVO;
 import com.user.service.UserService;
 import com.user.service.UserVO;
 
@@ -22,8 +23,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserVO> selectUserList(UserVO userVO) throws Exception {
-		return userDAO.selectUserList(userVO);
+	public List<UserVO> selectUserList(UserFilterVO filterVO) throws Exception {
+		if (filterVO.getPageIndex() < 1) {
+			filterVO.setPageIndex(1);
+		}
+		filterVO.setFirstIndex((filterVO.getPageIndex() - 1) * filterVO.getPageSize());
+		filterVO.setLastIndex(filterVO.getFirstIndex() + filterVO.getPageSize());
+		filterVO.setTotalCnt(selectUserListCnt(filterVO));
+		return userDAO.selectUserList(filterVO);
+	}
+
+	@Override
+	public int selectUserListCnt(UserFilterVO filterVO) throws Exception {
+		return userDAO.selectUserListCnt(filterVO);
 	}
 
 	@Override
