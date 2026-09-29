@@ -11,6 +11,7 @@
     <title>공통코드 목록</title>
     <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>" />
     <link href="<c:url value='/resources/css/base.css'/>" rel="stylesheet" type="text/css">
+    <link href="<c:url value='/resources/css/form.css'/>" rel="stylesheet" type="text/css">
 </head>
 <body>
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
@@ -31,16 +32,32 @@
             <c:set var="dcs" scope="request" value="등록된 전체 코드와 루트 코드를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
 
-            <div class="col-12 col-md-5 col-lg-4">
-                <label for="rootCode" class="form-label">루트 코드</label>
-                <select class="form-select" id="rootCode" name="rootCode">
-                    <option value="">루트 코드를 선택하세요</option>
-                    <c:forEach var="rootCode" items="${rootCodes}">
-                        <option value="${rootCode.cid}">
-                            <c:out value="${rootCode.code}"/> - <c:out value="${rootCode.name}"/>
-                        </option>
-                    </c:forEach>
-                </select>
+
+            <div class="search-box | bg-body-tertiary">
+                <div class="d-flex | flex-wrap | align-items-center | gap-2">
+                    <input
+                        class="form-control | input-box" 
+                        type="text"
+                        placeholder="코드명 검색"
+                        id="code" name="code"
+                    ></input>
+                    
+                    <select 
+                        class="form-select | input-box" 
+                        placeholder="코드 그룹 선택"
+                        id="rootCode" name="rootCode">
+                        <option value="">전체</option>
+                        <c:forEach var="code" items="${rootCodes}">
+                            <option value="${code.cid}">
+                                <c:out value="${code.code}"/> - <c:out value="${code.name}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <!-- 우측: 검색 버튼 -->
+                <button type="button" class="btn | btn-primary">검색</button>
+
             </div>
         
             <div class="table-responsive">
