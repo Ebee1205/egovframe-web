@@ -16,12 +16,14 @@
 		
 		<typeAlias alias="comDefaultVO"		type="com.cmm.ComDefaultVO" />
 		<typeAlias alias="UserVO"			 type="com.user.service.UserVO" />
-		<typeAlias alias="CodeVO"			 type="com.code.service.CodeVO" />
+		<typeAlias alias="CodeVO"			 type="com.code.service.CodeDetailVO" />
+		<typeAlias alias="codeDefaultVO"	 type="com.code.service.CodeDefaultVO" />
 	</typeAliases>
 
 	<mappers>
 		<mapper resource="mapper/service/User_SQL.xml" />
 		<mapper resource="mapper/service/Code_SQL.xml" />
+		<mapper resource="mapper/service/CodeUse_SQL.xml" />
 	</mappers>
     
 </configuration>

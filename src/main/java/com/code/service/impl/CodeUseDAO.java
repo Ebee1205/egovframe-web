@@ -22,6 +22,17 @@ public class CodeUseDAO extends EgovAbstractMapper {
     }
 
     /**
+     * 공통코드의 루트 코드만 불러온다.
+     *
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<CodeDefaultVO> selectCodeRoot(CodeDefaultVO vo) throws Exception {
+    	return selectList("CodeUseDAO.selectCodeRoot", vo);
+    }
+
+    /**
      * 공통코드로 사용할 가게정보를 불러온다.
      *
      * @param vo

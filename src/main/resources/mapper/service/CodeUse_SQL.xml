@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CodeUseDAO">
+
+	<resultMap id="codeDefaultResultMap" type="codeDefaultVO">
+		<id property="cid" column="cid"/>
+		<result property="parentCid" column="p_cid"/>
+		<result property="parentCode" column="p_code"/>
+		<result property="parentName" column="p_name"/>
+		<result property="code" column="code"/>
+		<result property="name" column="name"/>
+	</resultMap>
+
+	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 코드 전체를 조회 -->
+	<select id="selectCmmCodeDetail" parameterType="codeDefaultVO" resultMap="codeDefaultResultMap">
+		SELECT c.cid, c.p_cid, c.code, c.name,
+			p.code AS p_code, p.name AS p_name
+		FROM tb_cmn_code c
+		JOIN tb_cmn_code p ON p.cid = c.p_cid
+		<where>
+			<if test="parentCode != null and parentCode != ''">
+				AND p.code = #{parentCode}
+			</if>
+			<if test="parentCid != null">
+				AND c.p_cid = #{parentCid}
+			</if>
+			<if test="code != null and code != ''">
+				AND c.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND c.name LIKE '%' || #{name} || '%'
+			</if>
+			AND c.status = 'Y'
+		</where>
+		ORDER BY c.cid
+	</select>
+
+	<!-- 공통코드의 루트 코드만 조회 -->
+	<select id="selectCodeRoot" parameterType="codeDefaultVO" resultMap="codeDefaultResultMap">
+		SELECT c.cid, c.p_cid, c.code, c.name,
+			NULL AS p_code, NULL AS p_name
+		FROM tb_cmn_code c
+		<where>
+			c.p_cid IS NULL
+			<if test="code != null and code != ''">
+				AND c.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND c.name LIKE '%' || #{name} || '%'
+			</if>
+			AND c.status = 'Y'
+		</where>
+		ORDER BY c.cid
+	</select>
+
+</mapper>
