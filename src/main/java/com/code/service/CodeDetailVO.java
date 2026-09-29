@@ -6,7 +6,8 @@ import java.util.Date;
 public class CodeDetailVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
+	// 필드 선언부
 	private Long cid; // 코드 ID
 	private Long parentCid; // 상위 코드 ID
 	private String parentCode; // 상위 코드
@@ -19,6 +20,8 @@ public class CodeDetailVO implements Serializable {
 	private Date cDate; // 생성일
 	private Date uDate; // 수정일
 
+
+	// Getter / Setter
     public Long getCid() {
 		return cid;
 	}

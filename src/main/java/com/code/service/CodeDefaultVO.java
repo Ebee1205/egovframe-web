@@ -6,6 +6,7 @@ public class CodeDefaultVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	// 필드 선언부
 	private Long cid; // 코드 ID
 	private Long parentCid; // 상위 코드 ID
 	private String parentCode; // 상위 코드
@@ -15,7 +16,8 @@ public class CodeDefaultVO implements Serializable {
 	private String haveFilter; // 상세 조건 여부
 	private String filter = ""; // 상세조건
 
-
+	
+	// Getter / Setter
     public Long getCid() {
 		return cid;
 	}

@@ -22,7 +22,6 @@ public class ComSearchVO implements Serializable {
 
 
     // Getter / Setter
-    
     public String getSearchCondition() {
         return searchCondition;
     }
