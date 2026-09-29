@@ -16,6 +16,7 @@
 		
 		<typeAlias alias="comDefaultVO"		type="com.cmm.ComDefaultVO" />
 		<typeAlias alias="UserVO"			 type="com.user.service.UserVO" />
+		<typeAlias alias="CodeVO"			 type="com.code.service.CodeVO" />
 	</typeAliases>
 
 	<mappers>

@@ -30,27 +30,33 @@
                 <table class="table | table-light | table-hover | table-bordered">
                     <thead>
                         <tr>
-                            <th>코드 ID</th>
                             <th>코드명</th>
                             <th>코드값</th>
-                            <th>상위 코드 ID</th>
+                            <th>상위 코드</th>
+                            <th>레벨</th>
                             <th>설명</th>
+                            <th>상태</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:choose>
-                            <c:when test="${empty users}">
-                                <tr><td class="text-center | text-body-secondary | py-4" colspan="6">등록된 사용자가 없습니다.</td></tr>
+                            <c:when test="${empty codes}">
+                                <tr><td class="text-center | text-body-secondary | py-4" colspan="6">등록된 코드가 없습니다.</td></tr>
                             </c:when>
                             <c:otherwise>
-                                <c:forEach var="user" items="${users}">
+                                <c:forEach var="code" items="${codes}">
                                     <tr>
-                                        <td><c:out value="${user.uid}"/></td>
-                                        <td><c:out value="${user.email}"/></td>
-                                        <td><c:out value="${user.nickname}"/></td>
-                                        <td><c:out value="${user.type}"/></td>
-                                        <td><c:out value="${user.status}"/></td>
-                                        <td><c:out value="${user.rid}"/></td>
+                                        <td><c:out value="${code.name}"/></td>
+                                        <td><c:out value="${code.code}"/></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${empty code.parentCid}">-</c:when>
+                                                <c:otherwise><c:out value="${code.parentCode}"/></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td><c:out value="${code.level}"/></td>
+                                        <td><c:out value="${code.dsc}"/></td>
+                                        <td><c:out value="${code.status}"/></td>
                                     </tr>
                                 </c:forEach>
                             </c:otherwise>

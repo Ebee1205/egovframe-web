@@ -59,3 +59,6 @@ local.properties
 # Environment / secrets
 .env
 *.env.local
+
+# Local database credentials, including Maven/Eclipse copies.
+**/database-local.properties

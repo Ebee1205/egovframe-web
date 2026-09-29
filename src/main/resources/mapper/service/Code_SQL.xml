@@ -2,12 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="codeDAO">
 
-	<resultMap id="codeResultMap" type="egovMap">
+	<resultMap id="codeResultMap" type="CodeVO">
 		<id property="cid" column="cid"/>
-		<result property="pCid" column="p_cid"/>
+		<result property="parentCid" column="p_cid"/>
+		<result property="parentCode" column="p_code"/>
+		<result property="parentName" column="p_name"/>
 		<result property="code" column="code"/>
 		<result property="name" column="name"/>
-		<result property="cLvl" column="c_lvl"/>
+		<result property="level" column="c_lvl"/>
 		<result property="dsc" column="dsc"/>
 		<result property="status" column="status"/>
 		<result property="cDate" column="c_date"/>
@@ -15,43 +17,46 @@
 	</resultMap>
 
 	<sql id="codeColumns">
-		cid, p_cid, code, name, c_lvl, dsc, status, c_date, u_date
+		c.cid, c.p_cid, c.code, c.name, c.c_lvl, c.dsc, c.status, c.c_date, c.u_date,
+		p.code AS p_code, p.name AS p_name
 	</sql>
 
-	<select id="selectCode" parameterType="egovMap" resultMap="codeResultMap">
+	<select id="selectCode" parameterType="CodeVO" resultMap="codeResultMap">
 		SELECT <include refid="codeColumns"/>
-		FROM tb_cmn_code
-		WHERE cid = #{cid}
+		FROM tb_cmn_code c
+		LEFT JOIN tb_cmn_code p ON p.cid = c.p_cid
+		WHERE c.cid = #{cid}
 	</select>
 
-	<select id="selectCodeList" parameterType="egovMap" resultMap="codeResultMap">
+	<select id="selectCodeList" parameterType="CodeVO" resultMap="codeResultMap">
 		SELECT <include refid="codeColumns"/>
-		FROM tb_cmn_code
+		FROM tb_cmn_code c
+		LEFT JOIN tb_cmn_code p ON p.cid = c.p_cid
 		<where>
-			<if test="pCid != null">
-				AND p_cid = #{pCid}
+			<if test="parentCid != null">
+				AND c.p_cid = #{parentCid}
 			</if>
 			<if test="code != null and code != ''">
-				AND code = #{code}
+				AND c.code = #{code}
 			</if>
 			<if test="name != null and name != ''">
-				AND name LIKE '%' || #{name} || '%'
+				AND c.name LIKE '%' || #{name} || '%'
 			</if>
-			<if test="cLvl != null">
-				AND c_lvl = #{cLvl}
+			<if test="level != null">
+				AND c.c_lvl = #{level}
 			</if>
 			<if test="status != null and status != ''">
-				AND status = #{status}
+				AND c.status = #{status}
 			</if>
 		</where>
-		ORDER BY c_lvl, p_cid NULLS FIRST, cid
+		ORDER BY c.c_lvl, c.p_cid NULLS FIRST, c.cid
 	</select>
 
-	<insert id="insertCode" parameterType="egovMap">
+	<insert id="insertCode" parameterType="CodeVO">
 		INSERT INTO tb_cmn_code (
 			p_cid, code, name, c_lvl, dsc, status, c_date, u_date
 		) VALUES (
-			#{pCid, jdbcType=BIGINT}, #{code}, #{name}, #{cLvl}, #{dsc}, #{status},
+			#{parentCid, jdbcType=BIGINT}, #{code}, #{name}, #{level}, #{dsc}, #{status},
 			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
 			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
 		)
@@ -60,19 +65,19 @@
 		</selectKey>
 	</insert>
 
-	<update id="updateCode" parameterType="egovMap">
+	<update id="updateCode" parameterType="CodeVO">
 		UPDATE tb_cmn_code
-		SET p_cid = #{pCid, jdbcType=BIGINT},
+		SET p_cid = #{parentCid, jdbcType=BIGINT},
 			code = #{code},
 			name = #{name},
-			c_lvl = #{cLvl},
+			c_lvl = #{level},
 			dsc = #{dsc},
 			status = #{status},
 			u_date = CURRENT_TIMESTAMP
 		WHERE cid = #{cid}
 	</update>
 
-	<delete id="deleteCode" parameterType="egovMap">
+	<delete id="deleteCode" parameterType="CodeVO">
 		DELETE FROM tb_cmn_code
 		WHERE cid = #{cid}
 	</delete>
