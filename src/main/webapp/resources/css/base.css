@@ -34,3 +34,7 @@ a:link, a:visited, a:hover, a:active {text-decoration: none;}
 body {font-family: 'Pretendard GOV', sans-serif; font-size: 16px;}
 button, textarea {font-family: 'Pretendard GOV', sans-serif;}
 button {cursor: pointer;}
+
+@media (min-width: 992px) {
+    .main-content {margin-inline-start: var(--cui-sidebar-width, 16rem);}
+}
