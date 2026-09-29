@@ -32,7 +32,7 @@
             <c:set var="dcs" scope="request" value="등록된 사용자를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
 
-            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/userList.do'/>">
+            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/UserList.do'/>">
                 <input type="hidden" name="pageIndex" value="1" />
                 <div class="d-flex | flex-wrap | align-items-center | gap-2">
                     <input
@@ -101,7 +101,7 @@
                             <c:forEach var="i" begin="1" end="${totalPage}">
                                 <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
                                     <a class="page-link"
-                                        href="<c:url value='/userList.do'>
+                                        href="<c:url value='/UserList.do'>
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='email' value='${filterVO.email}'/>
                                                 <c:param name='nickname' value='${filterVO.nickname}'/>

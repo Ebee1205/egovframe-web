@@ -16,12 +16,17 @@ public class UserController {
 		this.userService = userService;
 	}
 
-	@RequestMapping("/userList.do")
+	@RequestMapping("/UserList.do")
 	public String userList(UserFilterVO filterVO, Model model) throws Exception {
 		model.addAttribute("users", userService.selectUserList(filterVO));
 		model.addAttribute("filterVO", filterVO);
 		model.addAttribute("totalPage", filterVO.getTotalCnt() == 0 ? 0
 				: (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize());
 		return "forward:/WEB-INF/jsp/user/UserList.jsp";
+	}
+
+	@RequestMapping("/UserCreate.do")
+	public String userCreate() {
+		return "forward:/WEB-INF/jsp/user/UserCreate.jsp";
 	}
 }

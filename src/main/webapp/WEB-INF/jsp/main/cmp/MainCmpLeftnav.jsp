@@ -11,7 +11,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/userList.do'/>">
+            <a class="nav-link" href="<c:url value='/UserList.do'/>">
                 <i class="nav-icon cil-layers"></i> 사용자
             </a>
         </li>

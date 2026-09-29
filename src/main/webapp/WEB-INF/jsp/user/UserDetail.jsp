@@ -31,8 +31,9 @@
             <c:set var="title" scope="request" value="사용자 등록"/>
             <c:set var="dcs" scope="request" value="새로운 사용자를 등록합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
-
         </div>
+
+        
     </div>
 </body>
 </html>
