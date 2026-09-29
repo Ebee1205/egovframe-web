@@ -19,7 +19,7 @@
 	</typeAliases>
 
 	<mappers>
-		<mapper resource="mapper/user/User_SQL.xml" />
+		<mapper resource="mapper/service/User_SQL.xml" />
 	</mappers>
     
 </configuration>
