@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>사용자 목록</title>
     <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>" />
+    <link href="<c:url value='/resources/css/base.css'/>" rel="stylesheet" type="text/css">
 </head>
 <body>
     <main class="container py-4">
