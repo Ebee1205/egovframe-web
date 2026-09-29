@@ -1,22 +1,19 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>사용자 목록</title>
-    <style>
-        body { margin: 40px; font-family: sans-serif; color: #222; }
-        h1 { margin-bottom: 24px; }
-        table { width: 100%; max-width: 900px; border-collapse: collapse; }
-        th, td { padding: 12px; border: 1px solid #d9dfe5; text-align: left; }
-        th { background: #f3f5f7; }
-        .empty { padding: 24px; color: #68737d; text-align: center; }
-    </style>
+    <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>" />
 </head>
 <body>
-    <h1>사용자 목록</h1>
-    <table>
+    <main class="container py-4">
+        <h1 class="h3 mb-4">사용자 목록 2</h1>
+        <div class="table-responsive">
+    <table class="table | table-light | table-hover | table-bordered">
         <thead>
             <tr>
                 <th>UID</th>
@@ -30,7 +27,7 @@
         <tbody>
             <c:choose>
                 <c:when test="${empty users}">
-                    <tr><td class="empty" colspan="6">등록된 사용자가 없습니다.</td></tr>
+                    <tr><td class="text-center | text-body-secondary | py-4" colspan="6">등록된 사용자가 없습니다.</td></tr>
                 </c:when>
                 <c:otherwise>
                     <c:forEach var="user" items="${users}">
@@ -47,5 +44,7 @@
             </c:choose>
         </tbody>
     </table>
+        </div>
+    </main>
 </body>
 </html>
