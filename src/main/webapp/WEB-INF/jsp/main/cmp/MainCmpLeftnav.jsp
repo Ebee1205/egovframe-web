@@ -29,5 +29,9 @@
             </ul>
         </li> -->
     </ul>
+
+    <div class="sidebar-footer | border-top | d-flex">
+        <p><small>v0.0.1</small></p>
+    </div>
 </div>
 <!--// Leftnav -->
