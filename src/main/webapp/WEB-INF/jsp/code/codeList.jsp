@@ -87,7 +87,7 @@
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty codes}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="10">등록된 코드가 없습니다.</td></tr>
+                                    <tr><td class="text-center text-body-secondary py-4" colspan="9">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="code" items="${codes}">

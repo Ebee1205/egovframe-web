@@ -30,7 +30,7 @@
 			<if test="name != null and name != ''">
 				AND c.name LIKE '%' || #{name} || '%'
 			</if>
-			AND c.status = '활성'
+			AND c.status = 'Y'
 		</where>
 		ORDER BY c.cid
 	</select>
@@ -48,7 +48,7 @@
 			<if test="name != null and name != ''">
 				AND c.name LIKE '%' || #{name} || '%'
 			</if>
-			AND c.status = '활성'
+			AND c.status = 'Y'
 		</where>
 		ORDER BY c.cid
 	</select>
