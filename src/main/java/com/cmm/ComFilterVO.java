@@ -3,14 +3,16 @@ package com.cmm;
 import java.io.Serializable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class ComSearchVO implements Serializable {
+public class ComFilterVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     // 필드 선언부
-    private String searchCondition = ""; // 검색조건
-    private String searchKeyword = ""; // 검색Keyword
-    private String searchUseYn = ""; // 검색사용여부
+    private String filterCondition = ""; // 검색조건
+    private String filterKeyword = ""; // 검색Keyword
+    private String filterUseYn = ""; // 검색사용여부
+    
+    private int totalCnt = 0; // 총 갯수
 
     private int pageIndex = 1; // 현재페이지
     private int pageNum = 10; // 페이지갯수
@@ -22,28 +24,36 @@ public class ComSearchVO implements Serializable {
 
 
     // Getter / Setter
-    public String getSearchCondition() {
-        return searchCondition;
+    public String getFilterCondition() {
+        return filterCondition;
     }
 
-    public void setSearchCondition(String searchCondition) {
-        this.searchCondition = searchCondition;
+    public void setFilterCondition(String filterCondition) {
+        this.filterCondition = filterCondition;
     }
 
-    public String getSearchKeyword() {
-        return searchKeyword;
+    public String getFilterKeyword() {
+        return filterKeyword;
     }
 
-    public void setSearchKeyword(String searchKeyword) {
-        this.searchKeyword = searchKeyword;
+    public void setFilterKeyword(String filterKeyword) {
+        this.filterKeyword = filterKeyword;
     }
 
-    public String getSearchUseYn() {
-        return searchUseYn;
+    public String getFilterUseYn() {
+        return filterUseYn;
     }
 
-    public void setSearchUseYn(String searchUseYn) {
-        this.searchUseYn = searchUseYn;
+    public void setFilterUseYn(String filterUseYn) {
+        this.filterUseYn = filterUseYn;
+    }
+
+    public int getTotalCnt() {
+        return totalCnt;
+    }
+
+    public void setTotalCnt(int totalCnt) {
+        this.totalCnt = totalCnt;
     }
 
     public int getPageIndex() {
