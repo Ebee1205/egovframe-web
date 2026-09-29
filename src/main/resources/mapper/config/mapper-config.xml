@@ -20,6 +20,7 @@
 
 	<mappers>
 		<mapper resource="mapper/service/User_SQL.xml" />
+		<mapper resource="mapper/service/Code_SQL.xml" />
 	</mappers>
     
 </configuration>
