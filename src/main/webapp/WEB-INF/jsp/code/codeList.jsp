@@ -27,7 +27,7 @@
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
         
-        <div class="container-lg">
+        <div class="p-3 | align-items-center">
             <c:set var="path" scope="request" value="홈/목록"/>
             <c:set var="title" scope="request" value="공통코드 목록"/>
             <c:set var="dcs" scope="request" value="등록된 전체 코드와 루트 코드를 확인합니다."/>
@@ -42,7 +42,7 @@
                         id="parentCid" name="parentCid">
                         <option value="">전체</option>
                         <c:forEach var="code" items="${rootCodes}">
-                            <option value="${code.cid}" ${code.cid == searchVO.parentCid ? 'selected' : ''}>
+                            <option value="${code.cid}" ${code.cid == filterVO.parentCid ? 'selected' : ''}>
                                 <c:out value="${code.code}"/> - <c:out value="${code.name}"/>
                             </option>
                         </c:forEach>
@@ -53,7 +53,7 @@
                         type="text"
                         placeholder="코드명 검색"
                         id="name" name="name"
-                        value="${searchVO.name}"
+                        value="${filterVO.name}"
                     ></input>
                 </div>
 
@@ -64,14 +64,14 @@
             <div class="table-container">
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
-                    <p class="table-info-text">총 <c:out value="${searchVO.totalCnt}"/>건</p>
+                    <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
                     <button type="create" class="btn | btn-outline-secondary">신규 등록</button>
                 </div>
 
                 <!-- 테이블 본문 -->
                 <div class="table-responsive">
                     <table class="table | table-hover | table-bordered | align-middle">
-                        <thead class="table-light">
+                        <thead class="table-light | text-center">
                             <tr>
                                 <th scope="col">상위 코드</th>
                                 <th scope="col">상위 코드명</th>
@@ -82,12 +82,13 @@
                                 <th scope="col">상태</th>
                                 <th scope="col">등록일</th>
                                 <th scope="col">수정일</th>
+                                <th scope="col">관리</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty codes}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="9">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center text-body-secondary py-4" colspan="10">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="code" items="${codes}">
@@ -101,6 +102,10 @@
                                             <td><c:out value="${code.status}"/></td>
                                             <td><fmt:formatDate value="${code.CDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><fmt:formatDate value="${code.UDate}" pattern="yyyy-MM-dd HH:mm"/></td>
+                                            <td class="text-nowrap">
+                                                <button type="button" class="btn | btn-sm | btn-outline-primary" data-code-id="${code.cid}" aria-label="${code.name} 수정">수정</button>
+                                                <button type="button" class="btn | btn-sm | btn-outline-danger" data-code-id="${code.cid}" aria-label="${code.name} 삭제">삭제</button>
+                                            </td>
                                         </tr>
                                     </c:forEach>
                                 </c:otherwise>
@@ -110,16 +115,16 @@
                 </div>
                 
                 <!-- 테이블 페이징 -->
-                <c:if test="${searchVO.totalCnt > 0}">
+                <c:if test="${filterVO.totalCnt > 0}">
                     <nav aria-label="공통코드 목록 페이징">
                         <ul class="pagination | justify-content-center">
                             <c:forEach var="i" begin="1" end="${totalPage}">
-                                <li class="page-item ${i == searchVO.pageIndex ? 'active' : ''}">
+                                <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
                                     <a class="page-link"
                                         href="<c:url value='/CodeList.do'>
                                                 <c:param name='pageIndex' value='${i}'/>
-                                                <c:param name='name' value='${searchVO.name}'/>
-                                                <c:param name='parentCid' value='${searchVO.parentCid}'/>
+                                                <c:param name='name' value='${filterVO.name}'/>
+                                                <c:param name='parentCid' value='${filterVO.parentCid}'/>
                                               </c:url>">
                                         <c:out value="${i}"/>
                                     </a>
@@ -133,5 +138,9 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        
+    </div>
 </body>
 </html>
