@@ -12,12 +12,23 @@
     <link href="<c:url value='/resources/css/base.css'/>" rel="stylesheet" type="text/css">
 </head>
 <body>
-<noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
-    
+    <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
+        
 
-<div>
-    렌더화면입니다.
-</div>
+    <!-- Leftnav -->
+    <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpLeftnav.jsp" />
+    <!--// Leftnav -->
+
+    <div class="wrapper | bg-body | main-content">
+        <!-- Header -->
+        <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
+        <!--// Header -->
+
+        <div class="container-lg">
+            <!-- Content here -->
+            렌더화면입니다
+        </div>
+    </div>
 
 
 </body>
