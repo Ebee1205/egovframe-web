@@ -1,7 +1,7 @@
 .search-box {
     width: 100%;
     padding: 12px;
-    margin-top: 48px;
+    margin-top: 16px;
     margin-bottom: 24px;
     border-radius: 8px;
     display: flex;
@@ -12,7 +12,7 @@
 
 
 .input-box {
-    width: 240px;
+    width: 256px;
     font-size: 1rem;
 }
 
