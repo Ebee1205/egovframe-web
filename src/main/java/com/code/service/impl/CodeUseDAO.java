@@ -33,6 +33,17 @@ public class CodeUseDAO extends EgovAbstractMapper {
     }
 
     /**
+     * 공통코드로 사용할 사용자정보를 불러온다.
+     *
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<CodeDefaultVO> selectUserDetail(CodeDefaultVO vo) throws Exception {
+    	return selectList("CodeUseDAO.selectUserDetail", vo);
+    }
+
+    /**
      * 공통코드로 사용할 가게정보를 불러온다.
      *
      * @param vo
@@ -41,5 +52,27 @@ public class CodeUseDAO extends EgovAbstractMapper {
      */
     public List<CodeDefaultVO> selectStoreDetail(CodeDefaultVO vo) throws Exception {
     	return selectList("CodeUseDAO.selectStoreDetail", vo);
+    }
+
+    /**
+     * 공통코드로 사용할 이벤트정보를 불러온다.
+     *
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<CodeDefaultVO> selectEventDetail(CodeDefaultVO vo) throws Exception {
+    	return selectList("CodeUseDAO.selectEventDetail", vo);
+    }
+
+    /**
+     * 공통코드로 사용할 이벤트상태를 불러온다.
+     *
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<CodeDefaultVO> selectEventStatus(CodeDefaultVO vo) throws Exception {
+    	return selectList("CodeUseDAO.selectEventStatus", vo);
     }
 }

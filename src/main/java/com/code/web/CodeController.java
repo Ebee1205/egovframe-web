@@ -19,6 +19,7 @@ public class CodeController {
 	@RequestMapping("/CodeList.do")
 	public String userList(Model model) throws Exception {
 		model.addAttribute("codes", codeService.selectCodeList(new CodeDetailVO()));
+		model.addAttribute("rootCodes", codeService.selectCodeRoot());
 		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 }

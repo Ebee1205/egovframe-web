@@ -8,6 +8,8 @@ public interface CodeService {
 
 	List<CodeDetailVO> selectCodeList(CodeDetailVO codeVO) throws Exception;
 
+	List<CodeDefaultVO> selectCodeRoot() throws Exception;
+
 	void insertCode(CodeDetailVO codeVO) throws Exception;
 
 	void updateCode(CodeDetailVO codeVO) throws Exception;
