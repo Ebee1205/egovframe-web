@@ -57,7 +57,7 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
-                    <button type="create" class="btn | btn-outline-secondary">신규 등록</button>
+                    <button type="create" class="btn | btn-outline-secondary" onclick="location.href='<c:url value='/UserCreate.do'/>'">신규 등록</button>
                 </div>
 
                 <div class="table-responsive">
@@ -75,7 +75,7 @@
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty users}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="6">등록된 사용자가 없습니다.</td></tr>
+                                    <tr><td class="text-center text-body-secondary py-4" colspan="6">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="user" items="${users}">
