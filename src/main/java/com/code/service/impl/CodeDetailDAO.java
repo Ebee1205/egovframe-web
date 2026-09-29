@@ -18,6 +18,10 @@ public class CodeDetailDAO extends EgovAbstractMapper {
 		return selectList("codeDAO.selectCodeList", codeVO);
 	}
 
+	public int selectCodeListCnt(CodeDetailVO codeVO) throws Exception {
+		return selectOne("codeDAO.selectCodeListCnt", codeVO);
+	}
+
 	public void insertCode(CodeDetailVO codeVO) throws Exception {
 		insert("codeDAO.insertCode", codeVO);
 	}

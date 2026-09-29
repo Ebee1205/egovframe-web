@@ -3,7 +3,9 @@ package com.code.service;
 import java.io.Serializable;
 import java.util.Date;
 
-public class CodeDetailVO implements Serializable {
+import com.cmm.ComFilterVO;
+
+public class CodeDetailVO extends ComFilterVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

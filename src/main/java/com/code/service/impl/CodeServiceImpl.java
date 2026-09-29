@@ -26,7 +26,18 @@ public class CodeServiceImpl implements CodeService {
 
 	@Override
 	public List<CodeDetailVO> selectCodeList(CodeDetailVO codeVO) throws Exception {
+		if (codeVO.getPageIndex() < 1) {
+			codeVO.setPageIndex(1); // 페이지 번호 보정
+		}
+		codeVO.setFirstIndex((codeVO.getPageIndex() - 1) * codeVO.getPageSize()); // 조회 시작 위치(OFFSET) 계산
+		codeVO.setLastIndex(codeVO.getFirstIndex() + codeVO.getPageSize());
+		codeVO.setTotalCnt(selectCodeListCnt(codeVO)); // 페이징 처리를 위한 총 건수 조회
 		return codeDAO.selectCodeList(codeVO);
+	}
+
+	@Override
+	public int selectCodeListCnt(CodeDetailVO codeVO) throws Exception {
+		return codeDAO.selectCodeListCnt(codeVO);
 	}
 
 	@Override

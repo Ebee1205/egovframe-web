@@ -17,9 +17,11 @@ public class CodeController {
 	}
 
 	@RequestMapping("/CodeList.do")
-	public String userList(Model model) throws Exception {
-		model.addAttribute("codes", codeService.selectCodeList(new CodeDetailVO()));
+	public String userList(CodeDetailVO searchVO, Model model) throws Exception {
+		model.addAttribute("codes", codeService.selectCodeList(searchVO));
 		model.addAttribute("rootCodes", codeService.selectCodeRoot());
+		model.addAttribute("searchVO", searchVO);
+		model.addAttribute("totalPage", (searchVO.getTotalCnt() - 1) / searchVO.getPageSize() + 1);
 		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 }

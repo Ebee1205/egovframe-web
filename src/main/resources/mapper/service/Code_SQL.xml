@@ -28,10 +28,7 @@
 		WHERE c.cid = #{cid}
 	</select>
 
-	<select id="selectCodeList" parameterType="CodeVO" resultMap="codeResultMap">
-		SELECT <include refid="codeColumns"/>
-		FROM tb_cmn_code c
-		LEFT JOIN tb_cmn_code p ON p.cid = c.p_cid
+	<sql id="codeListWhere">
 		<where>
 			<if test="parentCid != null">
 				AND c.p_cid = #{parentCid}
@@ -49,7 +46,21 @@
 				AND c.status = #{status}
 			</if>
 		</where>
+	</sql>
+
+	<select id="selectCodeList" parameterType="CodeVO" resultMap="codeResultMap">
+		SELECT <include refid="codeColumns"/>
+		FROM tb_cmn_code c
+		LEFT JOIN tb_cmn_code p ON p.cid = c.p_cid
+		<include refid="codeListWhere"/>
 		ORDER BY c.c_lvl, c.p_cid NULLS FIRST, c.cid
+		LIMIT #{pageSize} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectCodeListCnt" parameterType="CodeVO" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_cmn_code c
+		<include refid="codeListWhere"/>
 	</select>
 
 	<insert id="insertCode" parameterType="CodeVO">
