@@ -1,0 +1,103 @@
+package com.cmm;
+
+import java.io.Serializable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+public class ComSearchVO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    // 필드 선언부
+    private String searchCondition = ""; // 검색조건
+    private String searchKeyword = ""; // 검색Keyword
+    private String searchUseYn = ""; // 검색사용여부
+
+    private int pageIndex = 1; // 현재페이지
+    private int pageNum = 10; // 페이지갯수
+    private int pageSize = 10; // 페이지사이즈
+    private int pageCnt = 10; // 페이지당 노출 갯수
+
+    private int firstIndex = 1; // 첫번째 인덱스
+    private int lastIndex = 1; // 마지막 인덱스
+
+
+    // Getter / Setter
+    
+    public String getSearchCondition() {
+        return searchCondition;
+    }
+
+    public void setSearchCondition(String searchCondition) {
+        this.searchCondition = searchCondition;
+    }
+
+    public String getSearchKeyword() {
+        return searchKeyword;
+    }
+
+    public void setSearchKeyword(String searchKeyword) {
+        this.searchKeyword = searchKeyword;
+    }
+
+    public String getSearchUseYn() {
+        return searchUseYn;
+    }
+
+    public void setSearchUseYn(String searchUseYn) {
+        this.searchUseYn = searchUseYn;
+    }
+
+    public int getPageIndex() {
+        return pageIndex;
+    }
+
+    public void setPageIndex(int pageIndex) {
+        this.pageIndex = pageIndex;
+    }
+
+    public int getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int getPageCnt() {
+        return pageCnt;
+    }
+
+    public void setPageCnt(int pageCnt) {
+        this.pageCnt = pageCnt;
+    }
+
+    public int getFirstIndex() {
+        return firstIndex;
+    }
+
+    public void setFirstIndex(int firstIndex) {
+        this.firstIndex = firstIndex;
+    }
+
+    public int getLastIndex() {
+        return lastIndex;
+    }
+
+    public void setLastIndex(int lastIndex) {
+        this.lastIndex = lastIndex;
+    }
+
+    // 공통
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+}
