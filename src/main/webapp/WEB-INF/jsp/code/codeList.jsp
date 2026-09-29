@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -23,40 +24,59 @@
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
-
+        
         <div class="container-lg">
-            <!-- Content here -->
+            <c:set var="path" scope="request" value="홈/목록"/>
+            <c:set var="title" scope="request" value="공통코드 목록"/>
+            <c:set var="dcs" scope="request" value="등록된 전체 코드와 루트 코드를 확인합니다."/>
+            <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
+
+            <div class="col-12 col-md-5 col-lg-4">
+                <label for="rootCode" class="form-label">루트 코드</label>
+                <select class="form-select" id="rootCode" name="rootCode">
+                    <option value="">루트 코드를 선택하세요</option>
+                    <c:forEach var="rootCode" items="${rootCodes}">
+                        <option value="${rootCode.cid}">
+                            <c:out value="${rootCode.code}"/> - <c:out value="${rootCode.name}"/>
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
+        
             <div class="table-responsive">
-                <table class="table | table-light | table-hover | table-bordered">
+                <table class="table table-light table-hover table-bordered align-middle">
                     <thead>
                         <tr>
-                            <th>코드명</th>
-                            <th>코드값</th>
-                            <th>상위 코드</th>
-                            <th>레벨</th>
-                            <th>설명</th>
-                            <th>상태</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">상위 코드</th>
+                            <th scope="col">상위 코드명</th>
+                            <th scope="col">코드</th>
+                            <th scope="col">코드명</th>
+                            <th scope="col">레벨</th>
+                            <th scope="col">설명</th>
+                            <th scope="col">상태</th>
+                            <th scope="col">등록일</th>
+                            <th scope="col">수정일</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:choose>
                             <c:when test="${empty codes}">
-                                <tr><td class="text-center | text-body-secondary | py-4" colspan="6">등록된 코드가 없습니다.</td></tr>
+                                <tr><td class="text-center text-body-secondary py-4" colspan="10">등록된 코드가 없습니다.</td></tr>
                             </c:when>
                             <c:otherwise>
                                 <c:forEach var="code" items="${codes}">
                                     <tr>
-                                        <td><c:out value="${code.name}"/></td>
+                                        <td><c:out value="${code.cid}"/></td>
+                                        <td><c:out value="${code.parentCode}"/></td>
+                                        <td><c:out value="${code.parentName}"/></td>
                                         <td><c:out value="${code.code}"/></td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${empty code.parentCid}">-</c:when>
-                                                <c:otherwise><c:out value="${code.parentCode}"/></c:otherwise>
-                                            </c:choose>
-                                        </td>
+                                        <td><c:out value="${code.name}"/></td>
                                         <td><c:out value="${code.level}"/></td>
                                         <td><c:out value="${code.dsc}"/></td>
                                         <td><c:out value="${code.status}"/></td>
+                                        <td><fmt:formatDate value="${code.CDate}" pattern="yyyy-MM-dd HH:mm"/></td>
+                                        <td><fmt:formatDate value="${code.UDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                     </tr>
                                 </c:forEach>
                             </c:otherwise>
@@ -66,6 +86,6 @@
             </div>
         </div>
     </div>
+
 </body>
 </html>
-<!DOCTYPE html>

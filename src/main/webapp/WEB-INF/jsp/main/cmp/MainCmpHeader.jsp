@@ -3,8 +3,10 @@
 
 <!-- Header -->
 <header class="header | header-sticky">
-  <div class="container-fluid">
-    <a class="header-brand" href="#">Haeder</a>
+  <div class="container-fluid | justify-content-between">
+    <a class="header-brand" href="#">Header</a>
+
+    <div class="avatar | bg-primary | text-white">U</div>
   </div>
 </header>
 <!--// Header -->

@@ -6,7 +6,7 @@
     <ul class="sidebar-nav">
         <li class="nav-title">Compact nav</li>
         <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/codeList.do'/>">
+            <a class="nav-link" href="<c:url value='/CodeList.do'/>">
                 <i class="nav-icon cil-speedometer"></i>공통코드 
             </a>
         </li>
