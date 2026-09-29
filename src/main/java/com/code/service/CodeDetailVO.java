@@ -3,23 +3,23 @@ package com.code.service;
 import java.io.Serializable;
 import java.util.Date;
 
-public class CodeVO implements Serializable {
+public class CodeDetailVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Long cid;
-	private Long parentCid;
-	private String parentCode;
-	private String parentName;
-	private String code;
-	private String name;
-	private Integer level;
-	private String dsc;
-	private String status;
-	private Date cDate;
-	private Date uDate;
+	private Long cid; // 코드 ID
+	private Long parentCid; // 상위 코드 ID
+	private String parentCode; // 상위 코드
+	private String parentName; // 상위 코드명
+	private String code; // 코드
+	private String name; // 코드명
+	private Integer level; // 코드 레벨
+	private String dsc; // 설명
+	private String status; // 상태
+	private Date cDate; // 생성일
+	private Date uDate; // 수정일
 
-	public Long getCid() {
+    public Long getCid() {
 		return cid;
 	}
 

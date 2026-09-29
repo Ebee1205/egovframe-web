@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.code.service.CodeService;
-import com.code.service.CodeVO;
+import com.code.service.CodeDetailVO;
 
 @Controller
 public class CodeController {
@@ -16,9 +16,9 @@ public class CodeController {
 		this.codeService = codeService;
 	}
 
-	@RequestMapping("/codeList.do")
+	@RequestMapping("/CodeList.do")
 	public String userList(Model model) throws Exception {
-		model.addAttribute("codes", codeService.selectCodeList(new CodeVO()));
-		return "forward:/WEB-INF/jsp/code/codeList.jsp";
+		model.addAttribute("codes", codeService.selectCodeList(new CodeDetailVO()));
+		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 }

@@ -4,13 +4,13 @@ import java.util.List;
 
 public interface CodeService {
 
-	CodeVO selectCode(CodeVO codeVO) throws Exception;
+	CodeDetailVO selectCode(CodeDetailVO codeVO) throws Exception;
 
-	List<CodeVO> selectCodeList(CodeVO codeVO) throws Exception;
+	List<CodeDetailVO> selectCodeList(CodeDetailVO codeVO) throws Exception;
 
-	void insertCode(CodeVO codeVO) throws Exception;
+	void insertCode(CodeDetailVO codeVO) throws Exception;
 
-	void updateCode(CodeVO codeVO) throws Exception;
+	void updateCode(CodeDetailVO codeVO) throws Exception;
 
-	void deleteCode(CodeVO codeVO) throws Exception;
+	void deleteCode(CodeDetailVO codeVO) throws Exception;
 }
