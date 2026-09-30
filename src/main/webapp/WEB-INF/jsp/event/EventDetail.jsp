@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -27,27 +28,27 @@
         
         <div class="p-3 | align-items-center">
             <c:set var="path" scope="request" value="홈/이벤트/상세"/>
-            <c:set var="title" scope="request" value="이벤트 제목~~~"/>
-            <c:set var="dcs" scope="request" value="등록사용자~~~"/>
+            <c:set var="title" scope="request" value="${event.title}"/>
+            <c:set var="dcs" scope="request" value="등록자: ${event.createdBy}"/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
         </div>
 
         <div class="p-3 | align-items-center">
             <form class="form-container">
                 <div>
-                    <label for="exampleFormControlInput1" class="form-label">이벤트 제목</label>
-                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="이벤트 제목을 입력하세요">
+                    <label for="title" class="form-label">이벤트 제목</label>
+                    <input type="text" class="form-control" id="title" name="title" value="${event.title}">
                 </div>
         
                 <div>
-                    <label for="exampleFormControlTextarea1" class="form-label">이벤트 카테고리</label>
+                    <label for="ctg" class="form-label">이벤트 카테고리</label>
                     <select 
                         class="form-select | input-box" 
                         placeholder="카테고리 선택"
                         id="ctg" name="ctg">
                         <option value="">전체</option>
                         <c:forEach var="eventCtg" items="${eventCtgs}">
-                            <option value="${eventCtg.code}" ${eventCtg.code == filterVO.ctg ? 'selected' : ''}>
+                            <option value="${eventCtg.code}" ${eventCtg.code == event.ctg ? 'selected' : ''}>
                                 <c:out value="${eventCtg.name}"/>
                             </option>
                         </c:forEach>
@@ -56,12 +57,12 @@
         
                 <div class="row">
                     <div class="col">
-                        <label for="exampleFormControlInput1" class="form-label">이벤트 시작일</label>
-                        <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="이벤트 시작일을 입력하세요">
+                        <label for="sDate" class="form-label">이벤트 시작일</label>
+                        <input type="text" class="form-control" id="sDate" name="sDate" value="<fmt:formatDate value='${event.SDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                     <div class="col">
-                        <label for="exampleFormControlInput1" class="form-label">이벤트 종료일</label>
-                        <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="이벤트 종료일을 입력하세요">
+                        <label for="eDate" class="form-label">이벤트 종료일</label>
+                        <input type="text" class="form-control" id="eDate" name="eDate" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                 </div>
         
@@ -81,22 +82,38 @@
                 </div> -->
         
                 <div>
-                    <label for="exampleFormControlInput1" class="form-label">이벤트 주소</label>
-                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="이벤트 주소를 입력하세요">
+                    <label for="address" class="form-label">이벤트 주소</label>
+                    <input type="text" class="form-control" id="address" name="address" value="${event.address}">
                 </div>
         
                 <div>
-                    <label for="exampleFormControlTextarea1" class="form-label">이벤트 내용</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    <label for="dsc" class="form-label">이벤트 내용</label>
+                    <textarea class="form-control" id="dsc" name="dsc" rows="3"><c:out value="${event.dsc}"/></textarea>
                 </div>
+
+                <div>
+                    <label for="status" class="form-label">이벤트 상태</label>
+                    <select 
+                        class="form-select | input-box" 
+                        placeholder="상태 선택"
+                        id="status" name="status">
+                        <option value="">전체</option>
+                        <c:forEach var="eventStatus" items="${eventStatuses}">
+                            <option value="${eventStatus.code}" ${eventStatus.code == event.status ? 'selected' : ''}>
+                                <c:out value="${eventStatus.name}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
             </form>
         </div>
 
         <!-- 폼 하단 버튼박스 -->
         <div class="form-info">
             <div>
-                <p class="form-info-text">최초 등록일: <c:out value="${filterVO.cDate}"/></p>
-                <p class="form-info-text">최종 수정일: <c:out value="${filterVO.uDate}"/></p>
+                <p class="form-info-text">최초 등록일: <fmt:formatDate value="${event.CDate}" pattern="yyyy-MM-dd HH:mm"/></p>
+                <p class="form-info-text">최종 수정일: <fmt:formatDate value="${event.UDate}" pattern="yyyy-MM-dd HH:mm"/></p>
             </div>
             <div>
                 <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">수정</a>

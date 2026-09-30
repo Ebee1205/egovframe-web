@@ -3,11 +3,13 @@ package com.event.web;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
 import com.event.service.EventFilterVO;
 import com.event.service.EventService;
+import com.event.service.EventVO;
 
 @Controller
 public class EventController {
@@ -48,7 +50,19 @@ public class EventController {
 	}
 
 	@RequestMapping("/event/detail.do")
-	public String eventDetail() {
+	public String eventDetail(@RequestParam("eid") Long eid, Model model) throws Exception {
+		EventVO eventVO = new EventVO();
+		eventVO.setEid(eid);
+		model.addAttribute("event", eventService.selectEvent(eventVO));
+
+		CodeFilterVO eventCtgFilter = new CodeFilterVO();
+		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");
+		model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(eventCtgFilter));
+
+		CodeFilterVO eventStatusFilter = new CodeFilterVO();
+		eventStatusFilter.setParentCode("EVENT_STAT_ROOT");
+		model.addAttribute("eventStatuses", codeService.selectCmmCodeDetail(eventStatusFilter));
+
 		return "forward:/WEB-INF/jsp/event/EventDetail.jsp";
 	}
 }
