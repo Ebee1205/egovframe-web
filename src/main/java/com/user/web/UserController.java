@@ -42,4 +42,9 @@ public class UserController {
 	public String userCreate() {
 		return "forward:/WEB-INF/jsp/user/UserCreate.jsp";
 	}
+
+	@RequestMapping("/user/detail.do")
+	public String userDetail() {
+		return "forward:/WEB-INF/jsp/user/UserDetail.jsp";
+	}
 }

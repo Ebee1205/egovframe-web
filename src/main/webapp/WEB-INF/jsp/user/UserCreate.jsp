@@ -27,7 +27,7 @@
         <!--// Header -->
         
         <div class="p-3 | align-items-center">
-            <c:set var="path" scope="request" value="홈/사용자"/>
+            <c:set var="path" scope="request" value="홈/사용자/등록"/>
             <c:set var="title" scope="request" value="사용자 등록"/>
             <c:set var="dcs" scope="request" value="새로운 사용자를 등록합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />

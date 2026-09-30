@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>사용자 등록</title>
+    <title>사용자 상세</title>
     <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>" />
     <link href="<c:url value='/resources/css/base.css'/>" rel="stylesheet" type="text/css">
     <link href="<c:url value='/resources/css/form.css'/>" rel="stylesheet" type="text/css">
@@ -27,9 +27,9 @@
         <!--// Header -->
         
         <div class="p-3 | align-items-center">
-            <c:set var="path" scope="request" value="홈/사용자"/>
-            <c:set var="title" scope="request" value="사용자 등록"/>
-            <c:set var="dcs" scope="request" value="새로운 사용자를 등록합니다."/>
+            <c:set var="path" scope="request" value="홈/사용자/상세"/>
+            <c:set var="title" scope="request" value="사용자 상세"/>
+            <c:set var="dcs" scope="request" value="사용자 상세 정보를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
         </div>
 
