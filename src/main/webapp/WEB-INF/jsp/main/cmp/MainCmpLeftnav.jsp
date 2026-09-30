@@ -3,32 +3,10 @@
 
 <!-- Leftnav -->
 <div class="sidebar | sidebar-fixed | border-end | h-100">
-    <ul class="sidebar-nav">
-        <li class="nav-title">Compact nav</li>
-        <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/code/list.do'/>">
-                <i class="nav-icon cil-speedometer"></i>공통코드 
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/user/list.do'/>">
-                <i class="nav-icon cil-layers"></i> 사용자
-            </a>
-        </li>
-        <!-- <li class="nav-item nav-group show">
-            <a class="nav-link nav-group-toggle" href="#">
-            <i class="nav-icon cil-puzzle"></i> Items group
-            </a>
-            <ul class="nav-group-items">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Items group item</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Items group item</a>
-            </li>
-            </ul>
-        </li> -->
-    </ul>
+    <ul id="sidebar-menu" class="sidebar-nav"
+        data-context-path="<c:out value='${pageContext.request.contextPath}'/>"></ul>
+
+    <script src="<c:url value='/resources/js/selectMenu.js'/>"></script>
 
     <div class="sidebar-footer | border-top | d-flex">
         <p><small>v0.0.1</small></p>
