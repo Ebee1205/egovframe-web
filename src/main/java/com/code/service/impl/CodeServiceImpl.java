@@ -41,6 +41,11 @@ public class CodeServiceImpl implements CodeService {
 	}
 
 	@Override
+	public List<CodeFilterVO> selectCmmCodeDetail(CodeFilterVO filterVO) throws Exception {
+		return codeOptionDAO.selectCmmCodeDetail(filterVO);
+	}
+
+	@Override
 	public List<CodeFilterVO> selectCodeRoot() throws Exception {
 		return codeOptionDAO.selectCodeRoot(new CodeFilterVO());
 	}

@@ -44,6 +44,17 @@ public class CodeOptionDAO extends EgovAbstractMapper {
     }
 
     /**
+     * 공통코드로 사용할 사용자상태를 불러온다.
+     *
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<CodeFilterVO> selectUserStatus(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectUserStatus", vo);
+    }
+
+    /**
      * 공통코드로 사용할 가게정보를 불러온다.
      *
      * @param vo

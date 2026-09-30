@@ -57,7 +57,7 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
-                    <button type="create" class="btn | btn-outline-secondary" onclick="location.href='<c:url value='/user/create.do'/>'">신규 등록</button>
+                    <a href="<c:url value='/user/create.do'/>" class="btn | btn-outline-secondary">신규 등록</a>
                 </div>
 
                 <div class="table-responsive">
@@ -82,8 +82,24 @@
                                         <tr>
                                             <td><c:out value="${user.email}"/></td>
                                             <td><c:out value="${user.nickname}"/></td>
-                                            <td><c:out value="${user.type}"/></td>
-                                            <td><c:out value="${user.status}"/></td>
+                                            <td>
+                                                <c:set var="displayType" value="${user.type}"/>
+                                                <c:forEach var="userType" items="${userTypes}">
+                                                    <c:if test="${user.type eq userType.code}">
+                                                        <c:set var="displayType" value="${userType.name}"/>
+                                                    </c:if>
+                                                </c:forEach>
+                                                <c:out value="${displayType}"/>
+                                            </td>
+                                            <td>
+                                                <c:set var="displayStatus" value="${user.status}"/>
+                                                <c:forEach var="userStatus" items="${userStatuses}">
+                                                    <c:if test="${user.status eq userStatus.code}">
+                                                        <c:set var="displayStatus" value="${userStatus.name}"/>
+                                                    </c:if>
+                                                </c:forEach>
+                                                <c:out value="${displayStatus}"/>
+                                            </td>
                                             <td><c:out value="${user.rid}"/></td>
                                             <td><a href="<c:url value='/user/detail.do'><c:param name='uid' value='${user.uid}'/></c:url>" class="btn | btn-outline-primary">상세</a></td>
                                         </tr>
