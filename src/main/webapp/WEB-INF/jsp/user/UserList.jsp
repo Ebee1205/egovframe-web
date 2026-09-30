@@ -32,7 +32,7 @@
             <c:set var="dcs" scope="request" value="등록된 사용자를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
 
-            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/UserList.do'/>">
+            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/user/list.do'/>">
                 <input type="hidden" name="pageIndex" value="1" />
                 <div class="d-flex | flex-wrap | align-items-center | gap-2">
                     <input
@@ -57,7 +57,7 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
-                    <button type="create" class="btn | btn-outline-secondary" onclick="location.href='<c:url value='/UserCreate.do'/>'">신규 등록</button>
+                    <button type="create" class="btn | btn-outline-secondary" onclick="location.href='<c:url value='/user/create.do'/>'">신규 등록</button>
                 </div>
 
                 <div class="table-responsive">
@@ -85,7 +85,7 @@
                                             <td><c:out value="${user.type}"/></td>
                                             <td><c:out value="${user.status}"/></td>
                                             <td><c:out value="${user.rid}"/></td>
-                                            <td><a href="<c:url value='/UserDetail.do'><c:param name='uid' value='${user.uid}'/></c:url>" class="btn | btn-outline-primary">상세</a></td>
+                                            <td><a href="<c:url value='/user/detail.do'><c:param name='uid' value='${user.uid}'/></c:url>" class="btn | btn-outline-primary">상세</a></td>
                                         </tr>
                                     </c:forEach>
                                 </c:otherwise>
@@ -101,7 +101,7 @@
                             <c:forEach var="i" begin="1" end="${totalPage}">
                                 <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
                                     <a class="page-link"
-                                        href="<c:url value='/UserList.do'>
+                                        href="<c:url value='/user/list.do'>
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='email' value='${filterVO.email}'/>
                                                 <c:param name='nickname' value='${filterVO.nickname}'/>

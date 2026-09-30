@@ -6,12 +6,12 @@
     <ul class="sidebar-nav">
         <li class="nav-title">Compact nav</li>
         <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/CodeList.do'/>">
+            <a class="nav-link" href="<c:url value='/code/list.do'/>">
                 <i class="nav-icon cil-speedometer"></i>공통코드 
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="<c:url value='/UserList.do'/>">
+            <a class="nav-link" href="<c:url value='/user/list.do'/>">
                 <i class="nav-icon cil-layers"></i> 사용자
             </a>
         </li>

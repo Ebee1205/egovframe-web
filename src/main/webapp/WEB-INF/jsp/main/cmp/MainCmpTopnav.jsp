@@ -14,7 +14,7 @@
           <a class="nav-link | active" aria-current="page" href="#">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<c:url value='/UserList.do'/>">사용자</a>
+          <a class="nav-link" href="<c:url value='/user/list.do'/>">사용자</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">공통 코드</a>

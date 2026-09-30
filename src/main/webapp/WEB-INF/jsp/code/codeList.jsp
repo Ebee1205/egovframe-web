@@ -33,7 +33,7 @@
             <c:set var="dcs" scope="request" value="등록된 전체 코드와 루트 코드를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
 
-            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/CodeList.do'/>">
+            <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/code/list.do'/>">
                 <input type="hidden" name="pageIndex" value="1" />
                 <div class="d-flex | flex-wrap | align-items-center | gap-2">
                     <select 
@@ -121,7 +121,7 @@
                             <c:forEach var="i" begin="1" end="${totalPage}">
                                 <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
                                     <a class="page-link"
-                                        href="<c:url value='/CodeList.do'>
+                                        href="<c:url value='/code/list.do'>
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='name' value='${filterVO.name}'/>
                                                 <c:param name='parentCid' value='${filterVO.parentCid}'/>

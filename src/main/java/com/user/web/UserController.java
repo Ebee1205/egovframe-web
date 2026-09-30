@@ -16,7 +16,7 @@ public class UserController {
 		this.userService = userService;
 	}
 
-	@RequestMapping("/UserList.do")
+	@RequestMapping("/user/list.do")
 	public String userList(UserFilterVO filterVO, Model model) throws Exception {
 		model.addAttribute("users", userService.selectUserList(filterVO));
 		model.addAttribute("filterVO", filterVO);
@@ -25,7 +25,7 @@ public class UserController {
 		return "forward:/WEB-INF/jsp/user/UserList.jsp";
 	}
 
-	@RequestMapping("/UserCreate.do")
+	@RequestMapping("/user/create.do")
 	public String userCreate() {
 		return "forward:/WEB-INF/jsp/user/UserCreate.jsp";
 	}

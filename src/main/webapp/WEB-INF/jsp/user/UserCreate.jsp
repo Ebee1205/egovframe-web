@@ -31,8 +31,45 @@
             <c:set var="title" scope="request" value="사용자 등록"/>
             <c:set var="dcs" scope="request" value="새로운 사용자를 등록합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
-
         </div>
+
+        <div>
+            <form action="" method="post">
+
+
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="floatingInputGrid" placeholder="name@example.com" value="mdo@example.com">
+                    <label for="floatingInputGrid">Email 입력</label>
+                </div>
+                <div class="form-floating | mb-3">
+                    <input type="text" class="form-control" id="exampleInputName">
+                    <label for="exampleInputName" class="form-label">이름 입력</label>
+                </div>
+
+                <div class="form-floating">
+                    <select class="form-select" id="floatingSelect" aria-label="사용자 권한 설정">
+                        <option selected>Open this select menu</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                    <label for="floatingSelect">사용자 권한 설정</label>
+                </div>
+
+                <div class="form-floating">
+                    <select class="form-select" id="floatingSelect" aria-label="지역 선택">
+                        <option selected>Open this select menu</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                    <label for="floatingSelect">지역 선택</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+
     </div>
 </body>
 </html>

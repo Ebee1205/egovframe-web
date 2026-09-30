@@ -16,7 +16,7 @@ public class CodeController {
 		this.codeService = codeService;
 	}
 
-	@RequestMapping("/CodeList.do")
+	@RequestMapping("/code/list.do")
 	public String userList(CodeDetailVO filterVO, Model model) throws Exception {
 		model.addAttribute("codes", codeService.selectCodeList(filterVO));
 		model.addAttribute("rootCodes", codeService.selectCodeRoot());
