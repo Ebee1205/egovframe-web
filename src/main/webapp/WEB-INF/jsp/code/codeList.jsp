@@ -73,6 +73,7 @@
                     <table class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
+                                <th scope="col">NO</th>
                                 <th scope="col">상위 코드</th>
                                 <th scope="col">상위 코드명</th>
                                 <th scope="col">코드</th>
@@ -88,11 +89,12 @@
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty codes}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="10">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center text-body-secondary py-4" colspan="11">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:forEach var="code" items="${codes}">
+                                    <c:forEach var="code" items="${codes}" varStatus="rowStatus">
                                         <tr>
+                                            <td class="text-center"><c:out value="${filterVO.firstIndex + rowStatus.count}"/></td>
                                             <td><c:out value="${code.parentCode}"/></td>
                                             <td><c:out value="${code.parentName}"/></td>
                                             <td><c:out value="${code.code}"/></td>

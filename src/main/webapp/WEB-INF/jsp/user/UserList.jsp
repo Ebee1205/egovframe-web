@@ -86,6 +86,7 @@
                     <table class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
+                                <th scope="col">NO</th>
                                 <th scope="col">이메일</th>
                                 <th scope="col">닉네임</th>
                                 <th scope="col">유형</th>
@@ -97,11 +98,12 @@
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty users}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="6">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center text-body-secondary py-4" colspan="7">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:forEach var="user" items="${users}">
+                                    <c:forEach var="user" items="${users}" varStatus="rowStatus">
                                         <tr>
+                                            <td class="text-center"><c:out value="${filterVO.firstIndex + rowStatus.count}"/></td>
                                             <td><c:out value="${user.email}"/></td>
                                             <td><c:out value="${user.nickname}"/></td>
                                             <td>
