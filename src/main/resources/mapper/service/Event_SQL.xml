@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="eventDAO">
+
+	<resultMap id="eventResultMap" type="EventVO">
+		<id property="eid" column="eid"/>
+		<result property="title" column="title"/>
+		<result property="ctg" column="ctg"/>
+		<result property="status" column="status"/>
+		<result property="rid" column="rid"/>
+		<result property="sDate" column="s_date"/>
+		<result property="eDate" column="e_date"/>
+		<result property="cnt" column="cnt"/>
+		<result property="address" column="address"/>
+		<result property="lat" column="lat"/>
+		<result property="lon" column="lon"/>
+		<result property="fileId" column="file_id"/>
+		<result property="createdBy" column="created_by"/>
+		<result property="cDate" column="c_date"/>
+		<result property="uDate" column="u_date"/>
+	</resultMap>
+
+	<sql id="eventColumns">
+		eid, title, ctg, status, rid, s_date, e_date, cnt, address, lat, lon, file_id, created_by, c_date, u_date
+	</sql>
+
+	<select id="selectEvent" parameterType="EventVO" resultMap="eventResultMap">
+		SELECT <include refid="eventColumns"/>
+		FROM tb_event
+		WHERE eid = #{eid}
+	</select>
+
+	<sql id="eventListWhere">
+		<where>
+			<if test="title != null and title != ''">
+				AND title LIKE '%' || #{title} || '%'
+			</if>
+			<if test="type != null and type != ''">
+				AND ctg = #{type}
+			</if>
+			<if test="createdBy != null">
+				AND created_by = #{createdBy}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectEventList" parameterType="EventFilterVO" resultMap="eventResultMap">
+		SELECT <include refid="eventColumns"/>
+		FROM tb_event
+		<include refid="eventListWhere"/>
+		ORDER BY eid DESC
+		LIMIT #{pageSize} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectEventListCnt" parameterType="EventFilterVO" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_event
+		<include refid="eventListWhere"/>
+	</select>
+
+	<insert id="insertEvent" parameterType="EventVO">
+		INSERT INTO tb_event (
+			title, ctg, status, rid, s_date, e_date, cnt, address, lat, lon, file_id, created_by, c_date, u_date
+		) VALUES (
+			#{title}, #{ctg}, #{status}, #{rid}, #{sDate}, #{eDate}, #{cnt},
+			#{address, jdbcType=VARCHAR}, #{lat, jdbcType=DECIMAL}, #{lon, jdbcType=DECIMAL},
+			#{fileId, jdbcType=BIGINT}, #{createdBy},
+			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
+			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
+		)
+		<selectKey keyProperty="eid" resultType="long" order="AFTER">
+			SELECT currval(pg_get_serial_sequence('tb_event', 'eid'))
+		</selectKey>
+	</insert>
+
+	<update id="updateEvent" parameterType="EventVO">
+		UPDATE tb_event
+		SET title = #{title},
+			ctg = #{ctg},
+			status = #{status},
+			rid = #{rid},
+			s_date = #{sDate},
+			e_date = #{eDate},
+			cnt = #{cnt},
+			address = #{address, jdbcType=VARCHAR},
+			lat = #{lat, jdbcType=DECIMAL},
+			lon = #{lon, jdbcType=DECIMAL},
+			file_id = #{fileId, jdbcType=BIGINT},
+			u_date = CURRENT_TIMESTAMP
+		WHERE eid = #{eid}
+	</update>
+
+	<delete id="deleteEvent" parameterType="EventVO">
+		DELETE FROM tb_event
+		WHERE eid = #{eid}
+	</delete>
+
+</mapper>
