@@ -8,7 +8,14 @@
       <ol class="breadcrumb | mb-2">
           <c:forEach var="crumb" items="${fn:split(path, '/')}" varStatus="status">
               <li class="breadcrumb-item${status.last ? ' active' : ''}"${status.last ? ' aria-current="page"' : ''}>
-                  <c:out value="${crumb}"/>
+                  <c:choose>
+                      <c:when test="${status.last}">
+                          <c:out value="${crumb}"/>
+                      </c:when>
+                      <c:otherwise>
+                          <a href="<c:url value='/helloWorld.do'/>"><c:out value="${crumb}"/></a>
+                      </c:otherwise>
+                  </c:choose>
               </li>
           </c:forEach>
       </ol>
