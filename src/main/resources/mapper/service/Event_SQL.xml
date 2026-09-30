@@ -35,8 +35,8 @@
 			<if test="title != null and title != ''">
 				AND title LIKE '%' || #{title} || '%'
 			</if>
-			<if test="type != null and type != ''">
-				AND ctg = #{type}
+			<if test="ctg != null and ctg != ''">
+				AND ctg = #{ctg}
 			</if>
 			<if test="createdBy != null">
 				AND created_by = #{createdBy}

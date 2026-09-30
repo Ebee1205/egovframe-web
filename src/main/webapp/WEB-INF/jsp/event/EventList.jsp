@@ -38,12 +38,12 @@
                 <div class="d-flex | flex-wrap | align-items-center | gap-2">
                     <select 
                         class="form-select | input-box" 
-                        placeholder="분류 선택"
-                        id="type" name="type">
+                        placeholder="카테고리 선택"
+                        id="ctg" name="ctg">
                         <option value="">전체</option>
-                        <c:forEach var="eventType" items="${eventTypes}">
-                            <option value="${eventType.code}" ${eventType.code == filterVO.type ? 'selected' : ''}>
-                                <c:out value="${eventType.name}"/>
+                        <c:forEach var="eventCtg" items="${eventCtgs}">
+                            <option value="${eventCtg.code}" ${eventCtg.code == filterVO.ctg ? 'selected' : ''}>
+                                <c:out value="${eventCtg.name}"/>
                             </option>
                         </c:forEach>
                     </select>
@@ -144,7 +144,7 @@
                                         href="<c:url value='/event/list.do'>
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='title' value='${filterVO.title}'/>
-                                                <c:param name='type' value='${filterVO.type}'/>
+                                                <c:param name='ctg' value='${filterVO.ctg}'/>
                                               </c:url>">
                                         <c:out value="${i}"/>
                                     </a>
@@ -153,6 +153,7 @@
                         </ul>
                     </nav>
                 </c:if>
+                
             </div>
 
         </div>

@@ -8,7 +8,7 @@ public class EventFilterVO extends ComFilterVO {
 
     private String title; // 제목
     private Long createdBy; // 등록자 ID
-    private String type;
+    private String ctg; // 분류
 
     public String getTitle() {
         return title;
@@ -26,11 +26,11 @@ public class EventFilterVO extends ComFilterVO {
         this.createdBy = createdBy;
     }
 
-    public String getType() {
-        return type;
+    public String getCtg() {
+        return ctg;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCtg(String ctg) {
+        this.ctg = ctg;
     }
 }
