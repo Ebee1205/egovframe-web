@@ -10,7 +10,7 @@ public interface CodeService {
 
 	int selectCodeListCnt(CodeDetailVO codeVO) throws Exception;
 
-	List<CodeDefaultVO> selectCodeRoot() throws Exception;
+	List<CodeFilterVO> selectCodeRoot() throws Exception;
 
 	void insertCode(CodeDetailVO codeVO) throws Exception;
 

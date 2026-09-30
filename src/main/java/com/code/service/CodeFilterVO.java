@@ -2,7 +2,7 @@ package com.code.service;
 
 import java.io.Serializable;
 
-public class CodeDefaultVO implements Serializable {
+public class CodeFilterVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

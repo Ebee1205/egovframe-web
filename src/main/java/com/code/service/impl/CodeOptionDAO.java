@@ -5,10 +5,10 @@ import java.util.List;
 import org.egovframe.rte.psl.dataaccess.EgovAbstractMapper;
 import org.springframework.stereotype.Repository;
 
-import com.code.service.CodeDefaultVO;
+import com.code.service.CodeFilterVO;
 
-@Repository("codeUseDAO")
-public class CodeUseDAO extends EgovAbstractMapper {
+@Repository("codeOptionDAO")
+public class CodeOptionDAO extends EgovAbstractMapper {
 
     /**
      * 주어진 조건에 따른 공통코드를 불러온다.
@@ -17,8 +17,8 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-	public List<CodeDefaultVO> selectCmmCodeDetail(CodeDefaultVO vo) throws Exception {
-		return selectList("CodeUseDAO.selectCmmCodeDetail", vo);
+	public List<CodeFilterVO> selectCmmCodeDetail(CodeFilterVO vo) throws Exception {
+		return selectList("CodeOptionDAO.selectCmmCodeDetail", vo);
     }
 
     /**
@@ -28,8 +28,8 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-    public List<CodeDefaultVO> selectCodeRoot(CodeDefaultVO vo) throws Exception {
-    	return selectList("CodeUseDAO.selectCodeRoot", vo);
+    public List<CodeFilterVO> selectCodeRoot(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectCodeRoot", vo);
     }
 
     /**
@@ -39,8 +39,8 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-    public List<CodeDefaultVO> selectUserDetail(CodeDefaultVO vo) throws Exception {
-    	return selectList("CodeUseDAO.selectUserDetail", vo);
+    public List<CodeFilterVO> selectUserDetail(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectUserDetail", vo);
     }
 
     /**
@@ -50,8 +50,8 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-    public List<CodeDefaultVO> selectStoreDetail(CodeDefaultVO vo) throws Exception {
-    	return selectList("CodeUseDAO.selectStoreDetail", vo);
+    public List<CodeFilterVO> selectStoreDetail(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectStoreDetail", vo);
     }
 
     /**
@@ -61,8 +61,8 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-    public List<CodeDefaultVO> selectEventDetail(CodeDefaultVO vo) throws Exception {
-    	return selectList("CodeUseDAO.selectEventDetail", vo);
+    public List<CodeFilterVO> selectEventDetail(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectEventDetail", vo);
     }
 
     /**
@@ -72,7 +72,7 @@ public class CodeUseDAO extends EgovAbstractMapper {
      * @return
      * @throws Exception
      */
-    public List<CodeDefaultVO> selectEventStatus(CodeDefaultVO vo) throws Exception {
-    	return selectList("CodeUseDAO.selectEventStatus", vo);
+    public List<CodeFilterVO> selectEventStatus(CodeFilterVO vo) throws Exception {
+    	return selectList("CodeOptionDAO.selectEventStatus", vo);
     }
 }

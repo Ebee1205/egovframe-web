@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="CodeUseDAO">
+<mapper namespace="CodeOptionDAO">
 
-	<resultMap id="codeDefaultResultMap" type="codeDefaultVO">
+	<resultMap id="codeFilterResultMap" type="CodeFilterVO">
 		<id property="cid" column="cid"/>
 		<result property="parentCid" column="p_cid"/>
 		<result property="parentCode" column="p_code"/>
@@ -12,7 +12,7 @@
 	</resultMap>
 
 	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 코드 전체를 조회 -->
-	<select id="selectCmmCodeDetail" parameterType="codeDefaultVO" resultMap="codeDefaultResultMap">
+	<select id="selectCmmCodeDetail" parameterType="CodeFilterVO" resultMap="codeFilterResultMap">
 		SELECT c.cid, c.p_cid, c.code, c.name,
 			p.code AS p_code, p.name AS p_name
 		FROM tb_cmn_code c
@@ -36,7 +36,7 @@
 	</select>
 
 	<!-- 공통코드의 루트 코드만 조회 -->
-	<select id="selectCodeRoot" parameterType="codeDefaultVO" resultMap="codeDefaultResultMap">
+	<select id="selectCodeRoot" parameterType="CodeFilterVO" resultMap="codeFilterResultMap">
 		SELECT c.cid, c.p_cid, c.code, c.name,
 			NULL AS p_code, NULL AS p_name
 		FROM tb_cmn_code c

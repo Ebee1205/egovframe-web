@@ -5,18 +5,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.code.service.CodeService;
-import com.code.service.CodeDefaultVO;
+import com.code.service.CodeFilterVO;
 import com.code.service.CodeDetailVO;
 
 @Service
 public class CodeServiceImpl implements CodeService {
 
 	private final CodeDetailDAO codeDAO;
-	private final CodeUseDAO codeUseDAO;
+	private final CodeOptionDAO codeOptionDAO;
 
-	public CodeServiceImpl(CodeDetailDAO codeDAO, CodeUseDAO codeUseDAO) {
+	public CodeServiceImpl(CodeDetailDAO codeDAO, CodeOptionDAO codeOptionDAO) {
 		this.codeDAO = codeDAO;
-		this.codeUseDAO = codeUseDAO;
+		this.codeOptionDAO = codeOptionDAO;
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class CodeServiceImpl implements CodeService {
 	}
 
 	@Override
-	public List<CodeDefaultVO> selectCodeRoot() throws Exception {
-		return codeUseDAO.selectCodeRoot(new CodeDefaultVO());
+	public List<CodeFilterVO> selectCodeRoot() throws Exception {
+		return codeOptionDAO.selectCodeRoot(new CodeFilterVO());
 	}
 
 	@Override
