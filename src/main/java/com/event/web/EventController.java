@@ -26,7 +26,7 @@ public class EventController {
 
 		CodeFilterVO eventCtgFilter = new CodeFilterVO();
 		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");
-		model.addAttribute("eventTypes", codeService.selectCmmCodeDetail(eventCtgFilter));
+		model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(eventCtgFilter));
 
 		CodeFilterVO eventStatusFilter = new CodeFilterVO();
 		eventStatusFilter.setParentCode("EVENT_STAT_ROOT");

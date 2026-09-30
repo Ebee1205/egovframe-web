@@ -28,7 +28,7 @@
         <!--// Header -->
         
         <div class="p-3 | align-items-center">
-            <c:set var="path" scope="request" value="홈/목록"/>
+            <c:set var="path" scope="request" value="홈/이벤트 목록"/>
             <c:set var="title" scope="request" value="이벤트 목록"/>
             <c:set var="dcs" scope="request" value="등록된 전체 이벤트를 확인합니다."/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
@@ -74,14 +74,15 @@
                         <thead class="table-light | text-center">
                             <tr>
                                 <th scope="col">NO</th>
+                                <th scope="col">지역</th>
                                 <th scope="col">제목</th>
                                 <th scope="col">분류</th>
-                                <th scope="col">상태</th>
                                 <th scope="col">시작일</th>
                                 <th scope="col">종료일</th>
                                 <th scope="col">주소</th>
                                 <th scope="col">등록일</th>
                                 <th scope="col">수정일</th>
+                                <th scope="col">상태</th>
                                 <th scope="col">관리</th>
                             </tr>
                         </thead>
@@ -94,14 +95,35 @@
                                     <c:forEach var="event" items="${events}" varStatus="rowStatus">
                                         <tr>
                                             <td class="text-center"><c:out value="${filterVO.firstIndex + rowStatus.count}"/></td>
+                                            <td><c:out value="${event.rid}"/></td>
+
                                             <td><c:out value="${event.title}"/></td>
-                                            <td><c:out value="${event.ctg}"/></td>
-                                            <td><c:out value="${event.status}"/></td>
+                                            <td>
+                                                <c:set var="displayCtg" value="${event.ctg}"/>
+                                                <c:forEach var="eventCtg" items="${eventCtgs}">
+                                                    <c:if test="${event.ctg eq eventCtg.code}">
+                                                        <c:set var="displayCtg" value="${eventCtg.name}"/>
+                                                    </c:if>
+                                                </c:forEach>
+                                                <c:out value="${displayCtg}"/>
+                                            </td>
+
                                             <td><fmt:formatDate value="${event.SDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><fmt:formatDate value="${event.EDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><c:out value="${event.address}"/></td>
                                             <td><fmt:formatDate value="${event.CDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><fmt:formatDate value="${event.UDate}" pattern="yyyy-MM-dd HH:mm"/></td>
+
+                                            <td>
+                                                <c:set var="displayStatus" value="${event.status}"/>
+                                                <c:forEach var="eventStatus" items="${eventStatuses}">
+                                                    <c:if test="${event.status eq eventStatus.code}">
+                                                        <c:set var="displayStatus" value="${eventStatus.name}"/>
+                                                    </c:if>
+                                                </c:forEach>
+                                                <c:out value="${displayStatus}"/>
+                                            </td>
+
                                             <td><a href="<c:url value='/event/detail.do'><c:param name='eid' value='${event.eid}'/></c:url>" class="btn | btn-outline-primary">상세</a></td>
 
                                         </tr>
