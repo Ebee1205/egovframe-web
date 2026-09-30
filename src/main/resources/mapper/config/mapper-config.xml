@@ -20,6 +20,8 @@
 		<typeAlias alias="CodeFilterVO"		 type="com.code.service.CodeFilterVO" />
 		<typeAlias alias="EventVO"			 type="com.event.service.EventVO" />
 		<typeAlias alias="EventFilterVO" type="com.event.service.EventFilterVO" />
+		<typeAlias alias="EventCmtVO"			 type="com.event.service.EventCmtVO" />
+		<typeAlias alias="EventCmtFilterVO" type="com.event.service.EventCmtFilterVO" />
 	</typeAliases>
 
 	<mappers>
@@ -27,6 +29,7 @@
 		<mapper resource="mapper/service/Code_SQL.xml" />
 		<mapper resource="mapper/service/CodeUse_SQL.xml" />
 		<mapper resource="mapper/service/Event_SQL.xml" />
+		<mapper resource="mapper/service/EventCmt_SQL.xml" />
 	</mappers>
     
 </configuration>

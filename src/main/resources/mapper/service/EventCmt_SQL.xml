@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="eventCmtDAO">
+
+	<resultMap id="eventCmtResultMap" type="EventCmtVO">
+		<id property="cmtId" column="cmt_id"/>
+		<result property="eid" column="eid"/>
+		<result property="uid" column="uid"/>
+		<result property="cmt" column="cmt"/>
+		<result property="parentCmtId" column="p_cmt_id"/>
+		<result property="status" column="status"/>
+		<result property="cDate" column="c_date"/>
+		<result property="uDate" column="u_date"/>
+	</resultMap>
+
+	<sql id="eventCmtColumns">
+		cmt_id, eid, uid, cmt, p_cmt_id, status, c_date, u_date
+	</sql>
+
+	<select id="selectEventCmt" parameterType="EventCmtVO" resultMap="eventCmtResultMap">
+		SELECT <include refid="eventCmtColumns"/>
+		FROM tb_event_cmt
+		WHERE cmt_id = #{cmtId}
+	</select>
+
+	<select id="selectEventCmtList" parameterType="EventCmtFilterVO" resultMap="eventCmtResultMap">
+		SELECT <include refid="eventCmtColumns"/>
+		FROM tb_event_cmt
+		<where>
+			eid = #{eid}
+			AND p_cmt_id IS NULL
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+		ORDER BY cmt_id DESC
+		LIMIT #{pageSize} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectEventCmtListCnt" parameterType="EventCmtFilterVO" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_event_cmt
+		<where>
+			eid = #{eid}
+			AND p_cmt_id IS NULL
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectEventReplyList" parameterType="EventCmtFilterVO" resultMap="eventCmtResultMap">
+		SELECT <include refid="eventCmtColumns"/>
+		FROM tb_event_cmt
+		<where>
+			p_cmt_id = #{parentCmtId}
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+		ORDER BY cmt_id ASC
+		LIMIT #{pageSize} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectEventReplyListCnt" parameterType="EventCmtFilterVO" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_event_cmt
+		<where>
+			p_cmt_id = #{parentCmtId}
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertEventCmt" parameterType="EventCmtVO">
+		INSERT INTO tb_event_cmt (
+			eid, uid, cmt, p_cmt_id, status, c_date, u_date
+		) VALUES (
+			#{eid}, #{uid}, #{cmt}, #{parentCmtId, jdbcType=BIGINT}, #{status},
+			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
+			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
+		)
+		<selectKey keyProperty="cmtId" resultType="long" order="AFTER">
+			SELECT currval(pg_get_serial_sequence('tb_event_cmt', 'cmt_id'))
+		</selectKey>
+	</insert>
+
+	<update id="updateEventCmt" parameterType="EventCmtVO">
+		UPDATE tb_event_cmt
+		SET cmt = #{cmt},
+			status = #{status},
+			u_date = CURRENT_TIMESTAMP
+		WHERE cmt_id = #{cmtId}
+	</update>
+
+	<delete id="deleteEventCmt" parameterType="EventCmtVO">
+		DELETE FROM tb_event_cmt
+		WHERE cmt_id = #{cmtId}
+	</delete>
+
+</mapper>
