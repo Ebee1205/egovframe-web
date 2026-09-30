@@ -16,7 +16,7 @@ public class EventVO implements Serializable {
     private Long rid; // 지역 ID
     private Date sDate; // 시작일
     private Date eDate; // 종료일
-    private String cnt; // 내용
+    private String dsc; // 내용
     private String address; // 주소
     private BigDecimal lat; // 위도
     private BigDecimal lon; // 경도
@@ -82,12 +82,12 @@ public class EventVO implements Serializable {
         this.eDate = eDate;
     }
 
-    public String getCnt() {
-        return cnt;
+    public String getDsc() {
+        return dsc;
     }
 
-    public void setCnt(String cnt) {
-        this.cnt = cnt;
+    public void setDsc(String dsc) {
+        this.dsc = dsc;
     }
 
     public String getAddress() {

@@ -10,7 +10,7 @@
 		<result property="rid" column="rid"/>
 		<result property="sDate" column="s_date"/>
 		<result property="eDate" column="e_date"/>
-		<result property="cnt" column="cnt"/>
+		<result property="dsc" column="dsc"/>
 		<result property="address" column="address"/>
 		<result property="lat" column="lat"/>
 		<result property="lon" column="lon"/>
@@ -21,7 +21,7 @@
 	</resultMap>
 
 	<sql id="eventColumns">
-		eid, title, ctg, status, rid, s_date, e_date, cnt, address, lat, lon, file_id, created_by, c_date, u_date
+		eid, title, ctg, status, rid, s_date, e_date, dsc, address, lat, lon, file_id, created_by, c_date, u_date
 	</sql>
 
 	<select id="selectEvent" parameterType="EventVO" resultMap="eventResultMap">
@@ -60,9 +60,9 @@
 
 	<insert id="insertEvent" parameterType="EventVO">
 		INSERT INTO tb_event (
-			title, ctg, status, rid, s_date, e_date, cnt, address, lat, lon, file_id, created_by, c_date, u_date
+			title, ctg, status, rid, s_date, e_date, dsc, address, lat, lon, file_id, created_by, c_date, u_date
 		) VALUES (
-			#{title}, #{ctg}, #{status}, #{rid}, #{sDate}, #{eDate}, #{cnt},
+			#{title}, #{ctg}, #{status}, #{rid}, #{sDate}, #{eDate}, #{dsc},
 			#{address, jdbcType=VARCHAR}, #{lat, jdbcType=DECIMAL}, #{lon, jdbcType=DECIMAL},
 			#{fileId, jdbcType=BIGINT}, #{createdBy},
 			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
@@ -81,7 +81,7 @@
 			rid = #{rid},
 			s_date = #{sDate},
 			e_date = #{eDate},
-			cnt = #{cnt},
+			dsc = #{dsc},
 			address = #{address, jdbcType=VARCHAR},
 			lat = #{lat, jdbcType=DECIMAL},
 			lon = #{lon, jdbcType=DECIMAL},
