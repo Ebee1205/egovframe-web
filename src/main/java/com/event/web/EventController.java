@@ -46,4 +46,9 @@ public class EventController {
 	public String eventCreate() {
 		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
 	}
+
+	@RequestMapping("/event/detail.do")
+	public String eventDetail() {
+		return "forward:/WEB-INF/jsp/event/EventDetail.jsp";
+	}
 }

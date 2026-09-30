@@ -10,9 +10,32 @@
     justify-content: space-between;
 }
 
-
 .input-box {
     width: 256px;
     font-size: 1rem;
 }
 
+.form-container {
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.form-info {
+    width: 100%;
+    padding: 0px 24px;
+    margin-bottom: 8px;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+}
+
+.form-info-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d; 
+}
