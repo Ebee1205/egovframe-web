@@ -48,6 +48,18 @@
                         </c:forEach>
                     </select>
 
+                    <select 
+                        class="form-select | input-box" 
+                        placeholder="지역 선택"
+                        id="region" name="region">
+                        <option value="">전체</option>
+                        <c:forEach var="reg" items="${regs}">
+                            <option value="${reg.code}" ${reg.code == filterVO.reg ? 'selected' : ''}>
+                                <c:out value="${reg.name}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
+
                     <input
                         class="form-control | input-box" 
                         type="text"
@@ -153,7 +165,7 @@
                         </ul>
                     </nav>
                 </c:if>
-                
+
             </div>
 
         </div>
