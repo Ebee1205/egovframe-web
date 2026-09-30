@@ -49,6 +49,28 @@
                         id="nickname" name="nickname"
                         value="<c:out value='${filterVO.nickname}'/>"
                     />
+                    <select 
+                        class="form-select | input-box" 
+                        placeholder="사용자 유형 선택"
+                        id="type" name="type">
+                        <option value="">전체</option>
+                        <c:forEach var="code" items="${userTypes}">
+                            <option value="<c:out value='${code.code}'/>" ${code.code == filterVO.type ? 'selected' : ''}>
+                                <c:out value="${code.name}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
+                    <select 
+                        class="form-select | input-box" 
+                        placeholder="사용자 상태 선택"
+                        id="status" name="status">
+                        <option value="">전체</option>
+                        <c:forEach var="code" items="${userStatuses}">
+                            <option value="<c:out value='${code.code}'/>" ${code.code == filterVO.status ? 'selected' : ''}>
+                                <c:out value="${code.name}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
                 <button type="submit" class="btn | btn-primary">검색</button>
             </form>
@@ -121,6 +143,8 @@
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='email' value='${filterVO.email}'/>
                                                 <c:param name='nickname' value='${filterVO.nickname}'/>
+                                                <c:param name='type' value='${filterVO.type}'/>
+                                                <c:param name='status' value='${filterVO.status}'/>
                                               </c:url>">
                                         <c:out value="${i}"/>
                                     </a>

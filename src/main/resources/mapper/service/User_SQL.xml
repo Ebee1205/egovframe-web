@@ -34,6 +34,12 @@
             <if test="nickname != null and nickname != ''">
                 AND nickname LIKE '%' || #{nickname} || '%'
             </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
         </where>
         ORDER BY uid DESC
         LIMIT #{pageSize} OFFSET #{firstIndex}
@@ -48,6 +54,12 @@
             </if>
             <if test="nickname != null and nickname != ''">
                 AND nickname LIKE '%' || #{nickname} || '%'
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
             </if>
         </where>
     </select>
