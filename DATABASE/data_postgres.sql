@@ -48,6 +48,39 @@ INSERT INTO tb_cmn_code (cid, p_cid, code, name, c_lvl, dsc, status, c_date, u_d
 INSERT INTO tb_cmn_code (cid, p_cid, code, name, c_lvl, dsc, status, c_date, u_date) VALUES (72, 7, 'EVENT_STAT_CLOSED', '종료', 2, NULL, 'Y', '2026-09-28 15:00:00', '2026-09-28 15:00:00');
 INSERT INTO tb_cmn_code (cid, p_cid, code, name, c_lvl, dsc, status, c_date, u_date) VALUES (73, 7, 'EVENT_STAT_CANCELLED', '취소', 2, NULL, 'Y', '2026-09-28 15:00:00', '2026-09-28 15:00:00');
 
+
+-- ============================================================
+-- REGIONS
+-- ============================================================
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(1, NULL, 'SEOUL', '서울특별시', 1, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(2, 1, 'SEOUL_JONGNO', '종로구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(3, 1, 'SEOUL_JUNG', '중구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(4, 1, 'SEOUL_YONGSAN', '용산구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(5, 1, 'SEOUL_SEONGDONG', '성동구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(6, 1, 'SEOUL_GWANGJIN', '광진구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(7, 1, 'SEOUL_DONGDAEMUN', '동대문구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(8, 1, 'SEOUL_JUNGNANG', '중랑구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(9, 1, 'SEOUL_SEONGBUK', '성북구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(10, 1, 'SEOUL_GANGBUK', '강북구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(11, 1, 'SEOUL_DOBONG', '도봉구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(12, 1, 'SEOUL_NOWON', '노원구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(13, 1, 'SEOUL_EUNPYEONG', '은평구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(14, 1, 'SEOUL_SEODAEMUN', '서대문구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(15, 1, 'SEOUL_MAPO', '마포구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(16, 1, 'SEOUL_YANGCHEON', '양천구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(17, 1, 'SEOUL_GANGSEO', '강서구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(18, 1, 'SEOUL_GURO', '구로구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(19, 1, 'SEOUL_GEUMCHEON', '금천구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(20, 1, 'SEOUL_YEONGDEUNGPO', '영등포구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(21, 1, 'SEOUL_DONGJAK', '동작구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(22, 1, 'SEOUL_GWANAK', '관악구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(23, 1, 'SEOUL_SEOCHO', '서초구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(24, 1, 'SEOUL_GANGNAM', '강남구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(25, 1, 'SEOUL_SONGPA', '송파구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+INSERT INTO tb_reg (rid, p_reg_id, code, "name", "level", geom, status, c_date, u_date) VALUES(26, 1, 'SEOUL_GANGDONG', '강동구', 2, NULL, 'Y', '2026-09-28 15:00:00.000', '2026-09-28 15:00:00.000');
+
+
+
 -- ============================================================
 -- USER
 -- ============================================================
