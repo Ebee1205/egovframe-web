@@ -39,7 +39,7 @@
                     <select 
                         class="form-select | input-box" 
                         placeholder="코드 그룹 선택"
-                        id="parentCid" name="parentCid">
+                        id="parentCid" name="parentCid" autocomplete="off">
                         <option value="">전체</option>
                         <c:forEach var="code" items="${rootCodes}">
                             <option value="${code.cid}" ${code.cid == filterVO.parentCid ? 'selected' : ''}>
@@ -54,6 +54,7 @@
                         placeholder="코드명 검색"
                         id="name" name="name"
                         value="${filterVO.name}"
+                        autocomplete="off"
                     ></input>
                 </div>
 

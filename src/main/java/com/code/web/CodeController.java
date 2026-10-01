@@ -39,8 +39,8 @@ public class CodeController {
 		this.codeService = codeService;
 	}
 
-	@InitBinder("codeDetailVO")
-	public void initCodeBinder(WebDataBinder binder) {
+	@InitBinder("codeCreateVO")
+	public void initCodeCreateBinder(WebDataBinder binder) {
 		binder.setAllowedFields("parentCid", "name", "code");
 		binder.setMessageCodesResolver(new DefaultMessageCodesResolver() {
 			@Override
@@ -65,7 +65,7 @@ public class CodeController {
 	@RequestMapping(value = "/code/insert.do", method = RequestMethod.POST,
 			produces = "application/json")
 	public ResponseEntity<String> insertCode(
-			@ModelAttribute("codeDetailVO") CodeDetailVO codeVO, BindingResult bindingResult) throws Exception {
+			@ModelAttribute("codeCreateVO") CodeDetailVO codeVO, BindingResult bindingResult) throws Exception {
 		if (codeVO.getCode() != null) {
 			codeVO.setCode(codeVO.getCode().trim());
 		}
