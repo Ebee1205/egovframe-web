@@ -67,15 +67,14 @@
 
                             <!-- 액션 -->
                             <div class="d-flex | align-items-center | gap-1 | ms-n2">
-                                <a class="cmt-action" role="button"
-                                   data-coreui-toggle="collapse"
-                                   data-coreui-target="#reply-form-${comment.cmtId}">
+                                <a href="#reply-form-${comment.cmtId}" class="cmt-action" role="button"
+                                   data-reply-toggle="reply-form-${comment.cmtId}">
                                     💬 답글<c:if test="${not empty replies}"> ${fn:length(replies)}</c:if>
                                 </a>
                             </div>
 
-                            <!-- 답글 입력 (토글) -->
-                            <div class="collapse | mt-2" id="reply-form-${comment.cmtId}">
+                            <!-- 답글 입력 (기본 숨김, 답글 버튼으로 토글) -->
+                            <div class="d-none | mt-2" id="reply-form-${comment.cmtId}">
                                 <form action="${commentInsertUrl}" method="post" accept-charset="UTF-8" class="d-flex | gap-2">
                                     <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                                     <input type="hidden" name="uid" value="1">
@@ -86,8 +85,7 @@
                                         <textarea class="form-control | cmt-input" name="cmt" rows="2" placeholder="사용자 ${comment.uid}님에게 답글 남기기" required></textarea>
                                         <div class="d-flex | justify-content-end | gap-2">
                                             <button type="button" class="btn | btn-sm | btn-ghost-secondary | rounded-pill"
-                                                    data-coreui-toggle="collapse"
-                                                    data-coreui-target="#reply-form-${comment.cmtId}">취소</button>
+                                                    data-reply-toggle="reply-form-${comment.cmtId}">취소</button>
                                             <button type="submit" class="btn | btn-sm | btn-primary | rounded-pill | px-3">답글</button>
                                         </div>
                                     </div>
@@ -123,3 +121,25 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    if (window.__cmtThreadBound) return;
+    window.__cmtThreadBound = true;
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-reply-toggle]');
+        if (!btn) return;
+        e.preventDefault();
+
+        var box = document.getElementById(btn.getAttribute('data-reply-toggle'));
+        if (!box) return;
+
+        var isOpen = box.classList.toggle('d-none') === false;
+        if (isOpen) {
+            var ta = box.querySelector('textarea');
+            if (ta) ta.focus();
+        }
+    });
+})();
+</script>

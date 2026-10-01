@@ -4,6 +4,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <c:url var="commentInsertUrl" value="${param.insertUrl}" />
+<c:url var="commentUpdateUrl" value="${param.updateUrl}" />
+<c:url var="commentDeleteUrl" value="${param.deleteUrl}" />
 <c:set var="commentItems" value="${requestScope[param.commentsAttribute]}" />
 <c:set var="commentReplyMap" value="${requestScope[param.replyMapAttribute]}" />
 
@@ -54,9 +56,37 @@
 
                     <div class="mb-2" style="white-space: pre-wrap; word-break: break-word;"><c:out value="${comment.cmt}"/></div>
 
+                    <div class="d-flex | justify-content-end | gap-2">
+                        <button class="btn | btn-sm | btn-outline-secondary" type="button"
+                                data-comment-edit-toggle="edit-comment-${comment.cmtId}">수정</button>
+                                                <c:if test="${empty replies}">
+                                                        <form action="${commentDeleteUrl}" method="post"
+                                                                    onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                                                                <input type="hidden" name="cmtId" value="${comment.cmtId}">
+                                                                <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
+                                                                <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
+                                                        </form>
+                                                </c:if>
+                    </div>
+
+                    <div class="d-none | mt-2" id="edit-comment-${comment.cmtId}">
+                        <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8">
+                            <input type="hidden" name="cmtId" value="${comment.cmtId}">
+                            <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
+                            <input type="hidden" name="uid" value="${comment.uid}">
+                            <input type="hidden" name="status" value="Y">
+                            <textarea class="form-control | mb-2" name="cmt" rows="2" required><c:out value="${comment.cmt}"/></textarea>
+                            <div class="d-flex | justify-content-end | gap-2">
+                                <button class="btn | btn-sm | btn-outline-secondary" type="button"
+                                        data-comment-edit-toggle="edit-comment-${comment.cmtId}">취소</button>
+                                <button class="btn | btn-sm | btn-primary" type="submit">저장</button>
+                            </div>
+                        </form>
+                    </div>
+
                     <!-- 답글 목록 (항상 표시) -->
                     <c:if test="${not empty replies}">
-                        <div class="border-start | ps-3 | mt-3">
+                        <div class="ps-3 | mt-3">
                             <c:forEach var="reply" items="${replies}">
                                 <div class="card | mb-2">
                                     <div class="card-body | py-2">
@@ -69,6 +99,32 @@
 
                                         <div style="white-space: pre-wrap; word-break: break-word;">
                                             <c:out value="${reply.cmt}"/>
+                                        </div>
+
+                                        <div class="d-flex | justify-content-end | gap-2 | mt-2">
+                                            <button class="btn | btn-sm | btn-outline-secondary" type="button"
+                                                    data-comment-edit-toggle="edit-reply-${reply.cmtId}">수정</button>
+                                            <form action="${commentDeleteUrl}" method="post"
+                                                  onsubmit="return confirm('답글을 삭제하시겠습니까?');">
+                                                <input type="hidden" name="cmtId" value="${reply.cmtId}">
+                                                <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
+                                                <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
+                                            </form>
+                                        </div>
+
+                                        <div class="d-none | mt-2" id="edit-reply-${reply.cmtId}">
+                                            <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8">
+                                                <input type="hidden" name="cmtId" value="${reply.cmtId}">
+                                                <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
+                                                <input type="hidden" name="uid" value="${reply.uid}">
+                                                <input type="hidden" name="status" value="Y">
+                                                <textarea class="form-control | mb-2" name="cmt" rows="2" required><c:out value="${reply.cmt}"/></textarea>
+                                                <div class="d-flex | justify-content-end | gap-2">
+                                                    <button class="btn | btn-sm | btn-outline-secondary" type="button"
+                                                            data-comment-edit-toggle="edit-reply-${reply.cmtId}">취소</button>
+                                                    <button class="btn | btn-sm | btn-primary" type="submit">저장</button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -114,16 +170,21 @@
 
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('[data-reply-toggle]');
-        if (!btn) return;
+        var editBtn = e.target.closest('[data-comment-edit-toggle]');
+        var toggle = btn || editBtn;
+        if (!toggle) return;
         e.preventDefault();
 
-        var box = document.getElementById(btn.getAttribute('data-reply-toggle'));
-        if (!box) return;
-
-        var isOpen = box.classList.toggle('d-none') === false;
-        if (isOpen) {
-            var input = box.querySelector('input[name="cmt"], textarea');
-            if (input) input.focus();
+        var targetId = btn
+            ? btn.getAttribute('data-reply-toggle')
+            : editBtn.getAttribute('data-comment-edit-toggle');
+        var box = document.getElementById(targetId);
+        if (box) {
+            var isOpen = box.classList.toggle('d-none') === false;
+            if (isOpen) {
+                var input = box.querySelector('input[name="cmt"], textarea');
+                if (input) input.focus();
+            }
         }
     });
 })();
