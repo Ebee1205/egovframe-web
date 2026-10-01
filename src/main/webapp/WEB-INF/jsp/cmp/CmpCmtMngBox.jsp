@@ -158,7 +158,7 @@
                     </c:forEach>
 
                     <!-- 답글 입력 폼 (기본 숨김, 답글 버튼으로 토글) -->
-                    <tr class="d-none | table-active" id="reply-form-${comment.cmtId}">
+                    <tr class="d-none | table-active | js-comment-compose" id="reply-form-${comment.cmtId}">
                         <td colspan="6">
                             <form action="${commentInsertUrl}" method="post" accept-charset="UTF-8">
                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
@@ -178,6 +178,22 @@
                     </tr>
                 </c:forEach>
 
+                <!-- 댓글 입력 폼 (기본 표시) -->
+                <tr class="table-active | js-comment-compose" id="new-comment-form">
+                    <td colspan="6">
+                        <form action="${commentInsertUrl}" method="post" accept-charset="UTF-8">
+                            <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
+                            <input type="hidden" name="uid" value="1">
+                            <input type="hidden" name="status" value="Y">
+                            <label class="form-label | small | fw-semibold">댓글 작성</label>
+                            <div class="input-group | input-group-sm">
+                                <input type="text" class="form-control" name="cmt" placeholder="댓글을 입력해주세요." required>
+                                <button type="submit" class="btn | btn-sm | btn-primary">댓글 등록</button>
+                            </div>
+
+                        </form>
+                    </td>
+                </tr>
                 <!-- 데이터 없음 -->
                 <c:if test="${empty commentItems}">
                     <tr>
@@ -212,7 +228,19 @@
             : editBtn.getAttribute('data-comment-edit-toggle');
         var box = document.getElementById(targetId);
         if (box) {
-            var isOpen = box.classList.toggle('d-none') === false;
+            if (btn) {
+                var composeForms = box.closest('tbody').querySelectorAll('.js-comment-compose');
+                var returnToComment = targetId === 'new-comment-form' || !box.classList.contains('d-none');
+                composeForms.forEach(function (form) {
+                    form.classList.toggle('d-none', returnToComment
+                        ? form.id !== 'new-comment-form'
+                        : form.id !== targetId);
+                });
+            } else {
+                var isOpen = box.classList.toggle('d-none') === false;
+            }
+
+            var isOpen = !box.classList.contains('d-none');
             if (isOpen) {
                 var input = box.querySelector('input[name="cmt"], textarea');
                 if (input) input.focus();
