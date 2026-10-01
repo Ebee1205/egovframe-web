@@ -16,22 +16,22 @@ const pageList = [
     child: [
       {
         page: 'UserList',
-        name: '사용자 관리',
+        name: '사용자',
         path: '/user/list.do',
         icon: 'cil-layers',
       },
       {
         page: 'CodeList',
-        name: '공통코드 관리',
+        name: '공통코드',
         path: '/code/list.do',
         icon: 'cil-speedometer',
       },
-      {
-        page: 'RegionList',
-        name: '지역코드 관리',
-        path: '/region/list.do',
-        icon: 'cil-speedometer',
-      },
+      // {
+      //   page: 'RegionList',
+      //   name: '지역코드',
+      //   path: '/region/list.do',
+      //   icon: 'cil-speedometer',
+      // },
     ],
   },
   {
@@ -39,16 +39,16 @@ const pageList = [
     child: [
       {
         page: 'EventList',
-        name: '이벤트 관리',
+        name: '이벤트',
         path: '/event/list.do',
         icon: 'cil-layers',
       },
-      {
-        page: 'StoreList',
-        name: '사업장 관리',
-        path: '/store/list.do',
-        icon: 'cil-speedometer',
-      },
+      // {
+      //   page: 'StoreList',
+      //   name: '사업장',
+      //   path: '/store/list.do',
+      //   icon: 'cil-speedometer',
+      // },
       {
         page: 'MapView',
         name: '지도 보기',
