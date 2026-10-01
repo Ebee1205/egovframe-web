@@ -7,17 +7,17 @@
     <formset>
         <form name="codeDetailVO">
             <field property="parentCid" depends="long">
-                <arg0 key="부모 코드" resource="false"/>
+                <arg0 key="code.parentCid"/>
             </field>
             <field property="name" depends="required,maxlength,mask">
                 <msg name="mask" key="errors.code.name"/>
-                <arg0 key="코드명" resource="false"/>
+                <arg0 key="code.name"/>
                 <arg1 name="maxlength" key="100" resource="false"/>
                 <var><var-name>maxlength</var-name><var-value>100</var-value></var>
                 <var><var-name>mask</var-name><var-value>^[A-Za-z가-힣]+$</var-value></var>
             </field>
             <field property="code" depends="required,maxlength,englishUpperCase">
-                <arg0 key="코드" resource="false"/>
+                <arg0 key="code.code"/>
                 <arg1 name="maxlength" key="50" resource="false"/>
                 <var><var-name>maxlength</var-name><var-value>50</var-value></var>
                 <var><var-name>mask</var-name><var-value>^[A-Z0-9_]+$</var-value></var>
