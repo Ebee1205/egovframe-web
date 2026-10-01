@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springmodules.validation.commons.DefaultBeanValidator;
+import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
@@ -40,6 +41,8 @@ public class EventController {
 	private final CodeService codeService;
 	@Autowired
 	private DefaultBeanValidator beanValidator;
+	@Autowired
+	private DefaultValidatorFactory validatorFactory;
 
 	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService) {
 		this.eventService = eventService;
@@ -47,11 +50,14 @@ public class EventController {
 		this.codeService = codeService;
 	}
 
-	@InitBinder("eventVO")
+	@InitBinder({"eventVO", "eventCreateVO"})
 	public void initEventBinder(WebDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+		if ("eventCreateVO".equals(binder.getObjectName())) {
+			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "createdBy");
+		}
 	}
 
 	@RequestMapping("/event/list.do")
@@ -113,6 +119,11 @@ public class EventController {
 
 	@RequestMapping("/event/create.do")
 	public String eventCreate(Model model) throws Exception {
+		if (!model.containsAttribute("eventCreateVO")) {
+			EventVO eventVO = new EventVO();
+			eventVO.setRid(1L);
+			model.addAttribute("eventCreateVO", eventVO);
+		}
 		CodeFilterVO eventCtgFilter = new CodeFilterVO();
 		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");
 		model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(eventCtgFilter));
@@ -126,6 +137,18 @@ public class EventController {
 		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
 
 		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
+	}
+
+	@RequestMapping(value = "/event/insert.do", method = RequestMethod.POST)
+	public String eventInsert(@ModelAttribute("eventCreateVO") EventVO eventVO,
+			BindingResult bindingResult, Model model) throws Exception {
+		eventVO.setRid(1L);
+		validatorFactory.getValidator("eventCreateVO", eventVO, bindingResult).validate();
+		if (bindingResult.hasErrors()) {
+			return eventCreate(model);
+		}
+		eventService.insertEvent(eventVO);
+		return "redirect:/event/detail.do?eid=" + eventVO.getEid();
 	}
 
 	@RequestMapping(value = "/event/update.do", method = RequestMethod.POST)
