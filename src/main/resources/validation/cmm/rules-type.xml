@@ -296,7 +296,34 @@
                        org.springframework.validation.Errors"
                        
               depends=""
-                  msg="errors.long"/>
+                  msg="errors.long">
+          <javascript><![CDATA[
+            function validateLong(form) {
+                var rules = new long();
+                var messages = [];
+                for (var key in rules) {
+                    var field = form.elements[rules[key][0]];
+                    var value = field.value;
+                    if (!value) { continue; }
+                    var digits = value.replace(/^[+-]/, '').replace(/^0+(?=\d)/, '');
+                    var limit = value.charAt(0) === '-' ? '9223372036854775808' : '9223372036854775807';
+                    if (!/^[+-]?\d+$/.test(value) || digits.length > 19 ||
+                            (digits.length === 19 && digits > limit)) {
+                        messages.push(rules[key][1]);
+                        if (messages.length === 1 && field.type !== 'hidden') { field.focus(); }
+                    }
+                }
+                if (messages.length) {
+                    if (typeof form.onValidationErrors === 'function') {
+                        form.onValidationErrors(messages);
+                    } else {
+                        alert(messages.join('\n'));
+                    }
+                }
+                return messages.length === 0;
+            }
+          ]]></javascript>
+      </validator>
 
 
       <validator name="float"

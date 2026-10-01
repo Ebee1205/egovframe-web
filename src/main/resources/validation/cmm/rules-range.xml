@@ -167,7 +167,7 @@
 
         <!-- 날짜 범위 검사 -->
         <validator name="dateRange"
-            classname="egovframework.let.cmm.validation.CustomFieldChecks"
+            classname="com.cmm.ComFieldChecks"
                 method="validateDateRange"
         methodParams="java.lang.Object,
                         org.apache.commons.validator.ValidatorAction,
@@ -248,7 +248,7 @@
 
         <!-- 두 날짜 사이의 범위 검사 -->
         <validator name="dateAfterOrEqual"
-            classname="egovframework.let.cmm.validation.CustomFieldChecks"
+            classname="com.cmm.ComFieldChecks"
                 method="validateDateAfterOrEqual"
         methodParams="java.lang.Object,
                         org.apache.commons.validator.ValidatorAction,
