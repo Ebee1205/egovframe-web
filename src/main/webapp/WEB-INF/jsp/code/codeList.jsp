@@ -65,7 +65,7 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
-                    <button type="create" class="btn | btn-outline-secondary">신규 등록</button>
+                    <button id="openCodeCreate" type="button" class="btn | btn-outline-secondary">신규 등록</button>
                 </div>
 
                 <!-- 테이블 본문 -->
@@ -139,10 +139,7 @@
 
         </div>
     </div>
-
-
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        
-    </div>
+    <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
+    <jsp:include page="/WEB-INF/jsp/code/CodeCreateDialog.jsp" />
 </body>
 </html>
