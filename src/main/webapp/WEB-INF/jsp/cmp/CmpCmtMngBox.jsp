@@ -61,7 +61,7 @@
                                 data-comment-edit-toggle="edit-comment-${comment.cmtId}">수정</button>
                                                 <c:if test="${empty replies}">
                                                         <form action="${commentDeleteUrl}" method="post"
-                                                                    class="js-confirm-form" data-confirm-text="댓글을 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다.">
+                                                            class="js-confirm-form" data-confirm-text="댓글을 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다.">
                                                                 <input type="hidden" name="cmtId" value="${comment.cmtId}">
                                                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                                                                 <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
@@ -227,7 +227,12 @@
             isOneButton: true,
             okText: '확인',
             okButton: function () {
-                location.reload();
+                var successUrl = form.getAttribute('data-success-url');
+                if (successUrl) {
+                    location.href = successUrl;
+                } else {
+                    location.reload();
+                }
             }
         });
     }
@@ -252,7 +257,21 @@
 
         if (updateForm) {
             e.preventDefault();
-            submitFormAjax(updateForm, function () { showDone(updateForm, '수정이 완료되었습니다.'); });
+            var submitUpdate = function () {
+                submitFormAjax(updateForm, function () { showDone(updateForm, '수정이 완료되었습니다.'); });
+            };
+            var confirmText = updateForm.getAttribute('data-confirm-text');
+            if (confirmText) {
+                CmpDialog.open({
+                    title: '확인',
+                    text: confirmText,
+                    okText: '수정',
+                    cancelText: '취소',
+                    okButton: submitUpdate
+                });
+            } else {
+                submitUpdate();
+            }
         }
     });
 })();
