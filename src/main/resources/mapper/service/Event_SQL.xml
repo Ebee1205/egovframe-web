@@ -95,4 +95,9 @@
 		WHERE eid = #{eid}
 	</delete>
 
+	<delete id="deleteEventTags" parameterType="EventVO">
+		DELETE FROM mtb_event_tag
+		WHERE eid = #{eid}
+	</delete>
+
 </mapper>

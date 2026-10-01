@@ -34,4 +34,8 @@ public class EventDAO extends EgovAbstractMapper {
 	public void deleteEvent(EventVO eventVO) throws Exception {
 		delete("eventDAO.deleteEvent", eventVO);
 	}
+
+	public void deleteEventTags(EventVO eventVO) throws Exception {
+		delete("eventDAO.deleteEventTags", eventVO);
+	}
 }

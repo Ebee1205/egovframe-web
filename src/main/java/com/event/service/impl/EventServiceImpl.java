@@ -56,6 +56,7 @@ public class EventServiceImpl implements EventService {
 	public void deleteEvent(EventVO eventVO) throws Exception {
 		eventCmtDAO.clearEventCmtParentsByEid(eventVO.getEid());
 		eventCmtDAO.deleteEventCmtsByEid(eventVO.getEid());
+		eventDAO.deleteEventTags(eventVO);
 		eventDAO.deleteEvent(eventVO);
 	}
 }
