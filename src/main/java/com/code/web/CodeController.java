@@ -1,14 +1,18 @@
 package com.code.web;
 
 import java.util.Locale;
+import javax.json.Json;
 
 import org.springframework.context.MessageSource;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
+import org.springframework.validation.DefaultMessageCodesResolver;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +22,7 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 
 import com.code.service.CodeService;
 import com.code.service.CodeDetailVO;
+import com.cmm.util.ErrMessageBuildUtil;
 
 @Controller
 public class CodeController {
@@ -34,6 +39,20 @@ public class CodeController {
 		this.codeService = codeService;
 	}
 
+	@InitBinder("codeDetailVO")
+	public void initCodeBinder(WebDataBinder binder) {
+		binder.setAllowedFields("parentCid", "name", "code");
+		binder.setMessageCodesResolver(new DefaultMessageCodesResolver() {
+			@Override
+			public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
+				if ("typeMismatch".equals(errorCode) && "parentCid".equals(field)) {
+					return new String[] { "errors.code.parent" };
+				}
+				return super.resolveMessageCodes(errorCode, objectName, field, fieldType);
+			}
+		});
+	}
+
 	@RequestMapping("/code/list.do")
 	public String codeList(CodeDetailVO filterVO, Model model) throws Exception {
 		model.addAttribute("codes", codeService.selectCodeList(filterVO));
@@ -43,34 +62,36 @@ public class CodeController {
 		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 
-	@RequestMapping(value = "/code/insert.do", method = RequestMethod.POST)
+	@RequestMapping(value = "/code/insert.do", method = RequestMethod.POST,
+			produces = "application/json")
 	public ResponseEntity<String> insertCode(
-			@ModelAttribute("codeVO") CodeDetailVO codeVO, BindingResult bindingResult) throws Exception {
+			@ModelAttribute("codeDetailVO") CodeDetailVO codeVO, BindingResult bindingResult) throws Exception {
+		if (codeVO.getCode() != null) {
+			codeVO.setCode(codeVO.getCode().trim());
+		}
+		if (codeVO.getName() != null) {
+			codeVO.setName(codeVO.getName().trim());
+		}
 		beanValidator.validate(codeVO, bindingResult);
 
 		if (bindingResult.hasErrors()) {
-			// 응답 본문은 "필드명:메시지" 형식의 줄 단위 목록으로, 화면에서 필드별 오류로 분리해 표시한다.
-			StringBuilder errorMessage = new StringBuilder();
-			for (FieldError fieldError : bindingResult.getFieldErrors()) {
-				if (errorMessage.length() > 0) {
-					errorMessage.append("\n");
-				}
-				errorMessage.append(fieldError.getField()).append(":").append(messageSource.getMessage(fieldError, Locale.KOREAN));
-			}
-			return ResponseEntity.badRequest().body(errorMessage.toString());
+			return ResponseEntity.badRequest()
+					.body(ErrMessageBuildUtil.build(bindingResult, messageSource, Locale.KOREAN));
 		}
 
-		codeVO.setCode(codeVO.getCode().trim());
-		codeVO.setName(codeVO.getName().trim());
 		codeVO.setLevel(codeVO.getParentCid() == null ? 1 : 2);
 		codeVO.setStatus("Y");
 
 		try {
 			codeService.insertCode(codeVO);
 		} catch (DataIntegrityViolationException exception) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("code:같은 부모 코드 아래에 동일한 코드가 이미 있습니다.");
+			bindingResult.rejectValue("code", "errors.code.duplicate");
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body(ErrMessageBuildUtil.build(bindingResult, messageSource, Locale.KOREAN));
 		}
 
-		return ResponseEntity.status(HttpStatus.CREATED).body("코드가 생성되었습니다.");
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(Json.createObjectBuilder().add("message",
+						messageSource.getMessage("success.code.insert", null, Locale.KOREAN)).build().toString());
 	}
 }
