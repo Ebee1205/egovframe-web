@@ -120,17 +120,22 @@
                 <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">삭제</a>
             </div>
         </div>
-
-        <jsp:include page="/WEB-INF/jsp/cmp/CmpCmtBox.jsp">
+        
+        <jsp:include page="/WEB-INF/jsp/cmp/CmpCmtMngBox.jsp">
             <jsp:param name="insertUrl" value="/event/cmt/insert.do" />
+            <jsp:param name="updateUrl" value="/event/cmt/update.do" />
+            <jsp:param name="deleteUrl" value="/event/cmt/delete.do" />
             <jsp:param name="targetIdParam" value="eid" />
             <jsp:param name="targetId" value="${event.eid}" />
             <jsp:param name="commentsAttribute" value="comments" />
             <jsp:param name="replyMapAttribute" value="replyMap" />
         </jsp:include>
 
+        <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
+        
     </div>
-
-
+    
+    
 </body>
 </html>
+

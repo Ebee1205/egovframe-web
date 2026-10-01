@@ -61,7 +61,7 @@
                                 data-comment-edit-toggle="edit-comment-${comment.cmtId}">수정</button>
                                                 <c:if test="${empty replies}">
                                                         <form action="${commentDeleteUrl}" method="post"
-                                                                    onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                                                                    class="js-confirm-form" data-confirm-text="댓글을 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다.">
                                                                 <input type="hidden" name="cmtId" value="${comment.cmtId}">
                                                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                                                                 <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
@@ -70,7 +70,8 @@
                     </div>
 
                     <div class="d-none | mt-2" id="edit-comment-${comment.cmtId}">
-                        <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8">
+                        <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
+                              class="js-update-form" data-success-text="수정이 완료되었습니다.">
                             <input type="hidden" name="cmtId" value="${comment.cmtId}">
                             <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                             <input type="hidden" name="uid" value="${comment.uid}">
@@ -105,7 +106,7 @@
                                             <button class="btn | btn-sm | btn-outline-secondary" type="button"
                                                     data-comment-edit-toggle="edit-reply-${reply.cmtId}">수정</button>
                                             <form action="${commentDeleteUrl}" method="post"
-                                                  onsubmit="return confirm('답글을 삭제하시겠습니까?');">
+                                                  class="js-confirm-form" data-confirm-text="답글을 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다.">
                                                 <input type="hidden" name="cmtId" value="${reply.cmtId}">
                                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                                                 <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
@@ -113,7 +114,8 @@
                                         </div>
 
                                         <div class="d-none | mt-2" id="edit-reply-${reply.cmtId}">
-                                            <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8">
+                                            <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
+                                                  class="js-update-form" data-success-text="수정이 완료되었습니다.">
                                                 <input type="hidden" name="cmtId" value="${reply.cmtId}">
                                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
                                                 <input type="hidden" name="uid" value="${reply.uid}">
@@ -185,6 +187,72 @@
                 var input = box.querySelector('input[name="cmt"], textarea');
                 if (input) input.focus();
             }
+        }
+    });
+})();
+</script>
+
+<!-- 댓글/답글 삭제·수정 확인 및 완료 다이얼로그 (CmpDialog, 중복 include 시 1회만 바인딩) -->
+<script>
+(function () {
+    if (window.__cmtConfirmBound) return;
+    window.__cmtConfirmBound = true;
+
+    function submitFormAjax(form, onSuccess) {
+        // multipart/form-data로 전송되면 멀티파트 리졸버가 없어 서버에서 파라미터가 비어 바인딩된다.
+        // 기존 폼 전송과 동일하게 application/x-www-form-urlencoded로 전송한다.
+        var body = new URLSearchParams(new FormData(form));
+
+        fetch(form.action, {
+            method: form.method || 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: body
+        })
+            .then(function (res) {
+                if (res.ok) {
+                    onSuccess();
+                } else {
+                    CmpDialog.open({ title: '오류', text: '처리 중 오류가 발생했습니다.', isOneButton: true });
+                }
+            })
+            .catch(function () {
+                CmpDialog.open({ title: '오류', text: '네트워크 오류가 발생했습니다.', isOneButton: true });
+            });
+    }
+
+    function showDone(form, defaultText) {
+        CmpDialog.open({
+            title: '완료',
+            text: form.getAttribute('data-success-text') || defaultText,
+            isOneButton: true,
+            okText: '확인',
+            okButton: function () {
+                location.reload();
+            }
+        });
+    }
+
+    document.addEventListener('submit', function (e) {
+        var confirmForm = e.target.closest('.js-confirm-form');
+        var updateForm = e.target.closest('.js-update-form');
+
+        if (confirmForm) {
+            e.preventDefault();
+            CmpDialog.open({
+                title: '확인',
+                text: confirmForm.getAttribute('data-confirm-text') || '삭제하시겠습니까?',
+                okText: '삭제',
+                cancelText: '취소',
+                okButton: function () {
+                    submitFormAjax(confirmForm, function () { showDone(confirmForm, '삭제가 완료되었습니다.'); });
+                }
+            });
+            return;
+        }
+
+        if (updateForm) {
+            e.preventDefault();
+            submitFormAjax(updateForm, function () { showDone(updateForm, '수정이 완료되었습니다.'); });
         }
     });
 })();

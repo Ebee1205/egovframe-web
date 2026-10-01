@@ -22,22 +22,27 @@
         });
 --%>
 <c:set var="modalId" value="${empty param.modalId ? 'cmpYNDialog' : param.modalId}" />
-
-<link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>">
 <script src="<c:url value='/resources/coreui-5.8.0-dist/js/coreui.bundle.min.js'/>"></script>
 
 <!-- Dialog -->
-<div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog | modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 24px;">
+<div class="modal | fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog | modal-sm | modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title | w-100 text-center" data-dialog-title></h5>
-                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close" data-dialog-close></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close" 
+                    data-dialog-close>
+                </button>
             </div>
             <div class="modal-body | text-center | text-body-secondary" data-dialog-text></div>
             <div class="modal-footer | border-0 | justify-content-center | gap-2">
-                <button type="button" class="btn | btn-outline-secondary | flex-fill" data-coreui-dismiss="modal" data-dialog-cancel>취소</button>
-                <button type="button" class="btn | btn-primary | flex-fill" data-dialog-ok>확인</button>
+                <button type="button" class="btn | btn-outline-secondary | flex-fill" 
+                    data-coreui-dismiss="modal" 
+                    data-dialog-cancel
+                >취소</button>
+                <button type="button" class="btn | btn-primary | flex-fill" 
+                    data-dialog-ok
+                >확인</button>
             </div>
         </div>
     </div>
