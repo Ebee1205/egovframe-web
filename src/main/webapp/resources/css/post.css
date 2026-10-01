@@ -1,0 +1,28 @@
+.cmt-thread-line {
+    width: 2px;
+    background-color: var(--cui-border-color);
+    border-radius: 1px;
+    flex-grow: 1;
+    margin-top: .25rem;
+    transition: background-color .15s;
+}
+.cmt-thread:hover > .cmt-side > .cmt-thread-line { background-color: var(--cui-primary); }
+.cmt-action {
+    color: var(--cui-secondary-color);
+    font-size: .8125rem;
+    padding: .125rem .5rem;
+    border-radius: 999px;
+    text-decoration: none;
+}
+.cmt-action:hover { background-color: var(--cui-tertiary-bg); color: var(--cui-primary); }
+.cmt-input {
+    border: 0;
+    resize: none;
+    box-shadow: none !important;
+    background: transparent;
+}
+.cmt-reply-box {
+    border: 1px solid var(--cui-border-color);
+    border-radius: .75rem;
+}
+.cmt-reply-box:focus-within { border-color: var(--cui-primary); }
