@@ -34,7 +34,14 @@
         </div>
 
         <div class="p-3 | align-items-center">
-            <form class="form-container">
+            <form id="eventUpdateForm" action="<c:url value='/event/update.do'/>" method="post"
+                  class="form-container js-update-form" accept-charset="UTF-8"
+                  data-confirm-text="이벤트를 수정하시겠습니까?" data-success-text="수정이 완료되었습니다.">
+                <input type="hidden" name="eid" value="${event.eid}">
+                <input type="hidden" name="rid" value="${event.rid}">
+                <input type="hidden" name="lat" value="${event.lat}">
+                <input type="hidden" name="lon" value="${event.lon}">
+                <input type="hidden" name="fileId" value="${event.fileId}">
                 <div>
                     <label for="title" class="form-label">이벤트 제목</label>
                     <input type="text" class="form-control" id="title" name="title" value="${event.title}">
@@ -116,8 +123,13 @@
                 <p class="form-info-text">최종 수정일: <fmt:formatDate value="${event.UDate}" pattern="yyyy-MM-dd HH:mm"/></p>
             </div>
             <div>
-                <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">수정</a>
-                <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">삭제</a>
+                <button type="submit" form="eventUpdateForm" class="btn | btn-outline-secondary">수정</button>
+                <form action="<c:url value='/event/delete.do'/>" method="post" class="js-confirm-form d-inline"
+                      data-confirm-text="이벤트를 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다."
+                      data-success-url="<c:url value='/event/list.do'/>">
+                    <input type="hidden" name="eid" value="${event.eid}">
+                    <button type="submit" class="btn | btn-outline-secondary">삭제</button>
+                </form>
             </div>
         </div>
         

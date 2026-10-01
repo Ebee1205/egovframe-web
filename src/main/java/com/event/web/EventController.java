@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.code.service.CodeFilterVO;
@@ -108,13 +109,13 @@ public class EventController {
 		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
 	}
 
-	@RequestMapping("/event/update.do")
+	@RequestMapping(value = "/event/update.do", method = RequestMethod.POST)
 	public String eventUpdate(EventVO eventVO) throws Exception {
 		eventService.updateEvent(eventVO);
 		return "redirect:/event/detail.do?eid=" + eventVO.getEid();
 	}
 
-	@RequestMapping("/event/delete.do")
+	@RequestMapping(value = "/event/delete.do", method = RequestMethod.POST)
 	public String eventDelete(@RequestParam("eid") Long eid) throws Exception {
 		EventVO eventVO = new EventVO();
 		eventVO.setEid(eid);
