@@ -56,23 +56,6 @@ public class EventController {
 		return "forward:/WEB-INF/jsp/event/EventList.jsp";
 	}
 
-	@RequestMapping("/event/create.do")
-	public String eventCreate(Model model) throws Exception {
-		CodeFilterVO eventCtgFilter = new CodeFilterVO();
-		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");
-		model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(eventCtgFilter));
-
-		CodeFilterVO eventStatusFilter = new CodeFilterVO();
-		eventStatusFilter.setParentCode("EVENT_STAT_ROOT");
-		model.addAttribute("eventStatuses", codeService.selectCmmCodeDetail(eventStatusFilter));
-
-		CodeFilterVO tagFilter = new CodeFilterVO();
-		tagFilter.setParentCode("TAG_ROOT");
-		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
-
-		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
-	}
-
 	@RequestMapping("/event/detail.do")
 	public String eventDetail(@RequestParam("eid") Long eid, EventCmtFilterVO cmtFilterVO, Model model) throws Exception {
 		EventVO eventVO = new EventVO();
@@ -106,6 +89,37 @@ public class EventController {
 		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
 
 		return "forward:/WEB-INF/jsp/event/EventDetail.jsp";
+	}
+
+	@RequestMapping("/event/create.do")
+	public String eventCreate(Model model) throws Exception {
+		CodeFilterVO eventCtgFilter = new CodeFilterVO();
+		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");
+		model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(eventCtgFilter));
+
+		CodeFilterVO eventStatusFilter = new CodeFilterVO();
+		eventStatusFilter.setParentCode("EVENT_STAT_ROOT");
+		model.addAttribute("eventStatuses", codeService.selectCmmCodeDetail(eventStatusFilter));
+
+		CodeFilterVO tagFilter = new CodeFilterVO();
+		tagFilter.setParentCode("TAG_ROOT");
+		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
+
+		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
+	}
+
+	@RequestMapping("/event/update.do")
+	public String eventUpdate(EventVO eventVO) throws Exception {
+		eventService.updateEvent(eventVO);
+		return "redirect:/event/detail.do?eid=" + eventVO.getEid();
+	}
+
+	@RequestMapping("/event/delete.do")
+	public String eventDelete(@RequestParam("eid") Long eid) throws Exception {
+		EventVO eventVO = new EventVO();
+		eventVO.setEid(eid);
+		eventService.deleteEvent(eventVO);
+		return "redirect:/event/list.do";
 	}
 
 }
