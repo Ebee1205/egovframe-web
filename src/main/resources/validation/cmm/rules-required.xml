@@ -136,8 +136,12 @@
            }
                 }
                 if (fields.length > 0) {
-                   focusField.focus();
-                   alert(fields.join('\n'));
+                   if (focusField) { focusField.focus(); }
+                   if (typeof form.onValidationErrors === 'function') {
+                       form.onValidationErrors(fields);
+                   } else {
+                       alert(fields.join('\n'));
+                   }
                 }
                 return isValid;
             }
