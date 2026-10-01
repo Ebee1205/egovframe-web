@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -35,16 +36,18 @@
 
         <div class="p-3 | align-items-center">
             <form id="eventUpdateForm" action="<c:url value='/event/update.do'/>" method="post"
-                  class="form-container js-update-form" accept-charset="UTF-8"
-                  data-confirm-text="이벤트를 수정하시겠습니까?" data-success-text="수정이 완료되었습니다.">
+                class="form-container js-update-form" accept-charset="UTF-8"
+                data-confirm-text="이벤트를 수정하시겠습니까?" 
+                data-success-text="수정이 완료되었습니다."
+            >
                 <input type="hidden" name="eid" value="${event.eid}">
                 <input type="hidden" name="rid" value="${event.rid}">
-                <input type="hidden" name="lat" value="${event.lat}">
-                <input type="hidden" name="lon" value="${event.lon}">
+                <input type="hidden" name="lat" value="${empty event.lat ? '' : event.lat.toPlainString()}">
+                <input type="hidden" name="lon" value="${empty event.lon ? '' : event.lon.toPlainString()}">
                 <input type="hidden" name="fileId" value="${event.fileId}">
                 <div>
                     <label for="title" class="form-label">이벤트 제목</label>
-                    <input type="text" class="form-control" id="title" name="title" value="${event.title}">
+                    <input type="text" class="form-control" id="title" name="title" maxlength="300" required value="<c:out value='${event.title}'/>">
                 </div>
         
                 <div>
@@ -52,7 +55,7 @@
                     <select 
                         class="form-select | input-box" 
                         placeholder="카테고리 선택"
-                        id="ctg" name="ctg">
+                        id="ctg" name="ctg" required>
                         <option value="">전체</option>
                         <c:forEach var="eventCtg" items="${eventCtgs}">
                             <option value="${eventCtg.code}" ${eventCtg.code == event.ctg ? 'selected' : ''}>
@@ -65,11 +68,11 @@
                 <div class="row">
                     <div class="col">
                         <label for="sDate" class="form-label">이벤트 시작일</label>
-                        <input type="text" class="form-control" id="sDate" name="sDate" value="<fmt:formatDate value='${event.SDate}' pattern='yyyy-MM-dd HH:mm'/>">
+                        <input type="text" class="form-control" id="sDate" name="SDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.SDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                     <div class="col">
                         <label for="eDate" class="form-label">이벤트 종료일</label>
-                        <input type="text" class="form-control" id="eDate" name="eDate" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
+                        <input type="text" class="form-control" id="eDate" name="EDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                 </div>
         
@@ -90,12 +93,12 @@
         
                 <div>
                     <label for="address" class="form-label">이벤트 주소</label>
-                    <input type="text" class="form-control" id="address" name="address" value="${event.address}">
+                    <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
                 </div>
         
                 <div>
                     <label for="dsc" class="form-label">이벤트 내용</label>
-                    <textarea class="form-control" id="dsc" name="dsc" rows="3"><c:out value="${event.dsc}"/></textarea>
+                    <textarea class="form-control" id="dsc" name="dsc" rows="3" required><c:out value="${event.dsc}"/></textarea>
                 </div>
 
                 <div>
@@ -103,7 +106,7 @@
                     <select 
                         class="form-select | input-box" 
                         placeholder="상태 선택"
-                        id="status" name="status">
+                        id="status" name="status" required>
                         <option value="">전체</option>
                         <c:forEach var="eventStatus" items="${eventStatuses}">
                             <option value="${eventStatus.code}" ${eventStatus.code == event.status ? 'selected' : ''}>
@@ -124,9 +127,12 @@
             </div>
             <div>
                 <button type="submit" form="eventUpdateForm" class="btn | btn-outline-secondary">수정</button>
-                <form action="<c:url value='/event/delete.do'/>" method="post" class="js-confirm-form d-inline"
-                      data-confirm-text="이벤트를 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다."
-                      data-success-url="<c:url value='/event/list.do'/>">
+                <form action="<c:url value='/event/delete.do'/>" 
+                    method="post" class="js-confirm-form d-inline"
+                    data-confirm-text="이벤트를 삭제하시겠습니까?" 
+                    data-success-text="삭제가 완료되었습니다."
+                    data-success-url="<c:url value='/event/list.do'/>"
+                >
                     <input type="hidden" name="eid" value="${event.eid}">
                     <button type="submit" class="btn | btn-outline-secondary">삭제</button>
                 </form>
@@ -148,6 +154,27 @@
     </div>
     
     
+    <validator:javascript formName="eventVO" method="validateEventVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
+    <script>
+        window.alert = function (message) {
+            CmpDialog.open({
+                title: '입력 확인',
+                text: String(message).replace(/\r?\n/g, '<br>'),
+                isOneButton: true,
+                okButton: function () {
+                    CmpDialog.close();
+                }
+            });
+        };
+
+        document.getElementById('eventUpdateForm').addEventListener('submit', function (event) {
+            if (!validateEventVO(this)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        });
+    </script>
+
 </body>
 </html>
 
