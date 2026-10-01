@@ -1,3 +1,3 @@
-<%@ page language="java" contentType="application/javascript" %>
+<%@ page language="java" contentType="application/javascript; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator" %>
 <validator:javascript dynamicJavascript="false" staticJavascript="true"/>

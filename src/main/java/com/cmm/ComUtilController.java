@@ -33,7 +33,7 @@ public class ComUtilController {
 	@RequestMapping("/validator.do")
 	public String validate(){
 		LOGGER.info("Commons Validator JavaScript endpoint invoked: /validator.do");
-		return "cmm/validator";
+		return "forward:/WEB-INF/jsp/cmm/validator.jsp";
 	}
 
 }
