@@ -28,7 +28,7 @@ const pageList = [
       },
       {
         page: 'RegionList',
-        name: '지역 관리',
+        name: '지역코드 관리',
         path: '/region/list.do',
         icon: 'cil-speedometer',
       },
@@ -47,6 +47,12 @@ const pageList = [
         page: 'StoreList',
         name: '사업장 관리',
         path: '/store/list.do',
+        icon: 'cil-speedometer',
+      },
+      {
+        page: 'MapView',
+        name: '지도 보기',
+        path: '/content/map.do',
         icon: 'cil-speedometer',
       },
     ],
