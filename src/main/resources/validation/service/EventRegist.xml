@@ -39,8 +39,10 @@
                 <var><var-name>compareProperty</var-name><var-value>SDate</var-value></var>
             </field>
 
-            <field property="dsc" depends="required">
+            <field property="dsc" depends="required,maxlength">
                 <arg0 key="이벤트 내용" resource="false"/>
+                <arg1 name="maxlength" key="1000" resource="false"/>
+                <var><var-name>maxlength</var-name><var-value>1000</var-value></var>
             </field>
 
             <field property="address" depends="maxlength">

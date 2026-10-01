@@ -37,6 +37,7 @@
         <div class="p-3 | align-items-center">
             <form id="eventUpdateForm" action="<c:url value='/event/update.do'/>" method="post"
                 class="form-container js-update-form" accept-charset="UTF-8"
+                novalidate
                 data-confirm-text="이벤트를 수정하시겠습니까?" 
                 data-success-text="수정이 완료되었습니다."
             >
