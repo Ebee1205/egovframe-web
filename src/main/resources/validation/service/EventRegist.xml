@@ -29,15 +29,13 @@
                 <arg0 key="이벤트 지역 ID" resource="false"/>
             </field>
 
-            <field property="SDate" depends="required,date">
+            <field property="SDate" depends="required">
                 <arg0 key="이벤트 시작일" resource="false"/>
-                <var><var-name>datePatternStrict</var-name><var-value>yyyy-MM-dd</var-value></var>
             </field>
 
-            <field property="EDate" depends="required,date,dateAfterOrEqual">
+            <field property="EDate" depends="required,dateAfterOrEqual">
                 <arg0 key="이벤트 종료일" resource="false"/>
                 <arg1 name="dateAfterOrEqual" key="이벤트 시작일" resource="false"/>
-                <var><var-name>datePatternStrict</var-name><var-value>yyyy-MM-dd</var-value></var>
                 <var><var-name>compareProperty</var-name><var-value>SDate</var-value></var>
             </field>
 
@@ -50,7 +48,7 @@
                 <arg1 name="maxlength" key="500" resource="false"/>
                 <var><var-name>maxlength</var-name><var-value>500</var-value></var>
             </field>
-            <field property="lat" depends="required,double,floatRange">
+            <field property="lat" depends="double,floatRange">
                 <arg0 key="위도" resource="false"/>
                 <arg1 name="floatRange" key="-90" resource="false"/>
                 <arg2 name="floatRange" key="90" resource="false"/>
@@ -58,7 +56,7 @@
                 <var><var-name>max</var-name><var-value>90</var-value></var>
             </field>
 
-            <field property="lon" depends="required,double,floatRange">
+            <field property="lon" depends="double,floatRange">
                 <arg0 key="경도" resource="false"/>
                 <arg1 name="floatRange" key="-180" resource="false"/>
                 <arg2 name="floatRange" key="180" resource="false"/>
