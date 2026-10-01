@@ -7,13 +7,18 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springmodules.validation.commons.DefaultBeanValidator;
 
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
@@ -33,6 +38,8 @@ public class EventController {
 	private final EventService eventService;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
+	@Autowired
+	private DefaultBeanValidator beanValidator;
 
 	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService) {
 		this.eventService = eventService;
@@ -122,7 +129,13 @@ public class EventController {
 	}
 
 	@RequestMapping(value = "/event/update.do", method = RequestMethod.POST)
-	public String eventUpdate(EventVO eventVO) throws Exception {
+	public String eventUpdate(@ModelAttribute("eventVO") EventVO eventVO, BindingResult bindingResult) throws Exception {
+		beanValidator.validate(eventVO, bindingResult);
+
+		if (bindingResult.hasErrors()) {
+			throw new BindException(bindingResult);
+		}
+
 		eventService.updateEvent(eventVO);
 		return "redirect:/event/detail.do?eid=" + eventVO.getEid();
 	}
