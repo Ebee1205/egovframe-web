@@ -3,6 +3,7 @@ package com.event.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.event.service.EventFilterVO;
 import com.event.service.EventService;
@@ -12,9 +13,11 @@ import com.event.service.EventVO;
 public class EventServiceImpl implements EventService {
 
 	private final EventDAO eventDAO;
+	private final EventCmtDAO eventCmtDAO;
 
-	public EventServiceImpl(EventDAO eventDAO) {
+	public EventServiceImpl(EventDAO eventDAO, EventCmtDAO eventCmtDAO) {
 		this.eventDAO = eventDAO;
+		this.eventCmtDAO = eventCmtDAO;
 	}
 
 	@Override
@@ -49,7 +52,10 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteEvent(EventVO eventVO) throws Exception {
+		eventCmtDAO.clearEventCmtParentsByEid(eventVO.getEid());
+		eventCmtDAO.deleteEventCmtsByEid(eventVO.getEid());
 		eventDAO.deleteEvent(eventVO);
 	}
 }

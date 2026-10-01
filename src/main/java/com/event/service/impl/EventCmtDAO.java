@@ -42,4 +42,12 @@ public class EventCmtDAO extends EgovAbstractMapper {
     public void deleteEventCmt(EventCmtVO eventCmtVO) throws Exception {
         delete("eventCmtDAO.deleteEventCmt", eventCmtVO);
     }
+
+    public void clearEventCmtParentsByEid(Long eid) throws Exception {
+        update("eventCmtDAO.clearEventCmtParentsByEid", eid);
+    }
+
+    public void deleteEventCmtsByEid(Long eid) throws Exception {
+        delete("eventCmtDAO.deleteEventCmtsByEid", eid);
+    }
 }

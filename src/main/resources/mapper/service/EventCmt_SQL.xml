@@ -99,4 +99,16 @@
 		WHERE cmt_id = #{cmtId}
 	</delete>
 
+	<update id="clearEventCmtParentsByEid" parameterType="long">
+		UPDATE tb_event_cmt
+		SET p_cmt_id = NULL
+		WHERE eid = #{_parameter}
+			AND p_cmt_id IS NOT NULL
+	</update>
+
+	<delete id="deleteEventCmtsByEid" parameterType="long">
+		DELETE FROM tb_event_cmt
+		WHERE eid = #{_parameter}
+	</delete>
+
 </mapper>
