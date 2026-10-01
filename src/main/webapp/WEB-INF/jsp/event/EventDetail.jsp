@@ -36,7 +36,7 @@
 
         <div class="p-3 | align-items-center">
             <form id="eventUpdateForm" action="<c:url value='/event/update.do'/>" method="post"
-                class="form-container js-update-form" accept-charset="UTF-8"
+                class="form-container | js-update-form" accept-charset="UTF-8"
                 novalidate
                 data-confirm-text="이벤트를 수정하시겠습니까?" 
                 data-success-text="수정이 완료되었습니다."
@@ -140,15 +140,18 @@
             </div>
         </div>
         
-        <jsp:include page="/WEB-INF/jsp/cmp/CmpCmtMngBox.jsp">
-            <jsp:param name="insertUrl" value="/event/cmt/insert.do" />
-            <jsp:param name="updateUrl" value="/event/cmt/update.do" />
-            <jsp:param name="deleteUrl" value="/event/cmt/delete.do" />
-            <jsp:param name="targetIdParam" value="eid" />
-            <jsp:param name="targetId" value="${event.eid}" />
-            <jsp:param name="commentsAttribute" value="comments" />
-            <jsp:param name="replyMapAttribute" value="replyMap" />
-        </jsp:include>
+
+        <div class="p-3 | align-items-center">
+            <jsp:include page="/WEB-INF/jsp/cmp/CmpCmtMngBox.jsp">
+                <jsp:param name="insertUrl" value="/event/cmt/insert.do" />
+                <jsp:param name="updateUrl" value="/event/cmt/update.do" />
+                <jsp:param name="deleteUrl" value="/event/cmt/delete.do" />
+                <jsp:param name="targetIdParam" value="eid" />
+                <jsp:param name="targetId" value="${event.eid}" />
+                <jsp:param name="commentsAttribute" value="comments" />
+                <jsp:param name="replyMapAttribute" value="replyMap" />
+            </jsp:include>
+        </div>
 
         <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
         
