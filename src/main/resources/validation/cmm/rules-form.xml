@@ -52,6 +52,13 @@
 <form-validation>
 
    <global>
+      <!-- 서버용 대문자 검증. 허용할 숫자/기호는 각 필드의 mask 변수로 지정한다. -->
+      <validator name="englishUpperCase"
+                 classname="org.springmodules.validation.commons.FieldChecks"
+                 method="validateMask"
+                 methodParams="java.lang.Object,org.apache.commons.validator.ValidatorAction,org.apache.commons.validator.Field,org.springframework.validation.Errors"
+                 msg="errors.englishUpperCase"/>
+                 
       <validator name="creditCard"
             classname="org.springmodules.validation.commons.FieldChecks"
                method="validateCreditCard"
