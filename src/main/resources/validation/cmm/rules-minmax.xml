@@ -1,0 +1,267 @@
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.0//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_0.dtd">
+<!--
+
+   This file contains the default Struts Validator pluggable validator
+   definitions.  It should be placed somewhere under /WEB-INF and
+   referenced in the struts-config.xml under the plug-in element
+   for the ValidatorPlugIn.
+
+      <plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+        <set-property property="pathnames" value="/WEB-INF/validator-rules.xml,
+                                                  /WEB-INF/validation.xml"/>
+      </plug-in>
+
+   These are the default error messages associated with
+   each validator defined in this file.  They should be
+   added to your projects ApplicationResources.properties
+   file or you can associate new ones by modifying the
+   pluggable validators msg attributes in this file.
+
+    # Struts Validator Error Messages
+    #Validator 오류#
+    errors.required={0}은(는) 필수 입력 항목입니다.
+    errors.minlength={0}은(는) {1}자 이상 입력해야 합니다.
+    errors.maxlength={0}은(는) {1}자를 초과할 수 없습니다.
+    errors.invalid={0}이(가) 올바르지 않습니다.
+
+    errors.byte={0}은(는) byte 형식이어야 합니다.
+    errors.short={0}은(는) short 형식이어야 합니다.
+    errors.integer={0}은(는) 정수여야 합니다.
+    errors.long={0}은(는) long 형식이어야 합니다.
+    errors.float={0}은(는) 실수여야 합니다.
+    errors.double={0}은(는) double 형식이어야 합니다.
+
+    errors.date={0}은(는) 올바른 날짜 형식이 아닙니다.
+    errors.date.before={0}은(는) {1}보다 이전이어야 합니다.
+    errors.date.after={0}은(는) {1}보다 이후여야 합니다.
+    errors.date.beforeOrEqual={0}은(는) {1} 이전이거나 같아야 합니다.
+    errors.date.afterOrEqual={0}은(는) {1} 이후이거나 같아야 합니다.
+    errors.date.range={0}은(는) {1}부터 {2} 사이의 날짜여야 합니다.
+
+    errors.range={0}은(는) {1}에서 {2} 사이의 값이어야 합니다.
+    errors.creditcard={0}은(는) 올바른 신용카드 번호가 아닙니다.
+    errors.email={0}은(는) 올바른 이메일 주소가 아닙니다.
+    errors.url={0}은(는) 올바른 URL이 아닙니다.
+
+    errors.gis=위치 정보가 올바르지 않습니다.
+
+-->
+
+<form-validation>
+
+   <global>
+        <validator name="minlength"
+                classname="org.springmodules.validation.commons.FieldChecks"
+                method="validateMinLength"
+            methodParams="java.lang.Object,
+                        org.apache.commons.validator.ValidatorAction,
+                        org.apache.commons.validator.Field,
+                        org.springframework.validation.Errors"
+                        
+                depends=""
+                    msg="errors.minlength">
+
+            <javascript><![CDATA[
+                function validateMinLength(form) {
+                    var isValid = true;
+                    var focusField = null;
+                    var i = 0;
+                    var fields = new Array();
+                    oMinLength = new minlength();
+                    for (x in oMinLength) {
+                        var field = form[oMinLength[x][0]];
+                        
+                        if (field.type == 'text' ||
+                            field.type == 'textarea') {
+                            
+                            var iMin = parseInt(oMinLength[x][2]("minlength"));
+                            if ((trim(field.value).length > 0) && (field.value.length < iMin)) {
+                                if (i == 0) {
+                                    focusField = field;
+                                }
+                                fields[i++] = oMinLength[x][1];
+                                isValid = false;
+                            }
+                        }
+                    }
+                    if (fields.length > 0) {
+                    focusField.focus();
+                    alert(fields.join('\n'));
+                    }
+                    return isValid;
+                }]]>
+            </javascript>
+
+        </validator>
+
+
+        <validator name="maxlength"
+                classname="org.springmodules.validation.commons.FieldChecks"
+                method="validateMaxLength"
+            methodParams="java.lang.Object,
+                        org.apache.commons.validator.ValidatorAction,
+                        org.apache.commons.validator.Field,
+                        org.springframework.validation.Errors"
+                        
+                depends=""
+                    msg="errors.maxlength">
+
+            <javascript><![CDATA[
+                function validateMaxLength(form) {
+                    var isValid = true;
+                    var focusField = null;
+                    var i = 0;
+                    var fields = new Array();
+                    oMaxLength = new maxlength();
+                    for (x in oMaxLength) {
+                        var field = form[oMaxLength[x][0]];
+                        
+                        if (field.type == 'text' ||
+                            field.type == 'textarea') {
+                            
+                            var iMax = parseInt(oMaxLength[x][2]("maxlength"));
+                            if (field.value.length > iMax) {
+                                if (i == 0) {
+                                    focusField = field;
+                                }
+                                fields[i++] = oMaxLength[x][1];
+                                isValid = false;
+                            }
+                        }
+                    }
+                    if (fields.length > 0) {
+                    focusField.focus();
+                    alert(fields.join('\n'));
+                    }
+                    return isValid;
+                }]]>
+            </javascript>
+
+        </validator>
+
+
+        <validator name="mask"
+                classname="org.springmodules.validation.commons.FieldChecks"
+                method="validateMask"
+            methodParams="java.lang.Object,
+                        org.apache.commons.validator.ValidatorAction,
+                        org.apache.commons.validator.Field,
+                        org.springframework.validation.Errors"
+                        
+                depends=""
+                    msg="errors.invalid">
+
+            <javascript><![CDATA[
+                function validateMask(form) {
+                    var isValid = true;
+                    var focusField = null;
+                    var i = 0;
+                    var fields = new Array();
+                    oMasked = new mask();
+                    for (x in oMasked) {
+                        var field = form[oMasked[x][0]];
+                        
+                        if ((field.type == 'text' || 
+                            field.type == 'textarea') && 
+                            (field.value.length > 0)) {
+                            
+                            if (!matchPattern(field.value, oMasked[x][2]("mask"))) {
+                                if (i == 0) {
+                                    focusField = field;
+                                }
+                                fields[i++] = oMasked[x][1];
+                                isValid = false;
+                            }
+                        }
+                    }
+                    
+                    if (fields.length > 0) {
+                    focusField.focus();
+                    alert(fields.join('\n'));
+                    }
+                    return isValid;
+                }
+
+                function matchPattern(value, mask) {
+                return mask.exec(value);
+                }]]>
+            </javascript>
+
+        </validator>
+
+
+        <validator name="minInteger"
+            classname="org.egovframe.rte.ptl.mvc.validation.RteFieldChecks"
+               method="validateMinInteger"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                  msg="errors.minInteger">
+          <javascript><![CDATA[
+          function validateMinInteger(form){
+               var bValid = true;
+                var focusField = null;
+                var i = 0;
+                var fields = new Array();
+                oInteger = new minInteger();
+                for (x in oInteger) {
+                	var field = form[oInteger[x][0]];
+
+                    if (field.type == 'text' ||
+                        field.type == 'textarea' ||
+                        field.type == 'select-one' ||
+                        field.type == 'radio') {
+                        
+                        var value = '';
+						// get field's value
+						if (field.type == "select-one") {
+							var si = field.selectedIndex;
+						    if (si >= 0) {
+							    value = field.options[si].value;
+						    }
+						} else {
+							value = field.value;
+						}
+                        
+                        if (value.length > 0) {
+                        
+                            if (!isOK(value)) {
+                                bValid = false;
+                                if (i == 0) {
+	                                focusField = field;
+	                            }
+						        fields[i++] = oInteger[x][1];
+						        
+                            } else {
+	                            var iValue = parseInt(value);
+	                            if (isNaN(iValue) || !(iValue >= -2147483648 && iValue <= 2147483647)) {
+	                                if (i == 0) {
+	                                    focusField = field;
+	                                }
+	                                fields[i++] = oInteger[x][1];
+	                                bValid = false;
+	                           }
+                           }
+                       }
+                    }
+                }
+                if (fields.length > 0) {
+                   focusField.focus();
+                   alert(fields.join('\n'));
+                }
+                return bValid;
+            }
+            
+            function isOK(vv){
+				if (vv >0) return true;
+				else return false;                
+          }
+          ]]>
+          </javascript>
+      </validator>
+   </global>
+
+</form-validation>

@@ -1,0 +1,319 @@
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.0//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_0.dtd">
+<!--
+
+   This file contains the default Struts Validator pluggable validator
+   definitions.  It should be placed somewhere under /WEB-INF and
+   referenced in the struts-config.xml under the plug-in element
+   for the ValidatorPlugIn.
+
+      <plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+        <set-property property="pathnames" value="/WEB-INF/validator-rules.xml,
+                                                  /WEB-INF/validation.xml"/>
+      </plug-in>
+
+   These are the default error messages associated with
+   each validator defined in this file.  They should be
+   added to your projects ApplicationResources.properties
+   file or you can associate new ones by modifying the
+   pluggable validators msg attributes in this file.
+
+    # Struts Validator Error Messages
+    #Validator 오류#
+    errors.required={0}은(는) 필수 입력 항목입니다.
+    errors.minlength={0}은(는) {1}자 이상 입력해야 합니다.
+    errors.maxlength={0}은(는) {1}자를 초과할 수 없습니다.
+    errors.invalid={0}이(가) 올바르지 않습니다.
+
+    errors.byte={0}은(는) byte 형식이어야 합니다.
+    errors.short={0}은(는) short 형식이어야 합니다.
+    errors.integer={0}은(는) 정수여야 합니다.
+    errors.long={0}은(는) long 형식이어야 합니다.
+    errors.float={0}은(는) 실수여야 합니다.
+    errors.double={0}은(는) double 형식이어야 합니다.
+
+    errors.date={0}은(는) 올바른 날짜 형식이 아닙니다.
+    errors.date.before={0}은(는) {1}보다 이전이어야 합니다.
+    errors.date.after={0}은(는) {1}보다 이후여야 합니다.
+    errors.date.beforeOrEqual={0}은(는) {1} 이전이거나 같아야 합니다.
+    errors.date.afterOrEqual={0}은(는) {1} 이후이거나 같아야 합니다.
+    errors.date.range={0}은(는) {1}부터 {2} 사이의 날짜여야 합니다.
+
+    errors.range={0}은(는) {1}에서 {2} 사이의 값이어야 합니다.
+    errors.creditcard={0}은(는) 올바른 신용카드 번호가 아닙니다.
+    errors.email={0}은(는) 올바른 이메일 주소가 아닙니다.
+    errors.url={0}은(는) 올바른 URL이 아닙니다.
+
+    errors.gis=위치 정보가 올바르지 않습니다.
+
+-->
+
+<form-validation>
+
+   <global>
+    <!-- range is deprecated use intRange instead -->
+      <validator name="range"
+            classname="org.springmodules.validation.commons.FieldChecks"
+               method="validateIntRange"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                       
+              depends="integer"
+                  msg="errors.range">
+
+         <javascript><![CDATA[
+            function validateRange(form) {
+                return validateIntRange(form);
+            }]]>
+         </javascript>
+
+      </validator>
+
+      <validator name="intRange"
+            classname="org.springmodules.validation.commons.FieldChecks"
+               method="validateIntRange"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                       
+              depends="integer"
+                  msg="errors.range">
+
+         <javascript><![CDATA[
+            function validateIntRange(form) {
+                var isValid = true;
+                var focusField = null;
+                var i = 0;
+                var fields = new Array();
+                oRange = new intRange();
+                for (x in oRange) {
+                    var field = form[oRange[x][0]];
+                    
+                    if ((field.type == 'text' ||
+                         field.type == 'textarea') &&
+                        (field.value.length > 0)) {
+                        
+                        var iMin = parseInt(oRange[x][2]("min"));
+                        var iMax = parseInt(oRange[x][2]("max"));
+                        var iValue = parseInt(field.value);
+                        if (!(iValue >= iMin && iValue <= iMax)) {
+                            if (i == 0) {
+                                focusField = field;
+                            }
+                            fields[i++] = oRange[x][1];
+                            isValid = false;
+                        }
+                    }
+                }
+                if (fields.length > 0) {
+                    focusField.focus();
+                    alert(fields.join('\n'));
+                }
+                return isValid;
+            }]]>
+         </javascript>
+
+      </validator>
+
+      <validator name="floatRange"
+            classname="org.springmodules.validation.commons.FieldChecks"
+               method="validateFloatRange"
+         methodParams="java.lang.Object,
+                       org.apache.commons.validator.ValidatorAction,
+                       org.apache.commons.validator.Field,
+                       org.springframework.validation.Errors"
+                       
+              depends="float"
+                  msg="errors.range">
+
+         <javascript><![CDATA[
+            function validateFloatRange(form) {
+                var isValid = true;
+                var focusField = null;
+                var i = 0;
+                var fields = new Array();
+                oRange = new floatRange();
+                for (x in oRange) {
+                    var field = form[oRange[x][0]];
+                    
+                    if ((field.type == 'text' ||
+                         field.type == 'textarea') &&
+                        (field.value.length > 0)) {
+                        
+                        var fMin = parseFloat(oRange[x][2]("min"));
+                        var fMax = parseFloat(oRange[x][2]("max"));
+                        var fValue = parseFloat(field.value);
+                        if (!(fValue >= fMin && fValue <= fMax)) {
+                            if (i == 0) {
+                                focusField = field;
+                            }
+                            fields[i++] = oRange[x][1];
+                            isValid = false;
+                        }
+                    }
+                }
+                if (fields.length > 0) {
+                    focusField.focus();
+                    alert(fields.join('\n'));
+                }
+                return isValid;
+            }]]>
+         </javascript>
+      </validator>
+
+        <!-- 날짜 범위 검사 -->
+        <validator name="dateRange"
+            classname="egovframework.let.cmm.validation.CustomFieldChecks"
+                method="validateDateRange"
+        methodParams="java.lang.Object,
+                        org.apache.commons.validator.ValidatorAction,
+                        org.apache.commons.validator.Field,
+                        org.springframework.validation.Errors"
+                depends="date"
+                    msg="errors.date.range">
+
+            <javascript><![CDATA[
+                function validateDateRange(form) {
+                    var isValid = true;
+                    var focusField = null;
+                    var fields = new Array();
+                    var i = 0;
+
+                    var oDateRange = new dateRange();
+
+                    for (x in oDateRange) {
+                        var field = form[oDateRange[x][0]];
+
+                        if ((field.type == 'text' || field.type == 'textarea')
+                                && field.value.length > 0) {
+
+                            var minDate = oDateRange[x][2]("minDate");
+                            var maxDate = oDateRange[x][2]("maxDate");
+
+                            var value = parseDateRangeValue(field.value);
+                            var min = parseDateRangeValue(minDate);
+                            var max = parseDateRangeValue(maxDate);
+
+                            if (value == null || min == null || max == null
+                                    || value < min || value > max) {
+
+                                if (i == 0) {
+                                    focusField = field;
+                                }
+
+                                fields[i++] = oDateRange[x][1];
+                                isValid = false;
+                            }
+                        }
+                    }
+
+                    if (fields.length > 0) {
+                        if (focusField != null) {
+                            focusField.focus();
+                        }
+
+                        alert(fields.join('\n'));
+                    }
+
+                    return isValid;
+                }
+
+                function parseDateRangeValue(value) {
+                    var parts = value.split('-');
+
+                    if (parts.length != 3) {
+                        return null;
+                    }
+
+                    var year = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10);
+                    var day = parseInt(parts[2], 10);
+
+                    var date = new Date(year, month - 1, day);
+
+                    if (date.getFullYear() != year
+                            || date.getMonth() != month - 1
+                            || date.getDate() != day) {
+                        return null;
+                    }
+
+                    return date;
+                }
+            ]]></javascript>
+        </validator>
+
+        <!-- 두 날짜 사이의 범위 검사 -->
+        <validator name="dateAfterOrEqual"
+            classname="egovframework.let.cmm.validation.CustomFieldChecks"
+                method="validateDateAfterOrEqual"
+        methodParams="java.lang.Object,
+                        org.apache.commons.validator.ValidatorAction,
+                        org.apache.commons.validator.Field,
+                        org.springframework.validation.Errors"
+                    msg="errors.date.afterOrEqual">
+
+            <javascript><![CDATA[
+                function validateDateAfterOrEqual(form) {
+                    var isValid = true;
+                    var focusField = null;
+                    var fields = new Array();
+                    var i = 0;
+
+                    var oDateCompare = new dateAfterOrEqual();
+
+                    for (x in oDateCompare) {
+                        var field = form[oDateCompare[x][0]];
+
+                        // 비교할 다른 필드명
+                        var compareProperty =
+                            oDateCompare[x][2]("compareProperty");
+
+                        var compareField = form[compareProperty];
+
+                        if (field &&
+                            compareField &&
+                            field.value.length > 0 &&
+                            compareField.value.length > 0) {
+
+                            var currentValue = parseCompareDate(field.value);
+                            var compareValue = parseCompareDate(compareField.value);
+
+                            // 현재 필드 < 비교 필드이면 오류
+                            if (currentValue < compareValue) {
+                                if (i == 0) {
+                                    focusField = field;
+                                }
+
+                                fields[i++] = oDateCompare[x][1];
+                                isValid = false;
+                            }
+                        }
+                    }
+
+                    if (fields.length > 0) {
+                        if (focusField != null) {
+                            focusField.focus();
+                        }
+
+                        alert(fields.join('\n'));
+                    }
+
+                    return isValid;
+                }
+
+                function parseCompareDate(value) {
+                    return parseInt(
+                        value.replace(/[^0-9]/g, ''),
+                        10
+                    );
+                }
+            ]]></javascript>
+
+        </validator>
+   </global>
+
+</form-validation>

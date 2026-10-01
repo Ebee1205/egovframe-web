@@ -10,7 +10,7 @@
     <bean id="validatorFactory" class="org.springmodules.validation.commons.DefaultValidatorFactory">
         <property name="validationConfigLocations">
             <list>
-                <value>classpath:/validation/validator-rules-let.xml</value>
+                <value>classpath:/validation/cmm/*.xml</value>
                 <value>classpath:/validation/service/*.xml</value>
             </list>
         </property>
