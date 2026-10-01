@@ -68,6 +68,21 @@
         modal.show();
     });
 
+    // 취소 버튼, X, 배경 클릭, Esc가 모두 이 닫기 이벤트를 거친다.
+    modalElement.addEventListener('hide.coreui.modal', function (event) {
+        if (isSubmitting || !window.confirm('정말 닫을까요? 입력한 내용은 저장되지 않습니다.')) {
+            event.preventDefault();
+        }
+    });
+
+    modalElement.addEventListener('hidden.coreui.modal', function () {
+        form.reset();
+        errorMapper.clear();
+        submitButton.disabled = false;
+        spinner.classList.add('d-none');
+        buttonLabel.textContent = '생성';
+    });
+
     function validateForm() {
         nameInput.value = nameInput.value.trim();
         codeInput.value = codeInput.value.trim();
