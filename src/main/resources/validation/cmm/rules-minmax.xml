@@ -89,7 +89,7 @@
                     if (fields.length > 0) {
                     if (focusField) { focusField.focus(); }
                     if (typeof form.onValidationErrors === 'function') {
-                        form.onValidationErrors(fields);
+                        form.onValidationErrors(fields, oMinLength);
                     } else {
                         alert(fields.join('\n'));
                     }
@@ -138,7 +138,7 @@
                     if (fields.length > 0) {
                     if (focusField) { focusField.focus(); }
                     if (typeof form.onValidationErrors === 'function') {
-                        form.onValidationErrors(fields);
+                        form.onValidationErrors(fields, oMaxLength);
                     } else {
                         alert(fields.join('\n'));
                     }
@@ -188,7 +188,7 @@
                     if (fields.length > 0) {
                     if (focusField) { focusField.focus(); }
                     if (typeof form.onValidationErrors === 'function') {
-                        form.onValidationErrors(fields);
+                        form.onValidationErrors(fields, oMasked);
                     } else {
                         alert(fields.join('\n'));
                     }

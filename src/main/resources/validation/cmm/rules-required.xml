@@ -138,7 +138,7 @@
                 if (fields.length > 0) {
                    if (focusField) { focusField.focus(); }
                    if (typeof form.onValidationErrors === 'function') {
-                       form.onValidationErrors(fields);
+                       form.onValidationErrors(fields, oRequired);
                    } else {
                        alert(fields.join('\n'));
                    }

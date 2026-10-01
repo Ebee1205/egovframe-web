@@ -315,7 +315,7 @@
                 }
                 if (messages.length) {
                     if (typeof form.onValidationErrors === 'function') {
-                        form.onValidationErrors(messages);
+                        form.onValidationErrors(messages, rules);
                     } else {
                         alert(messages.join('\n'));
                     }
