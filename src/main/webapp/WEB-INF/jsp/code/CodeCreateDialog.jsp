@@ -63,17 +63,54 @@
     var errorMapper = ErrMessageMapper.create(form, formError);
     var modal = coreui.Modal.getOrCreateInstance(modalElement);
     var isSubmitting = false;
+    var isConfirmingCreate = false;
+    var allowModalClose = false;
+    var confirmDialogElement = document.getElementById('cmpYNDialog');
+    if (confirmDialogElement) {
+        confirmDialogElement.style.setProperty('--cui-modal-zindex', '1060');
+    }
+
+    function openConfirmDialog(options) {
+        CmpDialog.open(options);
+        var backdrops = document.querySelectorAll('.modal-backdrop');
+        var latestBackdrop = backdrops[backdrops.length - 1];
+        if (latestBackdrop) {
+            latestBackdrop.style.setProperty('--cui-backdrop-zindex', '1056');
+        }
+    }
 
     document.getElementById('openCodeCreate').addEventListener('click', function () {
         modal.show();
     });
 
-    // 취소 버튼, X, 배경 클릭, Esc가 모두 이 닫기 이벤트를 거친다.
     modalElement.addEventListener('hide.coreui.modal', function (event) {
-        if (isSubmitting || !window.confirm('정말 닫을까요? 입력한 내용은 저장되지 않습니다.')) {
+        if (isSubmitting || isConfirmingCreate) {
             event.preventDefault();
+            return;
+        }
+
+        if (!allowModalClose) {
+            event.preventDefault();
+            openConfirmDialog({
+                title: '닫기 확인',
+                text: '정말 닫을까요? 입력한 내용은 저장되지 않습니다.',
+                okText: '닫기',
+                cancelText: '계속 작성',
+                okButton: function () {
+                    allowModalClose = true;
+                    CmpDialog.close();
+                    modal.hide();
+                    allowModalClose = false;
+                }
+            });
         }
     });
+
+    if (confirmDialogElement) {
+        confirmDialogElement.addEventListener('hidden.coreui.modal', function () {
+            isConfirmingCreate = false;
+        });
+    }
 
     modalElement.addEventListener('hidden.coreui.modal', function () {
         form.reset();
@@ -94,12 +131,8 @@
 
     form.addEventListener('input', errorMapper.clear);
 
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        if (isSubmitting) { return; }
-
+    async function createCode() {
         try {
-            if (!validateForm()) { return; }
             isSubmitting = true;
             submitButton.disabled = true;
             spinner.classList.remove('d-none');
@@ -129,6 +162,25 @@
             spinner.classList.add('d-none');
             buttonLabel.textContent = '생성';
         }
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (isSubmitting || isConfirmingCreate) { return; }
+        if (!validateForm()) { return; }
+
+        isConfirmingCreate = true;
+        openConfirmDialog({
+            title: '생성 확인',
+            text: '새 코드를 생성하시겠습니까?',
+            okText: '생성',
+            cancelText: '취소',
+            okButton: function () {
+                isConfirmingCreate = false;
+                CmpDialog.close();
+                createCode();
+            }
+        });
     });
 })();
 </script>

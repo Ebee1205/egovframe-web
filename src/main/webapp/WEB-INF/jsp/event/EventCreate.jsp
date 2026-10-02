@@ -97,6 +97,17 @@
 
     <validator:javascript formName="eventCreateVO" method="validateEventCreateVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
     <script>
+        window.alert = function (message) {
+            CmpDialog.open({
+                title: '입력 확인',
+                text: String(message).replace(/\r?\n/g, '<br>'),
+                isOneButton: true,
+                okButton: function () {
+                    CmpDialog.close();
+                }
+            });
+        };
+
         (function () {
             var form = document.getElementById('eventCreateForm');
             form.addEventListener('submit', function (event) {
