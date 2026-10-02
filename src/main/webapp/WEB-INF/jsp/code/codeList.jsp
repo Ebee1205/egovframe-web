@@ -74,17 +74,17 @@
                     <table class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
-                                <th scope="col">NO</th>
+                                <th scope="col" style="width: 45px;">NO</th>
                                 <th scope="col">상위 코드</th>
-                                <th scope="col">상위 코드명</th>
+                                <th scope="col" style="width: 120px;">상위 코드명</th>
                                 <th scope="col">코드</th>
-                                <th scope="col">코드명</th>
-                                <th scope="col">레벨</th>
+                                <th scope="col" style="width: 120px;">코드명</th>
+                                <th scope="col" style="width: 45px;">레벨</th>
                                 <th scope="col">설명</th>
-                                <th scope="col">상태</th>
-                                <th scope="col">등록일</th>
-                                <th scope="col">수정일</th>
-                                <th scope="col">관리</th>
+                                <th scope="col" style="width: 45px;">상태</th>
+                                <th scope="col" style="width: 160px;">등록일</th>
+                                <th scope="col" style="width: 160px;">수정일</th>
+                                <th scope="col" style="width: 108px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -85,23 +85,23 @@
                     <table class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
-                                <th scope="col">NO</th>
-                                <th scope="col">지역</th>
-                                <th scope="col">제목</th>
-                                <th scope="col">분류</th>
+                                <th scope="col" style="width: 45px;">NO</th>
+                                <th scope="col" style="width: 80px;">지역</th>
+                                <th scope="col" style="width: 200px;">제목</th>
+                                <th scope="col" style="width: 80px;">분류</th>
                                 <th scope="col">시작일</th>
                                 <th scope="col">종료일</th>
                                 <th scope="col">주소</th>
                                 <th scope="col">등록일</th>
                                 <th scope="col">수정일</th>
-                                <th scope="col">상태</th>
-                                <th scope="col">관리</th>
+                                <th scope="col" style="width: 60px;">상태</th>
+                                <th scope="col" style="width: 80px;">관리</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty events}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="10">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="10">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="event" items="${events}" varStatus="rowStatus">

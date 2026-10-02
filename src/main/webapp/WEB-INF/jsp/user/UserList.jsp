@@ -86,13 +86,13 @@
                     <table class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
-                                <th scope="col">NO</th>
+                                <th scope="col" style="width: 45px;">NO</th>
                                 <th scope="col">이메일</th>
                                 <th scope="col">닉네임</th>
-                                <th scope="col">유형</th>
-                                <th scope="col">상태</th>
-                                <th scope="col">지역 ID</th>
-                                <th scope="col">상세</th>
+                                <th scope="col" style="width: 120px;">유형</th>
+                                <th scope="col" style="width: 80px;">상태</th>
+                                <th scope="col" style="width: 120px;">지역</th>
+                                <th scope="col" style="width: 80px;">상세</th>
                             </tr>
                         </thead>
                         <tbody>
