@@ -201,10 +201,6 @@
                     </tr>
                 </c:if>
 
-                <!-- 필터 결과 없음 -->
-                <tr class="d-none | js-cmt-empty">
-                    <td colspan="6" class="text-center | text-body-secondary | py-5">검색 결과가 없습니다.</td>
-                </tr>
             </tbody>
         </table>
     </div>
@@ -333,4 +329,5 @@
         }
     });
 })();
+
 </script>
