@@ -14,6 +14,6 @@ public class MapViewController {
 
     @RequestMapping("/service/map.do")
     public String mapService() {
-        return "forward:/WEB-INF/jsp/main/MainServiceView.jsp";
+        return "forward:/WEB-INF/jsp/service/ServiceView.jsp";
     }
 }

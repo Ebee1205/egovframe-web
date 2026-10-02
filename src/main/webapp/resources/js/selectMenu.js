@@ -52,7 +52,7 @@ const pageList = [
       {
         page: 'MapView',
         name: '지도 보기',
-        path: '/service/map.do',
+        path: '/content/map.do',
         icon: 'cil-speedometer',
       },
     ],

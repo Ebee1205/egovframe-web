@@ -16,7 +16,7 @@
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
 
     <!-- Leftnav -->
-    <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpSimpLeftnav.jsp" />
+    <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
     <div class="wrapper | d-flex | flex-column | min-vh-100">
@@ -24,10 +24,8 @@
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
 
-        <div class="body | flex-grow-1">
-            <div class="container-lg">
-                렌더화면입니다
-            </div>
+        <div class="body | m-0 | flex-grow-1">
+            렌더 화면이니다
         </div>
     </div>
 </body>
