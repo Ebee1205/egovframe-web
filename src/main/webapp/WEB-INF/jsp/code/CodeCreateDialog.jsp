@@ -66,18 +66,6 @@
     var isConfirmingCreate = false;
     var allowModalClose = false;
     var confirmDialogElement = document.getElementById('cmpYNDialog');
-    if (confirmDialogElement) {
-        confirmDialogElement.style.setProperty('--cui-modal-zindex', '1060');
-    }
-
-    function openConfirmDialog(options) {
-        CmpDialog.open(options);
-        var backdrops = document.querySelectorAll('.modal-backdrop');
-        var latestBackdrop = backdrops[backdrops.length - 1];
-        if (latestBackdrop) {
-            latestBackdrop.style.setProperty('--cui-backdrop-zindex', '1056');
-        }
-    }
 
     document.getElementById('openCodeCreate').addEventListener('click', function () {
         modal.show();
@@ -91,7 +79,7 @@
 
         if (!allowModalClose) {
             event.preventDefault();
-            openConfirmDialog({
+            CmpDialog.open({
                 title: '닫기 확인',
                 text: '정말 닫을까요? 입력한 내용은 저장되지 않습니다.',
                 okText: '닫기',
@@ -170,7 +158,7 @@
         if (!validateForm()) { return; }
 
         isConfirmingCreate = true;
-        openConfirmDialog({
+        CmpDialog.open({
             title: '생성 확인',
             text: '새 코드를 생성하시겠습니까?',
             okText: '생성',

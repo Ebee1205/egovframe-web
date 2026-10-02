@@ -25,7 +25,7 @@
 <script src="<c:url value='/resources/coreui-5.8.0-dist/js/coreui.bundle.min.js'/>"></script>
 
 <!-- Dialog -->
-<div class="modal | fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+<div class="modal | fade" id="${modalId}" tabindex="-1" aria-hidden="true" style="--cui-modal-zindex: 1060;">
     <div class="modal-dialog | modal-sm | modal-dialog-centered">
         <div class="modal-content" style="border-radius: 12px;">
             <div class="modal-header border-0 pb-0">
@@ -82,7 +82,14 @@
                 if (typeof options.okButton === 'function') options.okButton();
             };
 
+            // show()가 새로 만든 배경만 조정하여 다른 모달의 배경은 유지한다.
+            var existingBackdrops = new Set(document.querySelectorAll('.modal-backdrop'));
             coreui.Modal.getOrCreateInstance(el).show();
+            document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+                if (!existingBackdrops.has(backdrop)) {
+                    backdrop.style.setProperty('--cui-backdrop-zindex', '1056');
+                }
+            });
         },
 
         close: function (modalId) {
