@@ -189,11 +189,13 @@
                             <div class="input-group | input-group-sm">
                                 <input type="text" class="form-control" name="cmt" placeholder="댓글을 입력해주세요." required>
                                 <button type="submit" class="btn | btn-sm | btn-primary">댓글 등록</button>
+                                <div id="codeNameError" data-error-for="name" class="invalid-feedback" style="white-space: pre-line;"></div
                             </div>
 
                         </form>
                     </td>
                 </tr>
+
                 <!-- 데이터 없음 -->
                 <c:if test="${empty commentItems}">
                     <tr>
