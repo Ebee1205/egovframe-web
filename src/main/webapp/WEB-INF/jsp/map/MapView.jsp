@@ -20,17 +20,14 @@
     <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
-    <div class="wrapper | bg-body | main-content">
+    <div class="wrapper | bg-body | main-content | d-flex | flex-column | vh-100">
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
+        
+        <jsp:include page="/WEB-INF/jsp/map/Map.jsp" />
 
-        <div class="container-lg">
-            <!-- Content here -->
-            렌더화면입니다
-        </div>
     </div>
-
 
 </body>
 </html>

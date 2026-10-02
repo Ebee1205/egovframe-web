@@ -19,14 +19,12 @@
     <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
-    <div class="wrapper | d-flex | flex-column | min-vh-100">
+    <div class="wrapper | service-map-layout | d-flex | flex-column | vh-100">
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
 
-        <div class="body | m-0 | flex-grow-1">
-            렌더 화면이니다
-        </div>
+        <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpMap.jsp" />
     </div>
 </body>
 </html>

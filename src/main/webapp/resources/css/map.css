@@ -1,0 +1,9 @@
+.map-body {
+    flex: 1 1 auto;   /* 헤더 아래 남는 공간 전부 차지 */
+    min-height: 0;    /* flex 자식이 넘치지 않게 */
+    position: relative;
+}
+#map {
+    position: absolute;
+    inset: 0;         /* 부모를 꽉 채움 */
+}
