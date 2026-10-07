@@ -6,8 +6,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+                           
     <import resource="classpath:spring/context-database.xml"/>
-    <import resource="classpath:spring/context-valiation.xml"/>
+    <import resource="classpath:spring/context-validation.xml"/>
     <context:component-scan base-package="com.basic,com.service,com.user,com.code,com.event,com.map,com.cmm"/>
     <mvc:annotation-driven/>
 </beans>
