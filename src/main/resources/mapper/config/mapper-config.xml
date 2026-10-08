@@ -16,6 +16,7 @@
 		
 		<typeAlias alias="UserVO"			 type="com.user.service.UserVO" />
 		<typeAlias alias="UserFilterVO" type="com.user.service.UserFilterVO" />
+		<typeAlias alias="MeVO"				 type="com.user.service.MeVO" />
 		<typeAlias alias="CodeVO"			 type="com.code.service.CodeDetailVO" />
 		<typeAlias alias="CodeFilterVO"		 type="com.code.service.CodeFilterVO" />
 		<typeAlias alias="EventVO"			 type="com.event.service.EventVO" />
@@ -26,6 +27,7 @@
 
 	<mappers>
 		<mapper resource="mapper/service/User_SQL.xml" />
+		<mapper resource="mapper/service/Me_SQL.xml" />
 		<mapper resource="mapper/service/Code_SQL.xml" />
 		<mapper resource="mapper/service/CodeUse_SQL.xml" />
 		<mapper resource="mapper/service/Event_SQL.xml" />
