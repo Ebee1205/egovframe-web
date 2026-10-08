@@ -11,6 +11,7 @@ public class EventCmtVO implements Serializable {
     private Long cmtId;      // 댓글 ID
     private Long eid;        // 이벤트 ID
     private Long uid;        // 사용자 ID
+    private String nickname; // 작성자 닉네임
     private String cmt;      // 댓글 내용
     private Long parentCmtId; // 부모 댓글 ID
     private String status;   // 상태
@@ -40,6 +41,14 @@ public class EventCmtVO implements Serializable {
 
     public void setUid(Long uid) {
         this.uid = uid;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getCmt() {

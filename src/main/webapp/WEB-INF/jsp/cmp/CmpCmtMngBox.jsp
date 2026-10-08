@@ -48,10 +48,10 @@
 
                     <!-- 댓글 행 -->
                     <tr class="js-cmt-row" data-type="comment"
-                        data-search="<c:out value='${fn:toLowerCase(comment.cmt)}'/> ${comment.uid}">
+                        data-search="<c:out value='${fn:toLowerCase(comment.cmt)}'/> <c:out value='${fn:toLowerCase(comment.nickname)}'/>">
                         <td class="text-body-secondary">${comment.cmtId}</td>
                         <td><span class="badge | text-bg-primary">댓글</span></td>
-                        <td>사용자 ${comment.uid}</td>
+                        <td><c:out value="${comment.nickname}"/></td>
                         <td>
                             <div class="text-break" style="white-space: pre-wrap;"><c:out value="${comment.cmt}"/></div>
                             <c:if test="${not empty replies}">
@@ -108,10 +108,10 @@
                     <!-- 답글 목록 (항상 표시) -->
                     <c:forEach var="reply" items="${replies}">
                         <tr class="js-cmt-row | table-light" data-type="reply"
-                            data-search="<c:out value='${fn:toLowerCase(reply.cmt)}'/> ${reply.uid}">
+                            data-search="<c:out value='${fn:toLowerCase(reply.cmt)}'/> <c:out value='${fn:toLowerCase(reply.nickname)}'/>">
                             <td class="text-body-secondary">${reply.cmtId}</td>
                             <td><span class="badge | text-bg-info | text-white">답글</span></td>
-                            <td>사용자 ${reply.uid}</td>
+                            <td><c:out value="${reply.nickname}"/></td>
                             <td>
                                 <div class="d-flex | gap-2">
                                     <span class="text-body-secondary">↳</span>

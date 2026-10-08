@@ -6,6 +6,7 @@
 		<id property="cmtId" column="cmt_id"/>
 		<result property="eid" column="eid"/>
 		<result property="uid" column="uid"/>
+		<result property="nickname" column="nickname"/>
 		<result property="cmt" column="cmt"/>
 		<result property="parentCmtId" column="p_cmt_id"/>
 		<result property="status" column="status"/>
@@ -14,26 +15,29 @@
 	</resultMap>
 
 	<sql id="eventCmtColumns">
-		cmt_id, eid, uid, cmt, p_cmt_id, status, c_date, u_date
+		c.cmt_id, c.eid, c.uid, c.cmt, c.p_cmt_id, c.status, c.c_date, c.u_date,
+		COALESCE(NULLIF(u.nickname, ''), '알 수 없는 사용자') AS nickname
 	</sql>
 
 	<select id="selectEventCmt" parameterType="EventCmtVO" resultMap="eventCmtResultMap">
 		SELECT <include refid="eventCmtColumns"/>
-		FROM tb_event_cmt
-		WHERE cmt_id = #{cmtId}
+		FROM tb_event_cmt c
+		LEFT JOIN tb_users u ON u.uid = c.uid
+		WHERE c.cmt_id = #{cmtId}
 	</select>
 
 	<select id="selectEventCmtList" parameterType="EventCmtFilterVO" resultMap="eventCmtResultMap">
 		SELECT <include refid="eventCmtColumns"/>
-		FROM tb_event_cmt
+		FROM tb_event_cmt c
+		LEFT JOIN tb_users u ON u.uid = c.uid
 		<where>
-			eid = #{eid}
-			AND p_cmt_id IS NULL
+			c.eid = #{eid}
+			AND c.p_cmt_id IS NULL
 			<if test="status != null and status != ''">
-				AND status = #{status}
+				AND c.status = #{status}
 			</if>
 		</where>
-		ORDER BY cmt_id DESC
+		ORDER BY c.cmt_id DESC
 		LIMIT #{pageSize} OFFSET #{firstIndex}
 	</select>
 
@@ -51,14 +55,15 @@
 
 	<select id="selectEventReplyList" parameterType="EventCmtFilterVO" resultMap="eventCmtResultMap">
 		SELECT <include refid="eventCmtColumns"/>
-		FROM tb_event_cmt
+		FROM tb_event_cmt c
+		LEFT JOIN tb_users u ON u.uid = c.uid
 		<where>
-			p_cmt_id = #{parentCmtId}
+			c.p_cmt_id = #{parentCmtId}
 			<if test="status != null and status != ''">
-				AND status = #{status}
+				AND c.status = #{status}
 			</if>
 		</where>
-		ORDER BY cmt_id ASC
+		ORDER BY c.cmt_id ASC
 		LIMIT #{pageSize} OFFSET #{firstIndex}
 	</select>
 
