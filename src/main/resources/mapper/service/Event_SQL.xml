@@ -16,45 +16,50 @@
 		<result property="lon" column="lon"/>
 		<result property="fileId" column="file_id"/>
 		<result property="createdBy" column="created_by"/>
+		<result property="createdByNickname" column="created_by_nickname"/>
 		<result property="cDate" column="c_date"/>
 		<result property="uDate" column="u_date"/>
 	</resultMap>
 
 	<sql id="eventColumns">
-		eid, title, ctg, status, rid, s_date, e_date, dsc, address, lat, lon, file_id, created_by, c_date, u_date
+		e.eid, e.title, e.ctg, e.status, e.rid, e.s_date, e.e_date, e.dsc, e.address, e.lat, e.lon,
+		e.file_id, e.created_by, e.c_date, e.u_date,
+		COALESCE(NULLIF(u.nickname, ''), '알 수 없는 사용자') AS created_by_nickname
 	</sql>
 
 	<select id="selectEvent" parameterType="EventVO" resultMap="eventResultMap">
 		SELECT <include refid="eventColumns"/>
-		FROM tb_event
-		WHERE eid = #{eid}
+		FROM tb_event e
+		LEFT JOIN tb_users u ON u.uid = e.created_by
+		WHERE e.eid = #{eid}
 	</select>
 
 	<sql id="eventListWhere">
 		<where>
 			<if test="title != null and title != ''">
-				AND title LIKE '%' || #{title} || '%'
+				AND e.title LIKE '%' || #{title} || '%'
 			</if>
 			<if test="ctg != null and ctg != ''">
-				AND ctg = #{ctg}
+				AND e.ctg = #{ctg}
 			</if>
 			<if test="createdBy != null">
-				AND created_by = #{createdBy}
+				AND e.created_by = #{createdBy}
 			</if>
 		</where>
 	</sql>
 
 	<select id="selectEventList" parameterType="EventFilterVO" resultMap="eventResultMap">
 		SELECT <include refid="eventColumns"/>
-		FROM tb_event
+		FROM tb_event e
+		LEFT JOIN tb_users u ON u.uid = e.created_by
 		<include refid="eventListWhere"/>
-		ORDER BY eid DESC
+		ORDER BY e.eid DESC
 		LIMIT #{pageSize} OFFSET #{firstIndex}
 	</select>
 
 	<select id="selectEventListCnt" parameterType="EventFilterVO" resultType="int">
 		SELECT COUNT(*)
-		FROM tb_event
+		FROM tb_event e
 		<include refid="eventListWhere"/>
 	</select>
 
@@ -101,3 +106,4 @@
 	</delete>
 
 </mapper>
+

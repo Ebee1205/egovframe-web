@@ -22,6 +22,7 @@ public class EventVO implements Serializable {
     private BigDecimal lon; // 경도
     private Long fileId; // 파일 ID
     private Long createdBy; // 등록자 ID
+    private String createdByNickname; // 등록자 닉네임
     private Date cDate; // 생성일
     private Date uDate; // 수정일
 
@@ -128,6 +129,14 @@ public class EventVO implements Serializable {
 
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getCreatedByNickname() {
+        return createdByNickname;
+    }
+
+    public void setCreatedByNickname(String createdByNickname) {
+        this.createdByNickname = createdByNickname;
     }
 
     public Date getCDate() {

@@ -30,7 +30,7 @@
         <div class="p-3 | align-items-center">
             <c:set var="path" scope="request" value="홈/이벤트/상세"/>
             <c:set var="title" scope="request" value="${event.title}"/>
-            <c:set var="dcs" scope="request" value="등록자: ${event.createdBy}"/>
+            <c:set var="dcs" scope="request" value="작성자: ${event.createdByNickname}"/>
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
         </div>
 
@@ -181,4 +181,5 @@
 
 </body>
 </html>
+
 
