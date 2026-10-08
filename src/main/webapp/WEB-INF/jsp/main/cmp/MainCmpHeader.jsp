@@ -41,6 +41,7 @@
           localStorage.removeItem(STORAGE_KEY);
         }
       } catch (e) { /* 저장소 접근 불가 시 무시 */ }
+      document.dispatchEvent(new CustomEvent('current-user-changed'));
     }
 
     me = readMe();

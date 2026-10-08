@@ -66,7 +66,7 @@
                                 <button class="btn | btn-sm | btn-outline-primary" type="button"
                                         data-reply-toggle="reply-form-${comment.cmtId}">답글</button>
                                 <button class="btn | btn-sm | btn-outline-secondary" type="button"
-                                        data-comment-edit-toggle="edit-comment-${comment.cmtId}">수정</button>
+                                        data-comment-edit-toggle="edit-comment-${comment.cmtId}" data-cmt-manage-action data-comment-owner-uid="${comment.uid}" disabled>수정</button>
                                 <c:choose>
                                     <c:when test="${not empty replies}">
                                         <c:set var="deleteConfirmText" value="이 댓글과 달린 답글 ${fn:length(replies)}개가 모두 삭제됩니다. 삭제하시겠습니까?" />
@@ -75,20 +75,20 @@
                                         <c:set var="deleteConfirmText" value="댓글을 삭제하시겠습니까?" />
                                     </c:otherwise>
                                 </c:choose>
-                                <form action="${commentDeleteUrl}" method="post" class="js-confirm-form | d-inline"
+                                <form data-comment-owner-uid="${comment.uid}" action="${commentDeleteUrl}" method="post" class="js-confirm-form | d-inline"
                                       data-confirm-text="${deleteConfirmText}" data-success-text="삭제가 완료되었습니다.">
                                     <input type="hidden" name="cmtId" value="${comment.cmtId}">
                                     <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
-                                    <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
+                                    <button class="btn | btn-sm | btn-outline-danger" type="submit" data-cmt-manage-action data-comment-owner-uid="${comment.uid}" disabled>삭제</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
 
                     <!-- 댓글 수정 폼 (기본 숨김) -->
-                    <tr class="d-none | table-active" id="edit-comment-${comment.cmtId}">
+                    <tr class="d-none | table-active" id="edit-comment-${comment.cmtId}" data-comment-edit-owner-uid="${comment.uid}">
                         <td colspan="6">
-                            <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
+                            <form data-comment-owner-uid="${comment.uid}" action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
                                   class="js-update-form" data-success-text="수정이 완료되었습니다.">
                                 <input type="hidden" name="cmtId" value="${comment.cmtId}">
                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
@@ -99,7 +99,7 @@
                                 <div class="d-flex | justify-content-end | gap-2">
                                     <button class="btn | btn-sm | btn-outline-secondary" type="button"
                                             data-comment-edit-toggle="edit-comment-${comment.cmtId}">취소</button>
-                                    <button class="btn | btn-sm | btn-primary" type="submit">저장</button>
+                                    <button class="btn | btn-sm | btn-primary" type="submit" data-cmt-manage-action data-comment-owner-uid="${comment.uid}" disabled>저장</button>
                                 </div>
                             </form>
                         </td>
@@ -125,21 +125,21 @@
                             <td class="text-end">
                                 <div class="d-inline-flex | gap-1 | justify-content-end">
                                     <button class="btn | btn-sm | btn-outline-secondary" type="button"
-                                            data-comment-edit-toggle="edit-reply-${reply.cmtId}">수정</button>
-                                    <form action="${commentDeleteUrl}" method="post" class="js-confirm-form | d-inline"
+                                            data-comment-edit-toggle="edit-reply-${reply.cmtId}" data-cmt-manage-action data-comment-owner-uid="${reply.uid}" disabled>수정</button>
+                                    <form data-comment-owner-uid="${reply.uid}" action="${commentDeleteUrl}" method="post" class="js-confirm-form | d-inline"
                                           data-confirm-text="답글을 삭제하시겠습니까?" data-success-text="삭제가 완료되었습니다.">
                                         <input type="hidden" name="cmtId" value="${reply.cmtId}">
                                         <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
-                                        <button class="btn | btn-sm | btn-outline-danger" type="submit">삭제</button>
+                                        <button class="btn | btn-sm | btn-outline-danger" type="submit" data-cmt-manage-action data-comment-owner-uid="${reply.uid}" disabled>삭제</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
 
                         <!-- 답글 수정 폼 (기본 숨김) -->
-                        <tr class="d-none | table-active" id="edit-reply-${reply.cmtId}">
+                        <tr class="d-none | table-active" id="edit-reply-${reply.cmtId}" data-comment-edit-owner-uid="${reply.uid}">
                             <td colspan="6">
-                                <form action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
+                                <form data-comment-owner-uid="${reply.uid}" action="${commentUpdateUrl}" method="post" accept-charset="UTF-8"
                                       class="js-update-form" data-success-text="수정이 완료되었습니다.">
                                     <input type="hidden" name="cmtId" value="${reply.cmtId}">
                                     <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
@@ -150,7 +150,7 @@
                                     <div class="d-flex | justify-content-end | gap-2">
                                         <button class="btn | btn-sm | btn-outline-secondary" type="button"
                                                 data-comment-edit-toggle="edit-reply-${reply.cmtId}">취소</button>
-                                        <button class="btn | btn-sm | btn-primary" type="submit">저장</button>
+                                        <button class="btn | btn-sm | btn-primary" type="submit" data-cmt-manage-action data-comment-owner-uid="${reply.uid}" disabled>저장</button>
                                     </div>
                                 </form>
                             </td>
@@ -208,6 +208,78 @@
     </div>
 </div>
 
+<!-- 현재 사용자 UID/타입에 따른 댓글·답글 관리 버튼 활성화 -->
+<script>
+(function () {
+    function readCurrentUser() {
+        try {
+            var user = JSON.parse(localStorage.getItem('_user_info'));
+            var uid = user && user.uid != null ? String(user.uid) : '';
+            return /^[1-9]\d*$/.test(uid) ? user : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function canManage(ownerUid) {
+        var user = readCurrentUser();
+        return !!user && (user.type === 'USER_TYPE_ADMIN' || String(user.uid) === String(ownerUid));
+    }
+
+    function refresh() {
+        document.querySelectorAll('[data-cmt-manage-action]').forEach(function (button) {
+            var allowed = canManage(button.getAttribute('data-comment-owner-uid'));
+            button.disabled = !allowed;
+            button.setAttribute('aria-disabled', allowed ? 'false' : 'true');
+        });
+        document.querySelectorAll('[data-comment-edit-owner-uid]').forEach(function (row) {
+            if (!canManage(row.getAttribute('data-comment-edit-owner-uid'))) {
+                row.classList.add('d-none');
+            }
+        });
+    }
+
+    function allowForm(form) {
+        if (!form.hasAttribute('data-comment-owner-uid')) return true;
+        if (canManage(form.getAttribute('data-comment-owner-uid'))) return true;
+        refresh();
+        if (window.CmpDialog) {
+            CmpDialog.open({ title: '안내', text: '본인 댓글 또는 관리자 계정에서만 수정·삭제할 수 있습니다.', isOneButton: true });
+        } else {
+            alert('본인 댓글 또는 관리자 계정에서만 수정·삭제할 수 있습니다.');
+        }
+        return false;
+    }
+
+    if (window.CmpCmtPermissions) {
+        window.CmpCmtPermissions.refresh();
+        return;
+    }
+    window.CmpCmtPermissions = { canManage: canManage, refresh: refresh, allowForm: allowForm };
+    refresh();
+    document.addEventListener('current-user-changed', refresh);
+    window.addEventListener('storage', function (e) {
+        if (e.key === '_user_info' || e.key === null) refresh();
+    });
+    window.addEventListener('focus', refresh);
+    document.addEventListener('click', function (e) {
+        var button = e.target.closest('[data-cmt-manage-action]');
+        if (button && !canManage(button.getAttribute('data-comment-owner-uid'))) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            refresh();
+        }
+    }, true);
+    document.addEventListener('submit', function (e) {
+        if (!allowForm(e.target)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
+    }, true);
+})();
+
+</script>
+
 <!-- 답글/수정 박스 토글 (CoreUI JS 의존 없음, 중복 include 시 1회만 바인딩) -->
 <script>
 (function () {
@@ -255,6 +327,7 @@
     window.__cmtConfirmBound = true;
 
     function submitFormAjax(form, onSuccess) {
+        if (window.CmpCmtPermissions && !window.CmpCmtPermissions.allowForm(form)) return;
         // multipart/form-data로 전송되면 멀티파트 리졸버가 없어 서버에서 파라미터가 비어 바인딩된다.
         // 기존 폼 전송과 동일하게 application/x-www-form-urlencoded로 전송한다.
         var body = new URLSearchParams(new FormData(form));
