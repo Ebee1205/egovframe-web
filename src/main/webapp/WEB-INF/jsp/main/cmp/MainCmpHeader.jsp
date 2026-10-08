@@ -54,13 +54,6 @@
       avatar.title = me ? (me.nickname || '') + ' (' + (me.email || '') + ')' : '';
     }
 
-    function loadMe() {
-      fetch('<c:url value="/me/info.do"/>')
-        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
-        .then(function (user) { saveMe(user); renderAvatar(); })
-        .catch(function () {});
-    }
-
     function setOpen(open) {
       menu.classList.toggle('show', open);
       avatar.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -117,7 +110,6 @@
       if (!wrapper.contains(e.target)) { setOpen(false); }
     });
     renderAvatar();
-    loadMe();
   })();
 </script>
 <!--// Header -->

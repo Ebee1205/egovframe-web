@@ -162,7 +162,7 @@
                         <td colspan="6">
                             <form action="${commentInsertUrl}" method="post" accept-charset="UTF-8">
                                 <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
-                                <input type="hidden" name="uid" value="1">
+                                <input type="hidden" name="uid" value="" data-current-user-uid>
                                 <input type="hidden" name="parentCmtId" value="${comment.cmtId}">
                                 <input type="hidden" name="status" value="Y">
 
@@ -183,7 +183,7 @@
                     <td colspan="6">
                         <form action="${commentInsertUrl}" method="post" accept-charset="UTF-8">
                             <input type="hidden" name="<c:out value='${param.targetIdParam}'/>" value="<c:out value='${param.targetId}'/>">
-                            <input type="hidden" name="uid" value="1">
+                            <input type="hidden" name="uid" value="" data-current-user-uid>
                             <input type="hidden" name="status" value="Y">
                             <label class="form-label | small | fw-semibold">댓글 작성</label>
                             <div class="input-group | input-group-sm">
@@ -332,4 +332,43 @@
     });
 })();
 
+</script>
+
+<!-- localStorage의 현재 사용자로 댓글/답글 등록 -->
+<script>
+(function () {
+    function readCurrentUid() {
+        try {
+            var user = JSON.parse(localStorage.getItem('_user_info'));
+            var uid = user && user.uid != null ? String(user.uid) : '';
+            return /^[1-9]\d*$/.test(uid) ? uid : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    document.querySelectorAll('[data-current-user-uid]').forEach(function (input) {
+        input.value = readCurrentUid();
+    });
+
+    if (window.__cmtCurrentUserBound) return;
+    window.__cmtCurrentUserBound = true;
+
+    // 헤더에서 사용자를 바꾼 경우에도 제출 시점의 현재 사용자를 적용한다.
+    document.addEventListener('submit', function (e) {
+        var input = e.target.querySelector('[data-current-user-uid]');
+        if (!input) return;
+        var uid = readCurrentUid();
+        input.value = uid;
+        if (!uid) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (window.CmpDialog) {
+                CmpDialog.open({ title: '안내', text: '현재 사용자를 선택해주세요.', isOneButton: true });
+            } else {
+                alert('현재 사용자를 선택해주세요.');
+            }
+        }
+    }, true);
+})();
 </script>

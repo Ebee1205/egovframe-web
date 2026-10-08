@@ -2,8 +2,6 @@ package com.user.web;
 
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -14,20 +12,12 @@ import com.user.service.MeVO;
 @Controller
 public class MeController {
 
-	private static final String SESSION_UID = "loginUid";
 	private static final String JSON = "application/json;charset=UTF-8";
 
 	private final MeService meService;
 
 	public MeController(MeService meService) {
 		this.meService = meService;
-	}
-
-	@RequestMapping(value = "/me/info.do", produces = JSON)
-	@ResponseBody
-	public String info(HttpSession session) throws Exception {
-		MeVO me = meService.selectMe((Long) session.getAttribute(SESSION_UID));
-		return me == null ? "null" : toJson(me);
 	}
 
 	@RequestMapping(value = "/me/list.do", produces = JSON)
@@ -46,13 +36,9 @@ public class MeController {
 
 	@RequestMapping(value = "/me/switch.do", produces = JSON)
 	@ResponseBody
-	public String switchMe(Long uid, HttpSession session) throws Exception {
+	public String switchMe(Long uid) throws Exception {
 		MeVO me = meService.switchMe(uid);
-		if (me == null) {
-			return "null";
-		}
-		session.setAttribute(SESSION_UID, me.getUid());
-		return toJson(me);
+		return me == null ? "null" : toJson(me);
 	}
 
 	private static String toJson(MeVO me) {
