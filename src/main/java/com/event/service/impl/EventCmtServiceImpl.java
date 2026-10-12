@@ -28,17 +28,14 @@ public class EventCmtServiceImpl implements EventCmtService {
             filterVO.setPageIndex(1);
         }
 
-        filterVO.setFirstIndex(
-            (filterVO.getPageIndex() - 1) * filterVO.getPageSize()
-        );
-
-        filterVO.setLastIndex(
-            filterVO.getFirstIndex() + filterVO.getPageSize()
-        );
+        filterVO.setFirstIndex(filterVO.getPageSize() > 0
+            ? (filterVO.getPageIndex() - 1) * filterVO.getPageSize() : 0);
 
         filterVO.setTotalCnt(
             selectEventCmtListCnt(filterVO)
         );
+        filterVO.setLastIndex(filterVO.getPageSize() > 0
+            ? filterVO.getFirstIndex() + filterVO.getPageSize() : filterVO.getTotalCnt());
 
         return eventCmtDAO.selectEventCmtList(filterVO);
     }
@@ -54,17 +51,14 @@ public class EventCmtServiceImpl implements EventCmtService {
             filterVO.setPageIndex(1);
         }
 
-        filterVO.setFirstIndex(
-            (filterVO.getPageIndex() - 1) * filterVO.getPageSize()
-        );
-
-        filterVO.setLastIndex(
-            filterVO.getFirstIndex() + filterVO.getPageSize()
-        );
+        filterVO.setFirstIndex(filterVO.getPageSize() > 0
+            ? (filterVO.getPageIndex() - 1) * filterVO.getPageSize() : 0);
 
         filterVO.setTotalCnt(
             selectEventReplyListCnt(filterVO)
         );
+        filterVO.setLastIndex(filterVO.getPageSize() > 0
+            ? filterVO.getFirstIndex() + filterVO.getPageSize() : filterVO.getTotalCnt());
 
         return eventCmtDAO.selectEventReplyList(filterVO);
     }

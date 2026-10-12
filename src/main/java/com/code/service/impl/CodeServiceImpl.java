@@ -29,9 +29,11 @@ public class CodeServiceImpl implements CodeService {
 		if (codeVO.getPageIndex() < 1) {
 			codeVO.setPageIndex(1); // 페이지 번호 보정
 		}
-		codeVO.setFirstIndex((codeVO.getPageIndex() - 1) * codeVO.getPageSize()); // 조회 시작 위치(OFFSET) 계산
-		codeVO.setLastIndex(codeVO.getFirstIndex() + codeVO.getPageSize());
+		codeVO.setFirstIndex(codeVO.getPageSize() > 0
+				? (codeVO.getPageIndex() - 1) * codeVO.getPageSize() : 0); // 페이징을 사용하지 않으면 첫 인덱스는 0
 		codeVO.setTotalCnt(selectCodeListCnt(codeVO)); // 페이징 처리를 위한 총 건수 조회
+		codeVO.setLastIndex(codeVO.getPageSize() > 0
+				? codeVO.getFirstIndex() + codeVO.getPageSize() : codeVO.getTotalCnt());
 		return codeDAO.selectCodeList(codeVO);
 	}
 

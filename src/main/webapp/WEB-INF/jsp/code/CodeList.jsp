@@ -118,7 +118,7 @@
                 </div>
                 
                 <!-- 테이블 페이징 -->
-                <c:if test="${filterVO.totalCnt > 0}">
+                <c:if test="${filterVO.totalCnt > 0 and filterVO.pageSize > 0}">
                     <nav aria-label="공통코드 목록 페이징">
                         <ul class="pagination | justify-content-center">
                             <c:forEach var="i" begin="1" end="${totalPage}">

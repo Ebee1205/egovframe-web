@@ -27,9 +27,11 @@ public class UserServiceImpl implements UserService {
 		if (filterVO.getPageIndex() < 1) {
 			filterVO.setPageIndex(1);
 		}
-		filterVO.setFirstIndex((filterVO.getPageIndex() - 1) * filterVO.getPageSize());
-		filterVO.setLastIndex(filterVO.getFirstIndex() + filterVO.getPageSize());
+		filterVO.setFirstIndex(filterVO.getPageSize() > 0
+				? (filterVO.getPageIndex() - 1) * filterVO.getPageSize() : 0);
 		filterVO.setTotalCnt(selectUserListCnt(filterVO));
+		filterVO.setLastIndex(filterVO.getPageSize() > 0
+				? filterVO.getFirstIndex() + filterVO.getPageSize() : filterVO.getTotalCnt());
 		return userDAO.selectUserList(filterVO);
 	}
 

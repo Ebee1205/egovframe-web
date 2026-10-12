@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fileDAO">
+    <resultMap id="fileMap" type="com.cmm.service.file.FileVO">
+        <id property="fileId" column="file_id"/>
+        <result property="fileStreCours" column="file_stre_cours"/>
+        <result property="streFileNm" column="stre_file_nm"/>
+        <result property="orignlFileNm" column="orignl_file_nm"/>
+        <result property="fileExtsn" column="file_extsn"/>
+        <result property="fileCn" column="file_cn"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="cDate" column="c_date"/>
+    </resultMap>
+    <sql id="columns">file_id, file_stre_cours, stre_file_nm, orignl_file_nm, file_extsn, file_cn, file_size, c_date</sql>
+    <select id="selectFileInf" resultMap="fileMap">
+        SELECT <include refid="columns"/> FROM tb_file WHERE file_id = #{value}
+    </select>
+    <select id="selectFileForUpdate" resultMap="fileMap">
+        SELECT <include refid="columns"/> FROM tb_file WHERE file_id = #{value} FOR UPDATE
+    </select>
+    <sql id="filter">
+        <where>
+            <if test="fileId != null">AND file_id = #{fileId}</if>
+            <if test="orignlFileNm != null and orignlFileNm != ''">
+                AND LOWER(orignl_file_nm) LIKE '%' || LOWER(#{orignlFileNm}) || '%'
+            </if>
+            <if test="fileExtsn != null and fileExtsn != ''">AND file_extsn = #{fileExtsn}</if>
+            <if test="imagesOnly">AND file_extsn IN ('gif', 'jpg', 'jpeg', 'png')</if>
+        </where>
+    </sql>
+    <select id="selectFileInfs" resultMap="fileMap">
+        SELECT <include refid="columns"/> FROM tb_file <include refid="filter"/>
+        ORDER BY file_id DESC LIMIT #{pageSize} OFFSET #{firstIndex}
+    </select>
+    <select id="selectFileCount" resultType="long">
+        SELECT COUNT(*) FROM tb_file <include refid="filter"/>
+    </select>
+    <insert id="insertFileInf" useGeneratedKeys="true" keyProperty="fileId" keyColumn="file_id">
+        INSERT INTO tb_file (file_stre_cours, stre_file_nm, orignl_file_nm, file_extsn, file_cn, file_size, c_date)
+        VALUES (#{fileStreCours}, #{streFileNm}, #{orignlFileNm}, #{fileExtsn}, #{fileCn}, #{fileSize},
+                COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP))
+    </insert>
+    <update id="updateFileInf">
+        UPDATE tb_file SET file_stre_cours = #{fileStreCours}, stre_file_nm = #{streFileNm},
+            orignl_file_nm = #{orignlFileNm}, file_extsn = #{fileExtsn}, file_cn = #{fileCn}, file_size = #{fileSize}
+        WHERE file_id = #{fileId}
+    </update>
+    <delete id="deleteFileInf">DELETE FROM tb_file WHERE file_id = #{value}</delete>
+</mapper>

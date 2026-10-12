@@ -38,7 +38,9 @@
 			</if>
 		</where>
 		ORDER BY c.cmt_id DESC
-		LIMIT #{pageSize} OFFSET #{firstIndex}
+		<if test="pageSize > 0">
+			LIMIT #{pageSize} OFFSET #{firstIndex}
+		</if>
 	</select>
 
 	<select id="selectEventCmtListCnt" parameterType="EventCmtFilterVO" resultType="int">
@@ -64,7 +66,9 @@
 			</if>
 		</where>
 		ORDER BY c.cmt_id ASC
-		LIMIT #{pageSize} OFFSET #{firstIndex}
+		<if test="pageSize > 0">
+			LIMIT #{pageSize} OFFSET #{firstIndex}
+		</if>
 	</select>
 
 	<select id="selectEventReplyListCnt" parameterType="EventCmtFilterVO" resultType="int">

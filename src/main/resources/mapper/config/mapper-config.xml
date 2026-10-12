@@ -32,6 +32,7 @@
 		<mapper resource="mapper/service/CodeUse_SQL.xml" />
 		<mapper resource="mapper/service/Event_SQL.xml" />
 		<mapper resource="mapper/service/EventCmt_SQL.xml" />
+	    <mapper resource="mapper/service/File_SQL.xml" />
 	</mappers>
     
 </configuration>

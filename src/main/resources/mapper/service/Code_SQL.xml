@@ -54,7 +54,9 @@
 		LEFT JOIN tb_cmn_code p ON p.cid = c.p_cid
 		<include refid="codeListWhere"/>
 		ORDER BY c.c_lvl, c.p_cid NULLS FIRST, c.cid
-		LIMIT #{pageSize} OFFSET #{firstIndex}
+		<if test="pageSize > 0">
+			LIMIT #{pageSize} OFFSET #{firstIndex}
+		</if>
 	</select>
 
 	<select id="selectCodeListCnt" parameterType="CodeVO" resultType="int">

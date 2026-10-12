@@ -77,7 +77,8 @@ public class EventController {
 		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
 
 		model.addAttribute("filterVO", filterVO);
-		model.addAttribute("totalPage", filterVO.getTotalCnt() == 0 ? 0 : (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize());
+		model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0
+				? 0 : (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize());
 
 		return "forward:/WEB-INF/jsp/event/EventList.jsp";
 	}

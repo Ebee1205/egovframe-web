@@ -33,7 +33,7 @@ public class UserController {
 		model.addAttribute("userStatuses", codeService.selectCmmCodeDetail(userStatusFilter));
 		
 		model.addAttribute("filterVO", filterVO);
-		model.addAttribute("totalPage", filterVO.getTotalCnt() == 0 ? 0
+		model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
 				: (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize());
 		return "forward:/WEB-INF/jsp/user/UserList.jsp";
 	}

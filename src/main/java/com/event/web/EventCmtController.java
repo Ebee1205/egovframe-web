@@ -41,7 +41,7 @@ public class EventCmtController {
 
         model.addAttribute(
             "totalPage",
-            filterVO.getTotalCnt() == 0
+            filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0
                 ? 0
                 : (filterVO.getTotalCnt() + filterVO.getPageSize() - 1)
                     / filterVO.getPageSize()

@@ -54,7 +54,9 @@
 		LEFT JOIN tb_users u ON u.uid = e.created_by
 		<include refid="eventListWhere"/>
 		ORDER BY e.eid DESC
-		LIMIT #{pageSize} OFFSET #{firstIndex}
+		<if test="pageSize > 0">
+			LIMIT #{pageSize} OFFSET #{firstIndex}
+		</if>
 	</select>
 
 	<select id="selectEventListCnt" parameterType="EventFilterVO" resultType="int">

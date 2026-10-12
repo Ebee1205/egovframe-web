@@ -77,6 +77,7 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
+                    <button type="button" id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</button>
                     <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">신규 등록</a>
                 </div>
 
@@ -147,7 +148,7 @@
                 </div>
                 
                 <!-- 테이블 페이징 -->
-                <c:if test="${filterVO.totalCnt > 0}">
+                <c:if test="${filterVO.totalCnt > 0 and filterVO.pageSize > 0}">
                     <nav aria-label="이벤트 목록 페이징">
                         <ul class="pagination | justify-content-center">
                             <c:forEach var="i" begin="1" end="${totalPage}">
@@ -176,4 +177,90 @@
         
     </div>
 </body>
+
+<!-- SheetJS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function () {
+    const btn = document.getElementById('btnExcel');
+    const form = document.getElementById('searchForm');
+    const listUrl = '<c:url value="/event/list.do"/>';
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function timestamp() {
+        const d = new Date();
+        return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate())
+             + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+    }
+
+    async function downloadExcel() {
+        btn.disabled = true;
+        const originText = btn.textContent;
+        btn.textContent = '다운로드 중...';
+
+        try {
+            // 현재 검색 조건 + pageSize=0 (전체 조회)
+            const params = new URLSearchParams(new FormData(form));
+            params.set('pageIndex', '1');
+            params.set('pageSize', '0');
+
+            const res = await fetch(listUrl + '?' + params.toString(), {
+                credentials: 'same-origin'
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            // 응답 HTML 파싱
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const table = doc.querySelector('.table-responsive table');
+            if (!table) throw new Error('테이블을 찾을 수 없습니다.');
+
+            // 헤더 ("관리" 마지막 컬럼 제외)
+            const headers = Array.from(table.querySelectorAll('thead th'))
+                .slice(0, -1)
+                .map(th => th.textContent.trim());
+
+            // 본문 ("관리" 마지막 컬럼 제외)
+            const rows = [];
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length === 1 && tds[0].hasAttribute('colspan')) return; // 데이터 없음 행
+                rows.push(Array.from(tds).slice(0, -1).map(td => td.textContent.trim()));
+            });
+
+            if (rows.length === 0) {
+                alert('다운로드할 데이터가 없습니다.');
+                return;
+            }
+
+            // NO 컬럼 재번호 (pageSize=0 이므로 1부터)
+            rows.forEach((r, i) => { r[0] = i + 1; });
+
+            // 시트 생성
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+            ws['!cols'] = headers.map((h, i) => {
+                const maxLen = Math.max(
+                    h.length,
+                    ...rows.map(r => String(r[i] ?? '').length)
+                );
+                return { wch: Math.min(Math.max(maxLen + 2, 8), 50) };
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '이벤트 목록');
+            XLSX.writeFile(wb, '이벤트목록_' + timestamp() + '.xlsx');
+        } catch (e) {
+            console.error(e);
+            alert('엑셀 다운로드 중 오류가 발생했습니다.\n' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originText;
+        }
+    }
+
+    btn.addEventListener('click', downloadExcel);
+})();
+</script>
+
 </html>

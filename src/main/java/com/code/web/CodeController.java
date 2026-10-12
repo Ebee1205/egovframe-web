@@ -57,7 +57,8 @@ public class CodeController {
 		model.addAttribute("codes", codeService.selectCodeList(filterVO));
 		model.addAttribute("rootCodes", codeService.selectCodeRoot());
 		model.addAttribute("filterVO", filterVO);
-		model.addAttribute("totalPage", (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
+		model.addAttribute("totalPage", filterVO.getPageSize() > 0 && filterVO.getTotalCnt() > 0
+				? (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize() : 0);
 		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 

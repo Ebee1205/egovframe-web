@@ -30,9 +30,11 @@ public class EventServiceImpl implements EventService {
 		if (filterVO.getPageIndex() < 1) {
 			filterVO.setPageIndex(1);
 		}
-		filterVO.setFirstIndex((filterVO.getPageIndex() - 1) * filterVO.getPageSize());
-		filterVO.setLastIndex(filterVO.getFirstIndex() + filterVO.getPageSize());
+		filterVO.setFirstIndex(filterVO.getPageSize() > 0
+				? (filterVO.getPageIndex() - 1) * filterVO.getPageSize() : 0);
 		filterVO.setTotalCnt(selectEventListCnt(filterVO));
+		filterVO.setLastIndex(filterVO.getPageSize() > 0
+				? filterVO.getFirstIndex() + filterVO.getPageSize() : filterVO.getTotalCnt());
 		return eventDAO.selectEventList(filterVO);
 	}
 
