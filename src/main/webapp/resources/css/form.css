@@ -39,3 +39,14 @@
     font-weight: 500;
     color: #6c757d; 
 }
+
+.file-content {
+   	align-items: center;
+
+}
+
+.file-content-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6c757d; 
+}

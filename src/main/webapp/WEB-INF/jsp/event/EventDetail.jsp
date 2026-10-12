@@ -45,7 +45,6 @@
                 <input type="hidden" name="rid" value="${event.rid}">
                 <input type="hidden" name="lat" value="${empty event.lat ? '' : event.lat.toPlainString()}">
                 <input type="hidden" name="lon" value="${empty event.lon ? '' : event.lon.toPlainString()}">
-                <input type="hidden" name="fileId" value="${event.fileId}">
                 <div>
                     <label for="title" class="form-label">이벤트 제목</label>
                     <input type="text" class="form-control" id="title" name="title" maxlength="300" required value="<c:out value='${event.title}'/>">
@@ -102,10 +101,17 @@
                     <textarea class="form-control" id="dsc" name="dsc" rows="3" required><c:out value="${event.dsc}"/></textarea>
                 </div>
                 
-                <div class="input-group mb-3">
-				  <input type="file" class="form-control" id="inputGroupFile02">
-				  <label class="input-group-text" for="inputGroupFile02">업로드</label>
-				</div>
+                <div>
+                    <jsp:include page="/WEB-INF/jsp/cmp/CmpFileInputBox.jsp">
+                        <jsp:param name="id" value="eventAttachment" />
+                        <jsp:param name="uploadUrl" value="/event/file/upload.do" />
+                        <jsp:param name="name" value="fileId" />
+                        <jsp:param name="fileId" value="${event.fileId}" />
+                        <jsp:param name="fileName" value="${eventFile.orignlFileNm}" />
+                        <jsp:param name="accept" value="${fileAccept}" />
+                        <jsp:param name="maxSize" value="${fileMaxSize}" />
+                    </jsp:include>
+                </div>
         
                 <div>
                     <label for="status" class="form-label">이벤트 상태</label>
@@ -183,7 +189,6 @@
             }
         });
     </script>
-
 </body>
 </html>
 
