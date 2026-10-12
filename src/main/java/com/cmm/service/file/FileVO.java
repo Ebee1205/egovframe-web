@@ -15,7 +15,14 @@ public class FileVO implements Serializable {
     private Long fileSize;
     private Date cDate;
     private boolean imagesOnly;
+    private java.util.List<String> imageExtensions;
 
+    public java.util.List<String> getImageExtensions() {
+    	return imageExtensions;
+    }
+    public void setImageExtensions(java.util.List<String> value) {
+    	imageExtensions = value;
+    }
     public Long getFileId() { 
     	return fileId; 
     }

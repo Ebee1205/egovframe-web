@@ -25,6 +25,7 @@ import com.cmm.storage.FileStorage;
 @Transactional(rollbackFor = Exception.class)
 public class FileMngServiceImpl implements FileMngService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileMngServiceImpl.class);
+    private static final String DEFAULT_PREFIX = "file";
     private final FileStorage storage;
     private final FileDAO dao;
     private final FileMngUtil util;
@@ -69,14 +70,22 @@ public class FileMngServiceImpl implements FileMngService {
         }
     }
     @Override public List<FileVO> uploadFiles(List<MultipartFile> uploads, String description) throws IOException {
+        return uploadFiles(uploads, description, DEFAULT_PREFIX);
+    }
+    @Override public List<FileVO> uploadFiles(List<MultipartFile> uploads, String description, String prefix) throws IOException {
         util.validateCount(uploads == null ? 0 : uploads.size());
         List<FileVO> files = new ArrayList<>();
         // Validate the whole request before writing any object.
-        for (MultipartFile upload : uploads) { files.add(util.describe(upload, storage.getLocation(), description)); }
+        for (int i = 0; i < uploads.size(); i++) {
+            files.add(util.describe(uploads.get(i), storage.getLocation(), description, prefix, i + 1));
+        }
         for (int i = 0; i < files.size(); i++) { write(uploads.get(i), files.get(i)); dao.insertFileInf(files.get(i)); }
         return files;
     }
     @Override public FileVO updateFile(Long fileId, MultipartFile replacement, String description) throws IOException {
+        return updateFile(fileId, replacement, description, DEFAULT_PREFIX);
+    }
+    @Override public FileVO updateFile(Long fileId, MultipartFile replacement, String description, String prefix) throws IOException {
         FileVO current = find(fileId, true);
         location(current);
         if (replacement == null) {
@@ -84,7 +93,7 @@ public class FileMngServiceImpl implements FileMngService {
             dao.updateFileInf(current);
             return current;
         }
-        FileVO next = util.describe(replacement, storage.getLocation(), description == null ? current.getFileCn() : description);
+        FileVO next = util.describe(replacement, storage.getLocation(), description == null ? current.getFileCn() : description, prefix, 1);
         next.setFileId(current.getFileId());
         next.setCDate(current.getCDate());
         write(replacement, next);
@@ -104,7 +113,12 @@ public class FileMngServiceImpl implements FileMngService {
     }
     @Override @Transactional(readOnly = true)
     public List<FileVO> selectFileInfs(FileVO filter) {
-        return dao.selectFileInfs(filter == null ? new FileVO() : filter);
+        FileVO target = filter == null ? new FileVO() : filter;
+        java.util.List<String> previous = target.getImageExtensions();
+        try {
+            if (target.isImagesOnly()) { target.setImageExtensions(util.imageExtensions()); }
+            return dao.selectFileInfs(target);
+        } finally { target.setImageExtensions(previous); }
     }
     @Override @Transactional(readOnly = true)
     public FileVO selectFileInf(FileVO file) { return find(file == null ? null : file.getFileId(), false); }

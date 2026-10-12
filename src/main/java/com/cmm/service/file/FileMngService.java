@@ -28,6 +28,17 @@ public interface FileMngService {
     List<FileVO> uploadFiles(List<MultipartFile> files, String description) throws IOException;
 
     /**
+     * 업무 서비스에서 지정한 접두사를 사용하여 여러 파일을 업로드하고 정보를 등록한다.
+     *
+     * @param files 업로드할 파일 목록
+     * @param description 파일 설명
+     * @param prefix 업무 서비스에서 지정한 파일명 접두사 (예: event, user)
+     * @return 등록된 파일 정보 목록
+     * @throws IOException 파일을 읽거나 저장하는 중 오류가 발생한 경우
+     */
+    List<FileVO> uploadFiles(List<MultipartFile> files, String description, String prefix) throws IOException;
+
+    /**
      * 하나의 파일에 대한 정보를 수정하고, 교체 파일이 있으면 파일 실물도 교체한다.
      * 파일을 교체해도 기존 파일 ID는 유지한다.
      *
@@ -38,6 +49,18 @@ public interface FileMngService {
      * @throws IOException 교체 파일을 읽거나 저장하는 중 오류가 발생한 경우
      */
     FileVO updateFile(Long fileId, MultipartFile replacement, String description) throws IOException;
+
+    /**
+     * 파일 정보를 수정하고, 교체 파일에는 업무 서비스에서 지정한 접두사를 적용한다.
+     *
+     * @param fileId 수정할 파일 ID
+     * @param replacement 교체할 파일. null이면 기존 파일 실물을 유지한다.
+     * @param description 파일 설명. null이면 기존 설명을 유지한다.
+     * @param prefix 교체 파일에 적용할 파일명 접두사
+     * @return 수정된 파일 정보
+     * @throws IOException 교체 파일을 읽거나 저장하는 중 오류가 발생한 경우
+     */
+    FileVO updateFile(Long fileId, MultipartFile replacement, String description, String prefix) throws IOException;
 
     /**
      * 등록된 파일 정보를 확인하고 다운로드를 위한 파일 스트림을 연다.

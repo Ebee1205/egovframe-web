@@ -30,7 +30,7 @@ public class LocalFileStorage implements FileStorage {
     }
 
     private Path resolve(String key, boolean createParents) throws IOException {
-        if (key == null || !key.matches("[A-Za-z0-9_-]+(?:/[A-Za-z0-9_.-]+)*")
+        if (key == null || !key.matches("[A-Za-z0-9_-]+(?:[./][A-Za-z0-9_-]+)*")
                 || key.contains("..")) { throw new IllegalArgumentException("Invalid storage key."); }
         Files.createDirectories(directory);
         Path root = directory.toRealPath();

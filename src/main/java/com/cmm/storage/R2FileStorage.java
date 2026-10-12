@@ -21,7 +21,7 @@ public class R2FileStorage implements FileStorage {
         this.bucket = R2Configuration.required(bucket, "Globals.R2.Bucket");
     }
     private String key(String value) {
-        if (value == null || !value.matches("[A-Za-z0-9_-]+(?:/[A-Za-z0-9_.-]+)*") || value.contains("..")) {
+        if (value == null || !value.matches("[A-Za-z0-9_-]+(?:[./][A-Za-z0-9_-]+)*") || value.contains("..")) {
             throw new IllegalArgumentException("Invalid storage key.");
         }
         return value;

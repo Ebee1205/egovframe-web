@@ -2,8 +2,7 @@ package com.cmm.service.file.impl;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,26 +35,82 @@ public class FileMngUtil {
     private final Set<String> extensions;
     private final long maxSize;
     private final int maxFiles;
-    private final String prefix;
+    private static final String DEFAULT_NAME_FORMAT = "{prefix}/{prefix}_{date:yyyyMMdd}_{uuid}_{num}.{ext}";
+    private static final java.util.regex.Pattern NAME_TOKEN = java.util.regex.Pattern.compile("\\{(prefix|uuid|num|ext|date(?::[^{}]+)?)\\}");
+    private final String nameFormat;
+    private final java.util.List<String> imageExtensions;
 
     public FileMngUtil(@Value("${Globals.fileUpload.Extensions:}") String allowedExtensions,
+            @Value("${Globals.fileUpload.Extensions.Images:}") String imageExtensions,
             @Value("${Globals.fileUpload.MaxSizePerFile:52428800}") long maxSize,
             @Value("${Globals.fileUpload.MaxFiles:20}") int maxFiles,
-            @Value("${Globals.fileUpload.KeyPrefix:files}") String prefix) {
+            @Value("${Globals.fileUpload.NameFormat:}") String nameFormat) {
         this.extensions = new HashSet<>(Arrays.asList(allowedExtensions.toLowerCase(Locale.ROOT).split("\\.")));
         this.extensions.remove("");
+        java.util.List<String> images = new java.util.ArrayList<>(Arrays.asList(imageExtensions.toLowerCase(Locale.ROOT).split("\\.")));
+        images.removeIf(String::isEmpty);
+        this.imageExtensions = java.util.Collections.unmodifiableList(images);
         this.maxSize = maxSize;
         this.maxFiles = maxFiles;
-        if (maxSize <= 0 || maxFiles <= 0 || prefix == null || prefix.length() > 100
-                || !prefix.matches("[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*")) {
+        if (maxSize <= 0 || maxFiles <= 0) {
             throw new IllegalArgumentException("Invalid file upload configuration.");
         }
-        this.prefix = prefix;
+        this.nameFormat = nameFormat == null || nameFormat.trim().isEmpty() ? DEFAULT_NAME_FORMAT : nameFormat.trim();
+        if (!this.nameFormat.contains("{prefix}") || !this.nameFormat.contains("{uuid}")
+                || !this.nameFormat.endsWith(".{ext}")) {
+            throw new IllegalArgumentException("Globals.fileUpload.NameFormat requires {prefix}, {uuid}, and a .{ext} suffix.");
+        }
+        // Validate tokens and date patterns during initialization, before any upload is written.
+        formatFileName("file", "png", 1);
     }
+    /**
+     * 서비스에서 지정한 접두사와 전역 파일명 형식으로 저장 경로와 파일명을 생성한다.
+     * {prefix}, {uuid}, {num}, {ext}, {date}, {date:날짜패턴}을 지원한다.
+     *
+     * @param prefix 업무 서비스에서 지정한 파일명 접두사
+     * @param extension 점을 제외한 파일 확장자
+     * @param number 이번 업로드 요청 안에서의 파일 순번. 1부터 시작한다.
+     * @return 저장소 기준의 상대 경로와 파일명
+     */
+    public String formatFileName(String prefix, String extension, int number) {
+        if (prefix == null || !prefix.matches("[A-Za-z0-9_-]{1,100}")) {
+            throw new IllegalArgumentException("File prefix must be 1~100 letters, digits, underscores or hyphens.");
+        }
+        if (extension == null || !extension.matches("[a-z0-9]{1,20}") || number < 1) {
+            throw new IllegalArgumentException("Invalid file extension or sequence number.");
+        }
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        ZonedDateTime now = ZonedDateTime.now();
+        java.util.regex.Matcher matcher = NAME_TOKEN.matcher(nameFormat);
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            String token = matcher.group(1);
+            String value;
+            if ("prefix".equals(token)) { value = prefix; }
+            else if ("uuid".equals(token)) { value = uuid; }
+            else if ("num".equals(token)) { value = Integer.toString(number); }
+            else if ("ext".equals(token)) { value = extension; }
+            else {
+                String pattern = "date".equals(token) ? "yyyyMMdd" : token.substring(5);
+                try { value = now.format(DateTimeFormatter.ofPattern(pattern, Locale.ROOT)); }
+                catch (IllegalArgumentException exception) {
+                    throw new IllegalArgumentException("Invalid date pattern in Globals.fileUpload.NameFormat.", exception);
+                }
+            }
+            matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(value));
+        }
+        matcher.appendTail(result);
+        String name = result.toString();
+        if (name.length() > 255 || !name.matches("[A-Za-z0-9_-]+(?:[./][A-Za-z0-9_-]+)*")) {
+            throw new IllegalArgumentException("Globals.fileUpload.NameFormat must produce a safe relative storage path of at most 255 characters.");
+        }
+        return name;
+    }
+    public java.util.List<String> imageExtensions() { return imageExtensions; }
     public void validateCount(int count) {
         if (count < 1 || count > maxFiles) { throw bad("FILE_COUNT_INVALID", "업로드할 파일 수를 확인해주세요.", "files"); }
     }
-    public FileVO describe(MultipartFile upload, String location, String description) {
+    public FileVO describe(MultipartFile upload, String location, String description, String prefix, int number) {
         if (upload == null || upload.isEmpty()) { throw bad("FILE_EMPTY", "빈 파일은 업로드할 수 없습니다.", "files"); }
         String name = upload.getOriginalFilename();
         if (name == null) { throw bad("FILE_NAME_INVALID", "파일 이름을 확인해주세요.", "files"); }
@@ -76,8 +131,7 @@ public class FileMngUtil {
         file.setFileSize(upload.getSize());
         file.setFileCn(description);
         file.setFileStreCours(location);
-        file.setStreFileNm(prefix + "/" + LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))
-                + "/" + UUID.randomUUID().toString().replace("-", "") + "." + extension);
+        file.setStreFileNm(formatFileName(prefix, extension, number));
         file.setCDate(new Date());
         return file;
     }

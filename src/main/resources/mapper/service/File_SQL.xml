@@ -25,7 +25,15 @@
                 AND LOWER(orignl_file_nm) LIKE '%' || LOWER(#{orignlFileNm}) || '%'
             </if>
             <if test="fileExtsn != null and fileExtsn != ''">AND file_extsn = #{fileExtsn}</if>
-            <if test="imagesOnly">AND file_extsn IN ('gif', 'jpg', 'jpeg', 'png')</if>
+            <if test="imagesOnly">
+                AND file_extsn IN
+                <choose>
+                    <when test="imageExtensions != null and !imageExtensions.isEmpty()">
+                        <foreach collection="imageExtensions" item="ext" open="(" separator="," close=")">#{ext}</foreach>
+                    </when>
+                    <otherwise>(NULL)</otherwise>
+                </choose>
+            </if>
         </where>
     </sql>
     <select id="selectFileInfs" resultMap="fileMap">
