@@ -1,12 +1,10 @@
-package com.cmm.file.storage;
+package com.cmm.storage;
 
 import org.springframework.beans.factory.ObjectProvider;
-
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 
 public class R2FileStorage implements FileStorage {
-
     private final ObjectProvider<S3Client> s3ClientProvider;
     private final String bucket;
 
@@ -17,7 +15,7 @@ public class R2FileStorage implements FileStorage {
 
     @Override
     public void checkConnection() {
-        s3ClientProvider.getObject().headBucket(HeadBucketRequest.builder()
-                .bucket(R2Configuration.required(bucket, "Globals.R2.Bucket")).build());
+        String configuredBucket = R2Configuration.required(bucket, "Globals.R2.Bucket");
+        s3ClientProvider.getObject().headBucket(HeadBucketRequest.builder().bucket(configuredBucket).build());
     }
 }

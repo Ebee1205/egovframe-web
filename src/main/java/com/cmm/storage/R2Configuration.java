@@ -1,4 +1,4 @@
-package com.cmm.file.storage;
+package com.cmm.storage;
 
 import java.net.URI;
 import java.nio.file.Paths;

@@ -1,4 +1,4 @@
-package com.cmm.file.storage;
+package com.cmm.storage;
 
 public interface FileStorage {
 

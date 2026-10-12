@@ -1,4 +1,4 @@
-package com.cmm.file;
+package com.cmm.service.file;
 
 import java.io.Serializable;
 import java.util.Date;

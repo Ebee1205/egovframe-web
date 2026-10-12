@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class LocalFileStorage implements FileStorage {
-
     private final Path directory;
 
     public LocalFileStorage(Path directory) {

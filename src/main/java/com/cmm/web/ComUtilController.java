@@ -1,4 +1,4 @@
-package com.cmm;
+package com.cmm.web;
 
 import javax.annotation.PostConstruct;
 
