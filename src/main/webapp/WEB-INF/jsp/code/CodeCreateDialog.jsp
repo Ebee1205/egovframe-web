@@ -137,7 +137,7 @@
             var result = await response.json();
 
             if (!response.ok) {
-                errorMapper.show(result.errors, result.message);
+                errorMapper.showResponse(result);
                 return;
             }
 

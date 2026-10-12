@@ -37,6 +37,16 @@
             setFormError(message);
         }
 
+        // Common response: error.fields[] and code.message.
+        function showResponse(response) {
+            response = response || {};
+            var errors = Object.create(null);
+            var fields = response.error && response.error.fields || [];
+            fields.forEach(function (error) {
+                (errors[error.field] || (errors[error.field] = [])).push(error.message);
+            });
+            show(errors, response.code && response.code.message);
+        }
         // Commons Validator가 전달한 규칙에서 필드명을 가져온다.
         function showValidationErrors(messages, rules) {
             var errors = Object.create(null);
@@ -52,6 +62,7 @@
         return {
             clear: clear,
             show: show,
+            showResponse: showResponse,
             showValidationErrors: showValidationErrors,
             setFormError: setFormError
         };

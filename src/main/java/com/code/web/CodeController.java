@@ -1,7 +1,6 @@
 package com.code.web;
 
 import java.util.Locale;
-import javax.json.Json;
 
 import org.springframework.context.MessageSource;
 
@@ -22,7 +21,7 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 
 import com.code.service.CodeService;
 import com.code.service.CodeDetailVO;
-import com.cmm.util.ErrMessageBuildUtil;
+import com.cmm.service.ComResponseVO;
 
 @Controller
 public class CodeController {
@@ -76,7 +75,7 @@ public class CodeController {
 
 		if (bindingResult.hasErrors()) {
 			return ResponseEntity.badRequest()
-					.body(ErrMessageBuildUtil.build(bindingResult, messageSource, Locale.KOREAN));
+					.body(ComResponseVO.validationFailure(bindingResult, messageSource, Locale.KOREAN, "VALIDATION_FAILED", "입력값을 확인해주세요.").toJson());
 		}
 
 		codeVO.setLevel(codeVO.getParentCid() == null ? 1 : 2);
@@ -87,11 +86,11 @@ public class CodeController {
 		} catch (DataIntegrityViolationException exception) {
 			bindingResult.rejectValue("code", "errors.code.duplicate");
 			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body(ErrMessageBuildUtil.build(bindingResult, messageSource, Locale.KOREAN));
+					.body(ComResponseVO.validationFailure(bindingResult, messageSource, Locale.KOREAN, "CODE_DUPLICATE", "이미 사용 중인 코드입니다.").toJson());
 		}
 
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(Json.createObjectBuilder().add("message",
-						messageSource.getMessage("success.code.insert", null, Locale.KOREAN)).build().toString());
+				.body(ComResponseVO.success(null,
+						messageSource.getMessage("success.code.insert", null, Locale.KOREAN)).toJson());
 	}
 }
