@@ -1,6 +1,9 @@
 package com.event.service;
 
 import java.util.List;
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
+import com.cmm.service.file.FileVO;
 
 public interface EventService {
 
