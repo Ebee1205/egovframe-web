@@ -21,6 +21,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springmodules.validation.commons.DefaultBeanValidator;
 import org.springmodules.validation.commons.DefaultValidatorFactory;
 
+import com.cmm.service.ComResponseVO;
+import com.cmm.service.file.impl.FileMngUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import javax.servlet.http.HttpServletRequest;
+import com.cmm.service.file.FileMngService;
+import com.cmm.service.file.FileVO;
+import org.springframework.beans.factory.annotation.Value;
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
 
@@ -39,17 +48,43 @@ public class EventController {
 	private final EventService eventService;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
+	private final FileMngService fileMngService;
+	@Value("${Globals.fileUpload.Extensions:}")
+	private String fileExtensions;
+	@Value("${Globals.fileUpload.MaxSizePerFile:52428800}")
+	private long fileMaxSize;
 	@Autowired
 	private DefaultBeanValidator beanValidator;
 	@Autowired
 	private DefaultValidatorFactory validatorFactory;
 
-	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService) {
+	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService, FileMngService fileMngService) {
 		this.eventService = eventService;
 		this.eventCmtService = eventCmtService;
 		this.codeService = codeService;
+		this.fileMngService = fileMngService;
 	}
 
+	/** 이벤트 첨부 업로드는 업무 서비스에서 event 접두사를 지정한다. */
+	@RequestMapping(value = "/event/file/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	public ResponseEntity<String> eventFileUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
+			@RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) {
+		try {
+			List<Map<String, Object>> data = new java.util.ArrayList<>();
+			for (FileVO file : eventService.uploadEventFiles(files, description)) {
+				data.add(FileMngUtil.responseData(file, request.getContextPath()));
+			}
+			return ResponseEntity.status(201).body(ComResponseVO.success(data, "파일이 등록되었습니다.").toJson());
+		} catch (Exception exception) {
+			return FileMngUtil.errorResponse(exception);
+		}
+	}
+
+	/** 파일 크기 제한 등 요청 파싱 단계의 오류도 공통 응답으로 반환한다. */
+	@ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+	public ResponseEntity<String> eventFileUploadError(org.springframework.web.multipart.MultipartException exception) {
+		return FileMngUtil.errorResponse(exception);
+	}
 	@InitBinder({"eventVO", "eventCreateVO"})
 	public void initEventBinder(WebDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -87,7 +122,18 @@ public class EventController {
 	public String eventDetail(@RequestParam("eid") Long eid, EventCmtFilterVO cmtFilterVO, Model model) throws Exception {
 		EventVO eventVO = new EventVO();
 		eventVO.setEid(eid);
-		model.addAttribute("event", eventService.selectEvent(eventVO));
+		EventVO event = eventService.selectEvent(eventVO);
+		if (event == null) {
+			throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다.");
+		}
+		model.addAttribute("event", event);
+		if (event.getFileId() != null) {
+			FileVO file = new FileVO();
+			file.setFileId(event.getFileId());
+			model.addAttribute("eventFile", fileMngService.selectFileInf(file));
+		}
+		model.addAttribute("fileAccept", fileExtensions.replaceAll("\\.(?=[^.]+)", ",.").replaceFirst("^,", ""));
+		model.addAttribute("fileMaxSize", fileMaxSize);
 
 		cmtFilterVO.setEid(eid);
 		List<EventCmtVO> comments = eventCmtService.selectEventCmtList(cmtFilterVO);

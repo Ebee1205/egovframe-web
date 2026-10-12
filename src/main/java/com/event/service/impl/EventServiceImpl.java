@@ -1,6 +1,10 @@
 package com.event.service.impl;
 
 import java.util.List;
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
+import com.cmm.service.file.FileMngService;
+import com.cmm.service.file.FileVO;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +18,18 @@ public class EventServiceImpl implements EventService {
 
 	private final EventDAO eventDAO;
 	private final EventCmtDAO eventCmtDAO;
+	private final FileMngService fileMngService;
 
-	public EventServiceImpl(EventDAO eventDAO, EventCmtDAO eventCmtDAO) {
+	public EventServiceImpl(EventDAO eventDAO, EventCmtDAO eventCmtDAO, FileMngService fileMngService) {
 		this.eventDAO = eventDAO;
 		this.eventCmtDAO = eventCmtDAO;
+		this.fileMngService = fileMngService;
 	}
 
+	@Override
+	public List<FileVO> uploadEventFiles(List<MultipartFile> files, String description) throws IOException {
+		return fileMngService.uploadFiles(files, description, "event");
+	}
 	@Override
 	public EventVO selectEvent(EventVO eventVO) throws Exception {
 		return eventDAO.selectEvent(eventVO);
