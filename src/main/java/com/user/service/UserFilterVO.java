@@ -1,6 +1,6 @@
 package com.user.service;
 
-import com.cmm.ComFilterVO;
+import com.cmm.service.ComFilterVO;
 
 public class UserFilterVO extends ComFilterVO {
 

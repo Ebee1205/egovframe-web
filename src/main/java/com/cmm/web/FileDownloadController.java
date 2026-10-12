@@ -1,14 +1,28 @@
 package com.cmm.web;
 
-import org.springframework.stereotype.Controller;
-import com.cmm.service.file.FileMngService;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.util.Base64;
+import java.util.Map;
 
-/** Common download controller scaffold. Routes follow storage read and access control implementation. */
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam
+
 @Controller
 public class FileDownloadController {
-    protected final FileMngService fileMngService;
 
-    public FileDownloadController(FileMngService fileMngService) {
-        this.fileMngService = fileMngService;
-    }
 }

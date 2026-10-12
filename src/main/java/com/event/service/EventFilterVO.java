@@ -1,6 +1,6 @@
 package com.event.service;
 
-import com.cmm.ComFilterVO;
+import com.cmm.service.ComFilterVO;
 
 public class EventFilterVO extends ComFilterVO {
 

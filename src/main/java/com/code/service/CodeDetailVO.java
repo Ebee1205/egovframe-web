@@ -3,7 +3,7 @@ package com.code.service;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.cmm.ComFilterVO;
+import com.cmm.service.ComFilterVO;
 
 public class CodeDetailVO extends ComFilterVO implements Serializable {
 
