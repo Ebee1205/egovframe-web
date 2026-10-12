@@ -10,6 +10,17 @@ import com.code.service.CodeDetailVO;
 @Repository
 public class CodeDetailDAO extends EgovAbstractMapper {
 
+	public CodeDetailVO selectCodeForUpdate(CodeDetailVO codeVO) {
+		return selectOne("codeDAO.selectCodeForUpdate", codeVO);
+	}
+
+	public int selectCodeChildCount(CodeDetailVO codeVO) {
+		return selectOne("codeDAO.selectCodeChildCount", codeVO);
+	}
+
+	public int selectDuplicateCodeCount(CodeDetailVO codeVO) {
+		return selectOne("codeDAO.selectDuplicateCodeCount", codeVO);
+	}
 	public CodeDetailVO selectCode(CodeDetailVO codeVO) throws Exception {
 		return selectOne("codeDAO.selectCode", codeVO);
 	}

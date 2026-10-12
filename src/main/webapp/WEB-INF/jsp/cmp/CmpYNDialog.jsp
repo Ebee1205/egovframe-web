@@ -60,6 +60,17 @@
             var el = document.getElementById(options.modalId || 'cmpYNDialog');
             if (!el) return;
 
+            // 닫히는 중이면 닫힘이 끝난 뒤 다시 열어 표시 누락을 막는다.
+            if (!el.dataset.closeWatch) {
+                el.dataset.closeWatch = 'true';
+                el.addEventListener('hide.coreui.modal', function () { el.dataset.closing = 'true'; });
+                el.addEventListener('hidden.coreui.modal', function () { delete el.dataset.closing; });
+            }
+            if (el.dataset.closing) {
+                el.addEventListener('hidden.coreui.modal', function () { window.CmpDialog.open(options); }, {once: true});
+                return;
+            }
+
             var isOneButton = !!options.isOneButton;
             var titleEl = el.querySelector('[data-dialog-title]');
             var textEl = el.querySelector('[data-dialog-text]');

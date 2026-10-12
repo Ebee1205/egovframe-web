@@ -19,4 +19,17 @@ public interface CodeService {
 	void updateCode(CodeDetailVO codeVO) throws Exception;
 
 	void deleteCode(CodeDetailVO codeVO) throws Exception;
+	/** 코드 관리 규칙 위반을 공통 응답으로 전달하기 위한 예외이다. */
+	class CodeException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		private final int status;
+		private final String resultCode;
+		private final String field;
+		public CodeException(int status, String resultCode, String message, String field) {
+			super(message); this.status = status; this.resultCode = resultCode; this.field = field;
+		}
+		public int getStatus() { return status; }
+		public String getResultCode() { return resultCode; }
+		public String getField() { return field; }
+	}
 }

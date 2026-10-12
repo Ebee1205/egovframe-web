@@ -16,7 +16,7 @@
 </head>
 <body>
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
-        
+
 
     <!-- Leftnav -->
     <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpLeftnav.jsp" />
@@ -26,7 +26,7 @@
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
-        
+
         <div class="p-3 | align-items-center">
             <c:set var="path" scope="request" value="홈/목록"/>
             <c:set var="title" scope="request" value="공통코드 목록"/>
@@ -74,7 +74,7 @@
 
                 <!-- 테이블 본문 -->
                 <div class="table-responsive">
-                    <table class="table | table-hover | table-bordered | align-middle">
+                    <table id="codeListTable" class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
                                 <th scope="col" style="width: 45px;">NO</th>
@@ -93,7 +93,7 @@
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty codes}">
-                                    <tr><td class="text-center text-body-secondary py-4" colspan="11">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="11">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="code" items="${codes}" varStatus="rowStatus">
@@ -108,9 +108,10 @@
                                             <td><c:out value="${code.status}"/></td>
                                             <td><fmt:formatDate value="${code.CDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><fmt:formatDate value="${code.UDate}" pattern="yyyy-MM-dd HH:mm"/></td>
+
                                             <td class="text-nowrap">
-                                                <button type="button" class="btn | btn-sm | btn-outline-primary" data-code-id="${code.cid}" aria-label="${code.name} 수정">수정</button>
-                                                <button type="button" class="btn | btn-sm | btn-outline-danger" data-code-id="${code.cid}" aria-label="${code.name} 삭제">삭제</button>
+                                                <button data-code-action="edit" type="button" class="btn | btn-sm | btn-outline-primary" data-code-id="${code.cid}" aria-label="<c:out value='${code.name}'/> 수정">수정</button>
+                                                <button type="button" class="btn | btn-sm | btn-outline-danger" data-code-action="delete" data-code-id="${code.cid}" aria-label="<c:out value='${code.name}'/> 삭제">삭제</button>
                                             </td>
                                         </tr>
                                     </c:forEach>
@@ -119,7 +120,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- 테이블 페이징 -->
                 <c:if test="${filterVO.totalCnt > 0 and filterVO.pageSize > 0}">
                     <nav aria-label="공통코드 목록 페이징">
@@ -145,6 +146,21 @@
     </div>
     <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
     <jsp:include page="/WEB-INF/jsp/code/CodeCreateDialog.jsp" />
+    <jsp:include page="/WEB-INF/jsp/code/CodeDetailDialog.jsp" />
+    <form id="codeDeleteForm" method="post" action="<c:url value='/code/delete.do'/>">
+        <input type="hidden" name="cid">
+    </form>
+    <c:if test="${not empty codeDeleteMessage}">
+        <div id="codeDeleteMessage" hidden><c:out value="${codeDeleteMessage}"/></div>
+        <script>
+        (function () {
+            var escaped = document.createElement('span');
+            escaped.textContent = document.getElementById('codeDeleteMessage').textContent;
+            CmpDialog.open({title: '삭제 결과', text: escaped.innerHTML, isOneButton: true,
+                okButton: function () { CmpDialog.close(); }});
+        })();
+        </script>
+    </c:if>
 </body>
 
 <!-- SheetJS -->

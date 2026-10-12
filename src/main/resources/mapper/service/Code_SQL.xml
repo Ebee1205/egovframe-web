@@ -2,6 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="codeDAO">
 
+	<!-- 수정/삭제 대상은 잠가서 존재 확인과 변경을 한 트랜잭션에서 처리한다. -->
+	<select id="selectCodeForUpdate" parameterType="CodeVO" resultMap="codeResultMap">
+		SELECT cid, p_cid, code, name, c_lvl, dsc, status, c_date, u_date
+		FROM tb_cmn_code WHERE cid = #{cid} FOR UPDATE
+	</select>
+	<select id="selectCodeChildCount" parameterType="CodeVO" resultType="int">
+		SELECT COUNT(*) FROM tb_cmn_code WHERE p_cid = #{cid}
+	</select>
+	<select id="selectDuplicateCodeCount" parameterType="CodeVO" resultType="int">
+		SELECT COUNT(*) FROM tb_cmn_code
+		WHERE code = #{code}
+		  AND (p_cid = #{parentCid, jdbcType=BIGINT}
+		       OR (p_cid IS NULL AND #{parentCid, jdbcType=BIGINT} IS NULL))
+		  AND cid &lt;&gt; #{cid}
+	</select>
 	<resultMap id="codeResultMap" type="CodeVO">
 		<id property="cid" column="cid"/>
 		<result property="parentCid" column="p_cid"/>
