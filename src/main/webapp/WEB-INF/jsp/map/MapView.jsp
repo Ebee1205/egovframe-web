@@ -20,7 +20,7 @@
     <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
-    <div class="wrapper | bg-body | main-content | d-flex | flex-column | vh-100">
+    <div class="wrapper | map-layout | bg-body | main-content | d-flex | flex-column | vh-100">
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->

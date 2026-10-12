@@ -19,7 +19,7 @@
     <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
-    <div class="wrapper | service-map-layout | d-flex | flex-column | vh-100">
+    <div class="wrapper | map-layout | service-map-layout | d-flex | flex-column | vh-100">
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
