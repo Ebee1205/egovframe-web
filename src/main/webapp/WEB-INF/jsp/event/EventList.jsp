@@ -77,8 +77,10 @@
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info">
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
-                    <button type="button" id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</button>
-                    <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">신규 등록</a>
+                    <div>                    
+	                    <a id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</a>
+	                    <a href="<c:url value='/event/create.do'/>" class="btn | btn-outline-secondary">신규 등록</a>
+                    </div>
                 </div>
 
                 <!-- 테이블 본문 -->
