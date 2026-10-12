@@ -24,5 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class FileDownloadController {
-
+// 첨부파일로 등록된 파일에 대하여 다운로드를 제공한다.
+	@RequestMapping(value = "/cmm/file/FileDown.do")
+        response.setContentType("application/x-msdownload");
 }
