@@ -3,10 +3,9 @@ package com.cmm.service.file;
 import java.io.Serializable;
 import java.util.Date;
 
+/** Metadata corresponding to one tb_file row; storage paths are never client input. */
 public class FileVO implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
     private Long fileId;
     private String fileStreCours;
     private String streFileNm;
@@ -15,68 +14,60 @@ public class FileVO implements Serializable {
     private String fileCn;
     private Long fileSize;
     private Date cDate;
+    private boolean imagesOnly;
 
-    public Long getFileId() {
-        return fileId;
+    public Long getFileId() { 
+    	return fileId; 
     }
-
-    public void setFileId(Long fileId) {
-        this.fileId = fileId;
+    public void setFileId(Long value) {
+    	fileId = value; 
     }
-
-    public String getFileStreCours() {
-        return fileStreCours;
+    public String getFileStreCours() { 
+    	return fileStreCours; 
     }
-
-    public void setFileStreCours(String fileStreCours) {
-        this.fileStreCours = fileStreCours;
+    public void setFileStreCours(String value) { 
+    	fileStreCours = value; 
     }
-
-    public String getStreFileNm() {
-        return streFileNm;
+    public String getStreFileNm() { 
+    	return streFileNm; 
+	}
+    public void setStreFileNm(String value) { 
+    	streFileNm = value; 
     }
-
-    public void setStreFileNm(String streFileNm) {
-        this.streFileNm = streFileNm;
+    public String getOrignlFileNm() { 
+    	return orignlFileNm; 
     }
-
-    public String getOrignlFileNm() {
-        return orignlFileNm;
+    public void setOrignlFileNm(String value) { 
+    	orignlFileNm = value; 
     }
-
-    public void setOrignlFileNm(String orignlFileNm) {
-        this.orignlFileNm = orignlFileNm;
+    public String getFileExtsn() { 
+    	return fileExtsn; 
     }
-
-    public String getFileExtsn() {
-        return fileExtsn;
+    public void setFileExtsn(String value) { 
+    	fileExtsn = value; 
     }
-
-    public void setFileExtsn(String fileExtsn) {
-        this.fileExtsn = fileExtsn;
+    public String getFileCn() { 
+    	return fileCn; 
     }
-
-    public String getFileCn() {
-        return fileCn;
+    public void setFileCn(String value) { 
+    	fileCn = value; 
     }
-
-    public void setFileCn(String fileCn) {
-        this.fileCn = fileCn;
+    public Long getFileSize() { 
+    	return fileSize; 
     }
-
-    public Long getFileSize() {
-        return fileSize;
+    public void setFileSize(Long value) { 
+    	fileSize = value; 
     }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
+    public Date getCDate() { 
+    	return cDate; 
     }
-
-    public Date getCDate() {
-        return cDate;
+    public void setCDate(Date value) { 
+    	cDate = value; 
     }
-
-    public void setCDate(Date cDate) {
-        this.cDate = cDate;
+    public boolean isImagesOnly() { 
+    	return imagesOnly; 
+    }
+    public void setImagesOnly(boolean value) { 
+    	imagesOnly = value; 
     }
 }

@@ -4,12 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- MULTIPART RESOLVER (id는 반드시 multipartResolver) -->
-    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <property name="maxUploadSize" value="104857600" />        <!-- 요청 전체 100MB -->
-        <property name="maxUploadSizePerFile" value="52428800" />  <!-- 파일당 50MB (필요 시 조정) -->
-        <property name="maxInMemorySize" value="10240" />          <!-- 10KB 초과 시 임시파일 -->
-        <property name="defaultEncoding" value="UTF-8" />
-    </bean>
+    <!-- multipartResolver is configured in com.cmm.web.MultipartResolver. -->
 
 </beans>

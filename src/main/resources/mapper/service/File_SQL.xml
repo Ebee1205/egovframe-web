@@ -30,10 +30,7 @@
     </sql>
     <select id="selectFileInfs" resultMap="fileMap">
         SELECT <include refid="columns"/> FROM tb_file <include refid="filter"/>
-        ORDER BY file_id DESC LIMIT #{pageSize} OFFSET #{firstIndex}
-    </select>
-    <select id="selectFileCount" resultType="long">
-        SELECT COUNT(*) FROM tb_file <include refid="filter"/>
+        ORDER BY file_id DESC
     </select>
     <insert id="insertFileInf" useGeneratedKeys="true" keyProperty="fileId" keyColumn="file_id">
         INSERT INTO tb_file (file_stre_cours, stre_file_nm, orignl_file_nm, file_extsn, file_cn, file_size, c_date)

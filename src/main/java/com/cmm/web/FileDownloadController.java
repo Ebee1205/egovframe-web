@@ -1,30 +1,51 @@
 package com.cmm.web;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLEncoder;
-import java.util.Base64;
-import java.util.Map;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.cmm.service.file.FileMngService;
+import com.cmm.service.file.FileVO;
+import com.cmm.service.file.impl.FileMngUtil;
 
 @Controller
 public class FileDownloadController {
-// 첨부파일로 등록된 파일에 대하여 다운로드를 제공한다.
-	@RequestMapping(value = "/cmm/file/FileDown.do")
-        response.setContentType("application/x-msdownload");
+    private final FileMngService service;
+    public FileDownloadController(FileMngService service) { this.service = service; }
+
+    @RequestMapping(value = {"/cmm/file/download.do"}, method = RequestMethod.GET)
+    public void download(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws IOException {
+        FileVO query = new FileVO(); query.setFileId(fileId);
+        FileVO file = service.selectFileInf(query);
+        // Open before committing response headers so missing objects still get a JSON error.
+        try (InputStream input = service.openFile(file)) {
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", ContentDisposition.attachment()
+                    .filename(file.getOrignlFileNm(), StandardCharsets.UTF_8).build().toString());
+            response.setHeader("X-Content-Type-Options", "nosniff");
+            response.setHeader("Cache-Control", "private, no-store");
+            StreamUtils.copy(input, response.getOutputStream());
+            response.flushBuffer();
+        }
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handle(Exception exception, HttpServletResponse response) throws IOException {
+        if (response.isCommitted()) {
+            if (exception instanceof IOException) { throw (IOException) exception; }
+            throw new IOException("Download failed after response was committed.", exception);
+        }
+        response.reset();
+        return FileMngUtil.errorResponse(exception);
+    }
 }

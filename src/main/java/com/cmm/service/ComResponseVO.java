@@ -36,6 +36,12 @@ public final class ComResponseVO<T> {
         return new ComResponseVO<>(null, Collections.emptyList(), resultCode, message);
     }
 
+    /** Failure for a single field without requiring a Spring BindingResult. */
+    public static <T> ComResponseVO<T> fieldFailure(String resultCode, String message,
+            String field, String errorCode, String fieldMessage) {
+        return new ComResponseVO<>(null,
+                Collections.singletonList(new FieldError(field, errorCode, fieldMessage)), resultCode, message);
+    }
     /** Preserve every field error, including multiple errors on the same field. */
     public static ComResponseVO<Void> validationFailure(Errors errors, MessageSource messageSource,
             Locale locale, String resultCode, String defaultMessage) {
