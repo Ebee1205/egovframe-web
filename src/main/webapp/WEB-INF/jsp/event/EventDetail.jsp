@@ -76,7 +76,7 @@
                         <input type="text" class="form-control" id="eDate" name="EDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                 </div>
-        
+
                 <!-- <div class="mb-3">
                     <label for="exampleFormControlTextarea1" class="form-label">이벤트 지역</label>
                     <select 
@@ -101,7 +101,12 @@
                     <label for="dsc" class="form-label">이벤트 내용</label>
                     <textarea class="form-control" id="dsc" name="dsc" rows="3" required><c:out value="${event.dsc}"/></textarea>
                 </div>
-
+                
+                <div class="input-group mb-3">
+				  <input type="file" class="form-control" id="inputGroupFile02">
+				  <label class="input-group-text" for="inputGroupFile02">업로드</label>
+				</div>
+        
                 <div>
                     <label for="status" class="form-label">이벤트 상태</label>
                     <select 

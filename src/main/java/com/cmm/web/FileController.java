@@ -8,10 +8,8 @@ import com.cmm.service.file.FileValidator;
 @Controller
 public class FileController {
     protected final FileMngService fileMngService;
-    protected final FileValidator fileValidator;
 
-    public FileController(FileMngService fileMngService, FileValidator fileValidator) {
+    public FileController(FileMngService fileMngService) {
         this.fileMngService = fileMngService;
-        this.fileValidator = fileValidator;
     }
 }
