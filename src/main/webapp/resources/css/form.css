@@ -190,6 +190,15 @@
     line-height: 1.6;
 }
 
+.file-input-box .file-upload .upload-status {
+    width: 100%;
+    margin: 0;
+}
+
+.file-input-box .upload-status:empty {
+    display: none;
+}
+
 @media (max-width: 576px) {
     .file-input-box .file-upload {
         padding: 24px 16px;

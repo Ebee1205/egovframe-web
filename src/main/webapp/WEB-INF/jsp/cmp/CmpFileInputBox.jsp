@@ -58,10 +58,9 @@
         <div class="upload-actions">
             <button type="button" class="btn | btn-secondary" data-role="select" aria-controls="<c:out value='${fibId}'/>Input">파일 선택</button>
 
-            <button type="button" class="btn | btn-outline-secondary" data-role="upload" hidden disabled>업로드</button>
-            <button type="button" class="btn | btn-outline-secondary" data-role="retry" hidden>다시시도</button>
         </div>
         <ul data-role="selection" class="upload-selection d-flex flex-wrap gap-2" role="list" aria-label="업로드할 파일" hidden></ul>
+        <p data-role="status" id="<c:out value='${fibId}'/>Status" class="form-text upload-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
     <div class="file-list">
         <div class="upload-top"><span>첨부파일 <span data-role="count">0</span>개</span></div>
@@ -107,7 +106,6 @@
             </c:otherwise>
         </c:choose>
     </div>
-    <p data-role="status" id="<c:out value='${fibId}'/>Status" class="form-text upload-status" role="status" aria-live="polite" aria-atomic="true"></p>
 </div>
 <script>
 (function () {
@@ -122,7 +120,6 @@
 
     var commonPicker = role('picker');
     var selectButton = role('select');
-    var retryButton = role('retry');
     var pendingFiles = [];
     var activeBatch = null;
     var pendingSequence = 0;
@@ -179,7 +176,6 @@
         });
         selection.hidden = selection.children.length === 0;
         selectButton.disabled = commonPicker.disabled;
-        retryButton.hidden = selection.hidden || commonPicker.disabled;
     }
     selection.addEventListener('click', function (event) {
         var cancel = event.target.closest('[data-role="cancel"]');
@@ -205,8 +201,25 @@
         });
     }
     selectButton.addEventListener('click', function () { commonPicker.click(); });
-    retryButton.addEventListener('click', function () { role('upload').click(); });
+    function rejectSelection(message) {
+        // 허용되지 않은 파일을 input과 대기 목록 모두에서 제거한다.
+        commonPicker.value = '';
+        pendingFiles = [];
+        renderSelection();
+        var status = role('status');
+        status.textContent = message;
+        status.classList.add('text-danger');
+        status.classList.remove('text-body-secondary');
+    }
     commonPicker.addEventListener('change', function () {
+        if (commonPicker.disabled) { return; }
+        var rejectedNames = Array.from(commonPicker.files).filter(function (file) {
+            return !accepts(file);
+        }).map(function (file) { return file.name; });
+        if (rejectedNames.length) {
+            rejectSelection('허용되지 않는 파일 형식입니다: ' + rejectedNames.join(', '));
+            return;
+        }
         pendingFiles = Array.from(commonPicker.files).map(function (file) {
             return {key: ++pendingSequence, file: file, cancelled: false};
         });
@@ -244,7 +257,6 @@
     if (box.getAttribute('data-multiple') === 'true') {
         var list = role('list');
         var pickerMultiple = role('picker');
-        var uploadMultiple = role('upload');
         var emptyMultiple = role('empty');
         var statusMultiple = role('status');
         var maxSizeMultiple = Number(box.getAttribute('data-max-size'));
@@ -263,7 +275,6 @@
             count.textContent = fileRows.length;
             emptyMultiple.hidden = fileRows.length > 0;
             emptyMultiple.classList.toggle('d-none', fileRows.length > 0);
-            uploadMultiple.disabled = busyMultiple || pickerMultiple.files.length === 0;
             Array.prototype.forEach.call(fileRows, function (row) {
                 row.querySelector('[data-role="remove"]').disabled = busyMultiple;
             });
@@ -273,7 +284,6 @@
             busyMultiple = value;
             box.setAttribute('aria-busy', String(value));
             pickerMultiple.disabled = value;
-            uploadMultiple.textContent = value ? '처리 중…' : '업로드';
             if (value) {
                 var selector = 'button[type="submit"]';
                 var submitButtons = form
@@ -387,14 +397,14 @@
 
         pickerMultiple.addEventListener('change', function () {
             renderMultiple();
-            if (pickerMultiple.files.length) { uploadMultiple.click(); }
+            if (pickerMultiple.files.length) { uploadMultipleFiles(); }
         });
-        uploadMultiple.addEventListener('click', async function () {
+        async function uploadMultipleFiles() {
             if (busyMultiple || !pickerMultiple.files.length) { return; }
             var selectedFiles = Array.from(pickerMultiple.files);
             for (var i = 0; i < selectedFiles.length; i++) {
                 if (!accepts(selectedFiles[i])) {
-                    tellMultiple('허용되지 않는 파일 형식입니다: ' + selectedFiles[i].name, true);
+                    rejectSelection('허용되지 않는 파일 형식입니다: ' + selectedFiles[i].name);
                     return;
                 }
                 if (selectedFiles[i].size === 0 || (maxSizeMultiple > 0 && selectedFiles[i].size > maxSizeMultiple)) {
@@ -439,12 +449,12 @@
             } catch (error) {
                 pendingFiles = pendingFiles.filter(function (entry) { return !entry.cancelled; });
                 syncPicker();
-                tellMultiple(error.message || '파일 업로드에 실패했습니다. 다시 업로드하거나 X 버튼으로 취소해주세요.', true);
+                tellMultiple(error.message || '파일 업로드에 실패했습니다. 파일 선택 버튼으로 다시 선택하거나 X 버튼으로 취소해주세요.', true);
             } finally {
                 activeBatch = null;
                 setBusyMultiple(false);
             }
-        });
+        }
 
         list.addEventListener('click', function (event) {
             var button = event.target.closest('[data-role="remove"]');
@@ -476,7 +486,7 @@
                 if (busyMultiple || pickerMultiple.files.length) {
                     event.preventDefault();
                     event.stopImmediatePropagation();
-                    tellMultiple(busyMultiple ? '파일 처리가 끝난 후 저장해주세요.' : '업로드하지 못한 파일을 다시 업로드하거나 X 버튼으로 취소해주세요.', true);
+                    tellMultiple(busyMultiple ? '파일 처리가 끝난 후 저장해주세요.' : '업로드하지 못한 파일을 파일 선택 버튼으로 다시 선택하거나 X 버튼으로 취소해주세요.', true);
                 }
             }, true);
         }
@@ -486,7 +496,6 @@
 
     var idInput = role('id');
     var picker = role('picker');
-    var uploadButton = role('upload');
     var removeButton = role('remove');
     var undoButton = role('undo');
     var currentRow = role('current');
@@ -495,9 +504,8 @@
     var download = role('download');
     var status = role('status');
     // The undo button is optional; validate the required elements before binding any listener.
-    if (!idInput || !picker || !uploadButton || !removeButton || !currentRow || !emptyRow || !name || !download || !status) {
+    if (!idInput || !picker || !removeButton || !currentRow || !emptyRow || !name || !download || !status) {
         if (status) { status.textContent = '첨부파일 화면 구성을 확인해주세요.'; }
-        if (uploadButton) { uploadButton.disabled = true; }
         console.error('CmpFileInputBox: required elements are missing.');
         return;
     }
@@ -533,7 +541,6 @@
         if (current) { download.setAttribute('href', current.downloadUrl); }
         else { download.removeAttribute('href'); }
         removeButton.disabled = busy || !current;
-        uploadButton.disabled = busy || picker.files.length === 0;
         if (undoButton) {
             undoButton.hidden = idInput.value === (original ? String(original.fileId) : '');
             undoButton.disabled = busy;
@@ -550,7 +557,6 @@
         busy = value;
         box.setAttribute('aria-busy', String(value));
         picker.disabled = value;
-        uploadButton.textContent = value ? '처리 중…' : '업로드';
         if (value) {
             var selector = 'button[type="submit"]';
             var submitButtons = form
@@ -621,14 +627,14 @@
 
     picker.addEventListener('change', function () {
         render();
-        if (picker.files.length) { uploadButton.click(); }
+        if (picker.files.length) { uploadSingleFile(); }
     });
 
-    uploadButton.addEventListener('click', async function () {
+    async function uploadSingleFile() {
         if (busy || !picker.files.length) { return; }
         var file = picker.files[0];
         if (!accepts(file)) {
-            tell('허용되지 않는 파일 형식입니다: ' + file.name, true);
+            rejectSelection('허용되지 않는 파일 형식입니다: ' + file.name);
             return;
         }
         if (file.size === 0 || (maxSize > 0 && file.size > maxSize)) {
@@ -674,12 +680,12 @@
         } catch (error) {
             pendingFiles = pendingFiles.filter(function (entry) { return !entry.cancelled; });
             syncPicker();
-            tell(error.message || '파일 업로드에 실패했습니다. 다시 업로드하거나 X 버튼으로 취소해주세요.', true);
+            tell(error.message || '파일 업로드에 실패했습니다. 파일 선택 버튼으로 다시 선택하거나 X 버튼으로 취소해주세요.', true);
         } finally {
             activeBatch = null;
             setBusy(false);
         }
-    });
+    }
 
     removeButton.addEventListener('click', function () {
         if (busy || !current) { return; }
@@ -720,7 +726,7 @@
             if (busy || picker.files.length) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                tell(busy ? '파일 처리가 끝난 후 저장해주세요.' : '업로드하지 못한 파일을 다시 업로드하거나 X 버튼으로 취소해주세요.', true);
+                tell(busy ? '파일 처리가 끝난 후 저장해주세요.' : '업로드하지 못한 파일을 파일 선택 버튼으로 다시 선택하거나 X 버튼으로 취소해주세요.', true);
             }
         }, true);
     }
