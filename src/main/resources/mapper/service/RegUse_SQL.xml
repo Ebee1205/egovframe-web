@@ -11,13 +11,18 @@
 		<result property="name" column="name"/>
 	</resultMap>
 
-	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 행정구역 전체를 조회 -->
-	<select id="selectRegDetail" parameterType="RegFilterVO" resultMap="regFilterResultMap">
+	<!-- 선택한 루트의 바로 아래 행정구역만 조회. 루트 미선택 시 빈 목록. -->
+	<select id="selectCmmRegDetail" parameterType="RegFilterVO" resultMap="regFilterResultMap">
 		SELECT c.reg_id, c.p_reg_id, c.code, c.name,
 			p.code AS p_code, p.name AS p_name
 		FROM tb_reg c
 		JOIN tb_reg p ON p.reg_id = c.p_reg_id
-		<where>
+        <where>
+            p.p_reg_id IS NULL
+            AND p.status = 'Y'
+            <if test="(parentCode == null or parentCode == '') and parentRegId == null">
+                AND 1 = 0
+            </if>
 			<if test="parentCode != null and parentCode != ''">
 				AND p.code = #{parentCode}
 			</if>

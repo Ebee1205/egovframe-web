@@ -29,9 +29,13 @@ public class RegServiceImpl implements RegService {
     @Override
     public int selectRegListCnt(RegDetailVO vo) throws Exception { return regDAO.selectRegListCnt(vo); }
     @Override
-    public List<RegFilterVO> selectRegDetail(RegFilterVO vo) throws Exception { return regOptionDAO.selectRegDetail(vo); }
+    public List<RegFilterVO> selectCmmRegDetail(RegFilterVO vo) throws Exception { return regOptionDAO.selectCmmRegDetail(vo); }
     @Override
-    public List<RegFilterVO> selectRegRoot() throws Exception { return regOptionDAO.selectRegRoot(new RegFilterVO()); }
+    public List<RegFilterVO> selectRegDetail(RegFilterVO vo) throws Exception { return selectCmmRegDetail(vo); }
+    @Override
+    public List<RegFilterVO> selectRegRoot() throws Exception { return selectRegRoot(new RegFilterVO()); }
+    @Override
+    public List<RegFilterVO> selectRegRoot(RegFilterVO vo) throws Exception { return regOptionDAO.selectRegRoot(vo); }
     @Override
     public List<RegFilterVO> selectRegParents() throws Exception { return regOptionDAO.selectRegParents(new RegFilterVO()); }
     @Override

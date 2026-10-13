@@ -10,9 +10,14 @@ public interface RegService {
 
 	int selectRegListCnt(RegDetailVO regVO) throws Exception;
 
+	/** 루트 코드 또는 ID를 기준으로 바로 아래 사용 중인 행정구역을 조회한다. */
+	List<RegFilterVO> selectCmmRegDetail(RegFilterVO filterVO) throws Exception;
+
 	List<RegFilterVO> selectRegDetail(RegFilterVO filterVO) throws Exception;
 
 	List<RegFilterVO> selectRegRoot() throws Exception;
+
+	List<RegFilterVO> selectRegRoot(RegFilterVO filterVO) throws Exception;
 
 	List<RegFilterVO> selectRegParents() throws Exception;
 

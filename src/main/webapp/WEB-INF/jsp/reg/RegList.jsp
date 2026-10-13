@@ -41,7 +41,7 @@
                         placeholder="상위 행정구역 선택"
                         id="parentRegId" name="parentRegId" autocomplete="off">
                         <option value="">전체</option>
-                        <c:forEach var="code" items="${parentRegs}">
+                        <c:forEach var="code" items="${rootRegs}">
                             <option value="${code.reg_id}" ${code.reg_id == filterVO.parentRegId ? 'selected' : ''}>
                                 <c:out value="${code.code}"/> - <c:out value="${code.name}"/>
                             </option>

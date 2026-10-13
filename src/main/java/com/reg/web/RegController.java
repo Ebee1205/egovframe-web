@@ -60,6 +60,7 @@ public class RegController {
 	public String regList(RegDetailVO filterVO, Model model) throws Exception {
 		model.addAttribute("regs", regService.selectRegList(filterVO));
 		model.addAttribute("parentRegs", regService.selectRegParents());
+		model.addAttribute("rootRegs", regService.selectRegRoot());
 		model.addAttribute("filterVO", filterVO);
 		model.addAttribute("totalPage", filterVO.getPageSize() > 0 && filterVO.getTotalCnt() > 0
 				? (filterVO.getTotalCnt() + filterVO.getPageSize() - 1) / filterVO.getPageSize() : 0);
