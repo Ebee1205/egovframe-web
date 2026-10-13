@@ -32,6 +32,7 @@ import com.cmm.service.file.FileVO;
 import org.springframework.beans.factory.annotation.Value;
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
+import com.reg.service.RegService;
 
 import com.event.service.EventVO;
 import com.event.service.EventFilterVO;
@@ -48,6 +49,7 @@ public class EventController {
 	private final EventService eventService;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
+	private final RegService regService;
 	private final FileMngService fileMngService;
 	@Value("${Globals.fileUpload.Extensions:}")
 	private String fileExtensions;
@@ -59,11 +61,12 @@ public class EventController {
 	private DefaultValidatorFactory validatorFactory;
 
 	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService,
-			FileMngService fileMngService) {
+			FileMngService fileMngService, RegService regService) {
 		this.eventService = eventService;
 		this.eventCmtService = eventCmtService;
 		this.codeService = codeService;
 		this.fileMngService = fileMngService;
+		this.regService = regService;
 	}
 
 	/** 이벤트 첨부 업로드는 업무 서비스에서 event 접두사를 지정한다. */
@@ -99,6 +102,8 @@ public class EventController {
 	@RequestMapping("/event/list.do")
 	public String eventList(EventFilterVO filterVO, Model model) throws Exception {
 		model.addAttribute("events", eventService.selectEventList(filterVO));
+		model.addAttribute("rootRegs", regService.selectRegRoot());
+		model.addAttribute("childRegs", regService.selectRegParents());
 
 		CodeFilterVO eventCtgFilter = new CodeFilterVO();
 		eventCtgFilter.setParentCode("EVENT_CTG_ROOT");

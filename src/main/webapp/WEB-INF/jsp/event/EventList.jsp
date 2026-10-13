@@ -35,42 +35,48 @@
 
             <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/event/list.do'/>">
                 <input type="hidden" name="pageIndex" value="1" />
-                <div class="d-flex | flex-wrap | align-items-center | gap-2">
-                    <select 
-                        class="form-select | input-box" 
-                        placeholder="카테고리 선택"
-                        id="ctg" name="ctg">
-                        <option value="">전체</option>
+
+                <div class="row | m-0 | gap-2 | mb-2">
+                    <select class="form-select | input-box" id="ctg" name="ctg">
+                        <option value="">전체 분류</option>
                         <c:forEach var="eventCtg" items="${eventCtgs}">
                             <option value="${eventCtg.code}" ${eventCtg.code == filterVO.ctg ? 'selected' : ''}>
                                 <c:out value="${eventCtg.name}"/>
                             </option>
                         </c:forEach>
                     </select>
-
-                    <select 
-                        class="form-select | input-box" 
-                        placeholder="지역 선택"
-                        id="region" name="region">
-                        <option value="">전체</option>
-                        <c:forEach var="reg" items="${regs}">
-                            <option value="${reg.code}" ${reg.code == filterVO.reg ? 'selected' : ''}>
+                    <select class="form-select | input-box" id="parentRegId" name="parentRegId" aria-label="시도 선택">
+                        <option value="">전체 지역</option>
+                        <c:forEach var="reg" items="${rootRegs}">
+                            <option value="${reg.reg_id}" ${reg.reg_id == filterVO.parentRegId ? 'selected' : ''}>
                                 <c:out value="${reg.name}"/>
                             </option>
                         </c:forEach>
                     </select>
+                    <select class="form-select | input-box" id="reg_id" name="reg_id" aria-label="시군구 선택"
+                        ${empty filterVO.parentRegId ? 'disabled' : ''}>
+                        <option value="">전체 시(구)</option>
+                        <c:forEach var="reg" items="${childRegs}">
+                            <c:if test="${not empty reg.parentRegId}">
+                                <option value="${reg.reg_id}" data-parent-id="${reg.parentRegId}"
+                                    ${reg.reg_id == filterVO.reg_id ? 'selected' : ''}>
+                                    <c:out value="${reg.name}"/>
+                                </option>
+                            </c:if>
+                        </c:forEach>
+                    </select>
+                </div>
 
+                <div class="d-flex | justify-content-between | align-items-center | gap-2 | w-100">
                     <input
-                        class="form-control | input-box" 
+                        class="form-control | input-box"
                         type="text"
                         placeholder="제목 검색"
                         id="title" name="title"
                         value="${filterVO.title}"
-                    ></input>
+                    >
+                    <button type="submit" class="btn | btn-primary | flex-shrink-0">검색</button>
                 </div>
-
-                <!-- 우측: 검색 버튼 -->
-                <button type="submit" class="btn | btn-primary">검색</button>
             </form>
 
             <div class="table-container">
@@ -110,7 +116,7 @@
                                     <c:forEach var="event" items="${events}" varStatus="rowStatus">
                                         <tr>
                                             <td class="text-center"><c:out value="${filterVO.firstIndex + rowStatus.count}"/></td>
-                                            <td><c:out value="${event.reg_id}"/></td>
+                                            <td><c:out value="${event.regName}"/></td>
 
                                             <td><c:out value="${event.title}"/></td>
                                             <td>
@@ -160,6 +166,8 @@
                                                 <c:param name='pageIndex' value='${i}'/>
                                                 <c:param name='title' value='${filterVO.title}'/>
                                                 <c:param name='ctg' value='${filterVO.ctg}'/>
+                                                <c:param name='reg_id' value='${filterVO.reg_id}'/>
+                                                <c:param name='parentRegId' value='${filterVO.parentRegId}'/>
                                               </c:url>">
                                         <c:out value="${i}"/>
                                     </a>
@@ -187,6 +195,27 @@
     const btn = document.getElementById('btnExcel');
     const form = document.getElementById('searchForm');
     const listUrl = '<c:url value="/event/list.do"/>';
+    const parentRegion = document.getElementById('parentRegId');
+    const childRegion = document.getElementById('reg_id');
+
+    function updateChildRegions(resetSelection) {
+        const parentId = parentRegion.value;
+        childRegion.disabled = !parentId;
+        if (resetSelection) { childRegion.value = ''; }
+        Array.from(childRegion.options).forEach(function (option) {
+            if (option.value) {
+                option.hidden = !parentId || option.dataset.parentId !== parentId;
+            }
+        });
+        if (childRegion.selectedOptions.length && childRegion.selectedOptions[0].hidden) {
+            childRegion.value = '';
+        }
+    }
+
+    parentRegion.addEventListener('change', function () {
+        updateChildRegions(true);
+    });
+    updateChildRegions(false);
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
