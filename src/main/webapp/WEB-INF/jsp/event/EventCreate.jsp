@@ -33,7 +33,6 @@
                 <input type="hidden" name="rid" value="1">
                 <input type="hidden" name="lat" value="">
                 <input type="hidden" name="lon" value="">
-                <input type="hidden" name="fileId" value="">
                 <div>
                     <label for="title" class="form-label">이벤트 제목</label>
                     <form:input path="title" id="title" cssClass="form-control" maxlength="300" required="required" aria-describedby="titleError"/>
@@ -68,6 +67,17 @@
                     <label for="dsc" class="form-label">이벤트 내용</label>
                     <form:textarea path="dsc" id="dsc" cssClass="form-control" rows="3" maxlength="1000" required="required" aria-describedby="dscError"/>
                     <form:errors path="dsc" id="dscError" cssClass="text-danger" element="div" htmlEscape="true"/>
+                </div>
+                <div>
+                    <jsp:include page="/WEB-INF/jsp/cmp/CmpFileInputBox.jsp">
+                        <jsp:param name="id" value="eventAttachment" />
+                        <jsp:param name="uploadUrl" value="/event/file/upload.do" />
+                        <jsp:param name="name" value="fileIds" />
+                        <jsp:param name="multiple" value="true" />
+                        <jsp:param name="label" value="첨부 파일" />
+                        <jsp:param name="accept" value="${fileAccept}" />
+                        <jsp:param name="maxSize" value="${fileMaxSize}" />
+                    </jsp:include>
                 </div>
                 <div>
                     <label for="status" class="form-label">이벤트 상태</label>

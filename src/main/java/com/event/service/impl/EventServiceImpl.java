@@ -2,6 +2,9 @@ package com.event.service.impl;
 
 import java.util.List;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.springframework.web.multipart.MultipartFile;
 import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.FileVO;
@@ -32,7 +35,11 @@ public class EventServiceImpl implements EventService {
 	}
 	@Override
 	public EventVO selectEvent(EventVO eventVO) throws Exception {
-		return eventDAO.selectEvent(eventVO);
+		EventVO event = eventDAO.selectEvent(eventVO);
+		if (event != null) {
+			event.setAttachedFiles(eventDAO.selectEventFiles(event.getEid()));
+		}
+		return event;
 	}
 
 	@Override
@@ -54,13 +61,35 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void insertEvent(EventVO eventVO) throws Exception {
 		eventDAO.insertEvent(eventVO);
+		insertEventFiles(eventVO);
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void updateEvent(EventVO eventVO) throws Exception {
 		eventDAO.updateEvent(eventVO);
+		eventDAO.deleteEventFiles(eventVO);
+		insertEventFiles(eventVO);
+	}
+
+	private void insertEventFiles(EventVO eventVO) throws Exception {
+		List<Long> fileIds = eventVO.getFileIds();
+		if (fileIds == null || fileIds.isEmpty()) {
+			return;
+		}
+		Set<Long> uniqueFileIds = new LinkedHashSet<Long>();
+		for (Long fileId : fileIds) {
+			if (fileId != null) {
+				uniqueFileIds.add(fileId);
+			}
+		}
+		if (!uniqueFileIds.isEmpty()) {
+			eventVO.setFileIds(new ArrayList<Long>(uniqueFileIds));
+			eventDAO.insertEventFiles(eventVO);
+		}
 	}
 
 	@Override
@@ -69,6 +98,7 @@ public class EventServiceImpl implements EventService {
 		eventCmtDAO.clearEventCmtParentsByEid(eventVO.getEid());
 		eventCmtDAO.deleteEventCmtsByEid(eventVO.getEid());
 		eventDAO.deleteEventTags(eventVO);
+		eventDAO.deleteEventFiles(eventVO);
 		eventDAO.deleteEvent(eventVO);
 	}
 }

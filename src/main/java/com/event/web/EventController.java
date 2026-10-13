@@ -22,12 +22,12 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 import com.cmm.service.ComResponseVO;
+import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.impl.FileMngUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.servlet.http.HttpServletRequest;
-import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.FileVO;
 import org.springframework.beans.factory.annotation.Value;
 import com.code.service.CodeFilterVO;
@@ -58,7 +58,8 @@ public class EventController {
 	@Autowired
 	private DefaultValidatorFactory validatorFactory;
 
-	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService, FileMngService fileMngService) {
+	public EventController(EventService eventService, EventCmtService eventCmtService, CodeService codeService,
+			FileMngService fileMngService) {
 		this.eventService = eventService;
 		this.eventCmtService = eventCmtService;
 		this.codeService = codeService;
@@ -91,7 +92,7 @@ public class EventController {
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		if ("eventCreateVO".equals(binder.getObjectName())) {
-			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "createdBy");
+			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "createdBy", "fileIds");
 		}
 	}
 
@@ -127,11 +128,7 @@ public class EventController {
 			throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다.");
 		}
 		model.addAttribute("event", event);
-		if (event.getFileId() != null) {
-			FileVO file = new FileVO();
-			file.setFileId(event.getFileId());
-			model.addAttribute("eventFile", fileMngService.selectFileInf(file));
-		}
+		model.addAttribute("eventFiles", event.getAttachedFiles());
 		model.addAttribute("fileAccept", fileExtensions.replaceAll("\\.(?=[^.]+)", ",.").replaceFirst("^,", ""));
 		model.addAttribute("fileMaxSize", fileMaxSize);
 
@@ -182,6 +179,21 @@ public class EventController {
 		CodeFilterVO tagFilter = new CodeFilterVO();
 		tagFilter.setParentCode("TAG_ROOT");
 		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
+		EventVO formEvent = (EventVO) model.asMap().get("eventCreateVO");
+		List<FileVO> eventFiles = new java.util.ArrayList<FileVO>();
+		for (Long fileId : formEvent.getFileIds()) {
+			if (fileId != null) {
+				FileVO query = new FileVO();
+				query.setFileId(fileId);
+				FileVO file = fileMngService.selectFileInf(query);
+				if (file != null) {
+					eventFiles.add(file);
+				}
+			}
+		}
+		model.addAttribute("eventFiles", eventFiles);
+		model.addAttribute("fileAccept", fileExtensions.replaceAll("\\.(?=[^.]+)", ",.").replaceFirst("^,", ""));
+		model.addAttribute("fileMaxSize", fileMaxSize);
 
 		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
 	}

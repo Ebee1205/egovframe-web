@@ -186,8 +186,6 @@ CREATE TABLE tb_event (
 
     geom        GEOMETRY,
 
-    file_id     BIGINT,
-
     created_by  BIGINT NOT NULL,
 
     c_date      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -199,9 +197,24 @@ CREATE TABLE tb_event (
 
     CONSTRAINT fk_tb_event_user
         FOREIGN KEY (created_by)
-        REFERENCES tb_users (uid),
+        REFERENCES tb_users (uid)
 
-    CONSTRAINT fk_tb_event_file
+);
+
+CREATE TABLE mtb_event_file (
+    eid         BIGINT NOT NULL,
+    file_id     BIGINT NOT NULL,
+    c_date      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_mtb_event_file
+        PRIMARY KEY (eid, file_id),
+
+    CONSTRAINT fk_mtb_event_file_event
+        FOREIGN KEY (eid)
+        REFERENCES tb_event (eid)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_mtb_event_file_file
         FOREIGN KEY (file_id)
         REFERENCES tb_file (file_id)
 );
@@ -286,8 +299,8 @@ CREATE INDEX ix_tb_event_rid
 CREATE INDEX ix_tb_event_created_by
     ON tb_event (created_by);
 
-CREATE INDEX ix_tb_event_file_id
-    ON tb_event (file_id);
+CREATE INDEX ix_mtb_event_file_file_id
+    ON mtb_event_file (file_id);
 
 CREATE INDEX ix_tb_event_date
     ON tb_event (s_date, e_date);

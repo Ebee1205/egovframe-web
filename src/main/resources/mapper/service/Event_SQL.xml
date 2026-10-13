@@ -14,16 +14,26 @@
 		<result property="address" column="address"/>
 		<result property="lat" column="lat"/>
 		<result property="lon" column="lon"/>
-		<result property="fileId" column="file_id"/>
 		<result property="createdBy" column="created_by"/>
 		<result property="createdByNickname" column="created_by_nickname"/>
 		<result property="cDate" column="c_date"/>
 		<result property="uDate" column="u_date"/>
 	</resultMap>
 
+	<resultMap id="eventFileResultMap" type="com.cmm.service.file.FileVO">
+		<id property="fileId" column="file_id"/>
+		<result property="fileStreCours" column="file_stre_cours"/>
+		<result property="streFileNm" column="stre_file_nm"/>
+		<result property="orignlFileNm" column="orignl_file_nm"/>
+		<result property="fileExtsn" column="file_extsn"/>
+		<result property="fileCn" column="file_cn"/>
+		<result property="fileSize" column="file_size"/>
+		<result property="cDate" column="c_date"/>
+	</resultMap>
+
 	<sql id="eventColumns">
 		e.eid, e.title, e.ctg, e.status, e.rid, e.s_date, e.e_date, e.dsc, e.address, e.lat, e.lon,
-		e.file_id, e.created_by, e.c_date, e.u_date,
+		e.created_by, e.c_date, e.u_date,
 		COALESCE(NULLIF(u.nickname, ''), '알 수 없는 사용자') AS created_by_nickname
 	</sql>
 
@@ -65,13 +75,22 @@
 		<include refid="eventListWhere"/>
 	</select>
 
+	<select id="selectEventFiles" parameterType="long" resultMap="eventFileResultMap">
+		SELECT f.file_id, f.file_stre_cours, f.stre_file_nm, f.orignl_file_nm,
+			f.file_extsn, f.file_cn, f.file_size, f.c_date
+		FROM mtb_event_file ef
+		JOIN tb_file f ON f.file_id = ef.file_id
+		WHERE ef.eid = #{value}
+		ORDER BY ef.c_date, ef.file_id
+	</select>
+
 	<insert id="insertEvent" parameterType="EventVO">
 		INSERT INTO tb_event (
-			title, ctg, status, rid, s_date, e_date, dsc, address, lat, lon, file_id, created_by, c_date, u_date
+			title, ctg, status, rid, s_date, e_date, dsc, address, lat, lon, created_by, c_date, u_date
 		) VALUES (
 			#{title}, #{ctg}, #{status}, #{rid}, #{sDate}, #{eDate}, #{dsc},
 			#{address, jdbcType=VARCHAR}, #{lat, jdbcType=DECIMAL}, #{lon, jdbcType=DECIMAL},
-			#{fileId, jdbcType=BIGINT}, #{createdBy},
+			#{createdBy},
 			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
 			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
 		)
@@ -79,6 +98,19 @@
 			SELECT currval(pg_get_serial_sequence('tb_event', 'eid'))
 		</selectKey>
 	</insert>
+
+	<insert id="insertEventFiles" parameterType="EventVO">
+		INSERT INTO mtb_event_file (eid, file_id)
+		VALUES
+		<foreach collection="fileIds" item="fileId" separator=",">
+			(#{eid}, #{fileId})
+		</foreach>
+	</insert>
+
+	<delete id="deleteEventFiles" parameterType="EventVO">
+		DELETE FROM mtb_event_file
+		WHERE eid = #{eid}
+	</delete>
 
 	<update id="updateEvent" parameterType="EventVO">
 		UPDATE tb_event
@@ -92,7 +124,6 @@
 			address = #{address, jdbcType=VARCHAR},
 			lat = #{lat, jdbcType=DECIMAL},
 			lon = #{lon, jdbcType=DECIMAL},
-			file_id = #{fileId, jdbcType=BIGINT},
 			u_date = CURRENT_TIMESTAMP
 		WHERE eid = #{eid}
 	</update>
@@ -108,4 +139,3 @@
 	</delete>
 
 </mapper>
-

@@ -2,6 +2,7 @@ package com.event.service.impl;
 
 import java.util.List;
 
+import com.cmm.service.file.FileVO;
 import org.egovframe.rte.psl.dataaccess.EgovAbstractMapper;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,10 @@ public class EventDAO extends EgovAbstractMapper {
 		return selectOne("eventDAO.selectEvent", eventVO);
 	}
 
+	public List<FileVO> selectEventFiles(Long eid) throws Exception {
+		return selectList("eventDAO.selectEventFiles", eid);
+	}
+
 	public List<EventVO> selectEventList(EventFilterVO filterVO) throws Exception {
 		return selectList("eventDAO.selectEventList", filterVO);
 	}
@@ -25,6 +30,14 @@ public class EventDAO extends EgovAbstractMapper {
 
 	public void insertEvent(EventVO eventVO) throws Exception {
 		insert("eventDAO.insertEvent", eventVO);
+	}
+
+	public void insertEventFiles(EventVO eventVO) throws Exception {
+		insert("eventDAO.insertEventFiles", eventVO);
+	}
+
+	public void deleteEventFiles(EventVO eventVO) throws Exception {
+		delete("eventDAO.deleteEventFiles", eventVO);
 	}
 
 	public void updateEvent(EventVO eventVO) throws Exception {

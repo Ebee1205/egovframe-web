@@ -105,9 +105,9 @@
                     <jsp:include page="/WEB-INF/jsp/cmp/CmpFileInputBox.jsp">
                         <jsp:param name="id" value="eventAttachment" />
                         <jsp:param name="uploadUrl" value="/event/file/upload.do" />
-                        <jsp:param name="name" value="fileId" />
-                        <jsp:param name="fileId" value="${event.fileId}" />
-                        <jsp:param name="fileName" value="${eventFile.orignlFileNm}" />
+                        <jsp:param name="name" value="fileIds" />
+                        <jsp:param name="multiple" value="true" />
+                        <jsp:param name="label" value="첨부 파일" />
                         <jsp:param name="accept" value="${fileAccept}" />
                         <jsp:param name="maxSize" value="${fileMaxSize}" />
                     </jsp:include>
@@ -138,6 +138,8 @@
                 <p class="form-info-text">최종 수정일: <fmt:formatDate value="${event.UDate}" pattern="yyyy-MM-dd HH:mm"/></p>
             </div>
             <div>
+    	        <a id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</a>
+            
                 <button type="submit" form="eventUpdateForm" class="btn | btn-outline-secondary">수정</button>
                 <form action="<c:url value='/event/delete.do'/>" 
                     method="post" class="js-confirm-form d-inline"
@@ -171,6 +173,11 @@
     
     <validator:javascript formName="eventVO" method="validateEventVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
     <script>
+   		async function downloadExcel() {
+   			
+   		}
+    
+    
         window.alert = function (message) {
             CmpDialog.open({
                 title: '입력 확인',
@@ -188,8 +195,10 @@
                 event.stopImmediatePropagation();
             }
         });
+        
+        
+        
     </script>
 </body>
 </html>
-
 

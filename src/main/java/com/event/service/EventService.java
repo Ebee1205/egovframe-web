@@ -9,7 +9,7 @@ public interface EventService {
 
 	/**
 	 * 이벤트 첨부파일을 event 접두사로 업로드하고 파일 정보를 등록한다.
-	 * 반환된 파일 ID는 이벤트 수정 시 첨부 ID로 저장한다.
+	 * 반환된 파일 ID 목록은 이벤트 저장 시 첨부 ID로 저장한다.
 	 *
 	 * @param files 업로드할 첨부파일 목록
 	 * @param description 파일 설명

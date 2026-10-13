@@ -3,6 +3,10 @@ package com.event.service;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.cmm.service.file.FileVO;
 
 public class EventVO implements Serializable {
 
@@ -20,7 +24,8 @@ public class EventVO implements Serializable {
     private String address; // 주소
     private BigDecimal lat; // 위도
     private BigDecimal lon; // 경도
-    private Long fileId; // 파일 ID
+    private List<Long> fileIds = new ArrayList<Long>(); // 첨부 파일 ID 목록
+    private List<FileVO> attachedFiles = new ArrayList<FileVO>();
     private Long createdBy; // 등록자 ID
     private String createdByNickname; // 등록자 닉네임
     private Date cDate; // 생성일
@@ -115,12 +120,20 @@ public class EventVO implements Serializable {
         this.lon = lon;
     }
 
-    public Long getFileId() {
-        return fileId;
+    public List<Long> getFileIds() {
+        return fileIds;
     }
 
-    public void setFileId(Long fileId) {
-        this.fileId = fileId;
+    public void setFileIds(List<Long> fileIds) {
+        this.fileIds = fileIds == null ? new ArrayList<Long>() : fileIds;
+    }
+
+    public List<FileVO> getAttachedFiles() {
+        return attachedFiles;
+    }
+
+    public void setAttachedFiles(List<FileVO> attachedFiles) {
+        this.attachedFiles = attachedFiles == null ? new ArrayList<FileVO>() : attachedFiles;
     }
 
     public Long getCreatedBy() {
