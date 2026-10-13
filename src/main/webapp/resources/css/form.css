@@ -128,7 +128,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 12px;
-    font-weight: 700;
+    font-weight: 400;
 }
 
 .file-input-box .upload-list {

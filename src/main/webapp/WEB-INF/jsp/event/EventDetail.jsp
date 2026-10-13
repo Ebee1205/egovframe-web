@@ -107,7 +107,7 @@
                         <jsp:param name="uploadUrl" value="/event/file/upload.do" />
                         <jsp:param name="name" value="fileIds" />
                         <jsp:param name="multiple" value="true" />
-                        <jsp:param name="label" value="첨부 파일" />
+                        <jsp:param name="label" value="첨부파일" />
                         <jsp:param name="description" value="이벤트 관련 파일을 여러 개 첨부할 수 있습니다. 선택한 파일은 한 번에 자동 업로드됩니다. X 버튼으로 첨부를 취소하고, 하단의 수정 버튼을 눌러 반영해주세요." />
                         <jsp:param name="accept" value="${fileAccept}" />
                         <jsp:param name="maxSize" value="${fileMaxSize}" />
@@ -323,7 +323,7 @@
 	                put('A8:E8', '첨부파일', labelStyle);
 	            }
 
-	            // 7. 9행~: 첨부 파일 (한 파일당 한 행, A~E 병합)
+	            // 7. 9행~: 첨부파일 (한 파일당 한 행, A~E 병합)
 	            for (let i = 0; i < attachments.length; i++) {
 	                const attachment = attachments[i];
 	                const rowNo = 9 + i;                                        // 엑셀 행 번호(1-base)
