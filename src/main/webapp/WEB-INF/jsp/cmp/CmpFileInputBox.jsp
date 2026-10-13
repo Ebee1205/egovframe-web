@@ -52,16 +52,39 @@
     </p>
     <div class="file-upload" data-role="dropzone">
         <p class="txt">첨부할 파일을 여기에 끌어다 놓거나,<br>파일 선택 버튼을 눌러 파일을 직접 선택해주세요.</p>
+        
         <input type="file" class="upload-picker" data-role="picker" id="<c:out value='${fibId}'/>Input"
             ${fibMultiple ? 'multiple="multiple"' : ''} accept="<c:out value='${param.accept}'/>"
             aria-describedby="<c:out value='${fibId}'/>Help <c:out value='${fibId}'/>Status">
         <div class="upload-actions">
             <button type="button" class="btn | btn-secondary" data-role="select" aria-controls="<c:out value='${fibId}'/>Input">파일 선택</button>
-
         </div>
-        <ul data-role="selection" class="upload-selection d-flex flex-wrap gap-2" role="list" aria-label="업로드할 파일" hidden></ul>
-        <p data-role="status" id="<c:out value='${fibId}'/>Status" class="form-text upload-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        
+        <ul data-role="selection" class=" upload-selection | d-flex | flex-wrap | gap-2" role="list" aria-label="업로드 대기 파일 목록" hidden></ul>
+        
+        <template data-role="file-template">
+
+            <li data-role="file" data-temp="true"
+                class="file-item | border | rounded | bg-body-tertiary | d-inline-flex | align-items-center | gap-2">
+
+                <input type="hidden" data-role="id" name="<c:out value='${fibName}'/>">
+
+                <div class="file-name">
+                    <a data-role="download" class="link-body-emphasis | text-decoration-none" download>
+                        <span data-role="name"></span>
+                    </a>
+                    <span class="file-size" data-role="size"></span>
+                </div>
+                <div class="file-btn">
+                    <button data-role="remove" type="button" class="btn-close | flex-shrink-0"
+                        aria-label="첨부 취소"></button>
+                </div>
+            </li>
+
+        </template>
+        <p data-role="status" id="<c:out value='${fibId}'/>Status" class="form-text | upload-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
+    
     <div class="file-list">
         <div class="upload-top"><span>첨부파일 <span data-role="count">0</span>개</span></div>
         <c:choose>
@@ -76,19 +99,22 @@
                             data-file-id="<c:out value='${fibFile.fileId}'/>"
                             data-file-name="<c:out value='${fibFile.orignlFileNm}'/>"
                             data-download-url="<c:out value='${fibItemDownloadUrl}'/>" class="file-item border | rounded bg-body | d-inline-flex | align-items-center | gap-2">
+
                             <input type="hidden" data-role="id" name="<c:out value='${fibName}'/>" value="<c:out value='${fibFile.fileId}'/>">
+
                             <div class="file-name">
                                 <a data-role="download" class="link-body-emphasis | text-decoration-none" href="<c:out value='${fibItemDownloadUrl}'/>" aria-describedby="<c:out value='${fibId}'/>File<c:out value='${fibIndex.index}'/>" download><span data-role="name" id="<c:out value='${fibId}'/>File<c:out value='${fibIndex.index}'/>"><c:out value="${fibFile.orignlFileNm}"/></span></a>
                                 <span class="file-size" data-role="size" data-size="<c:out value='${fibFile.fileSize}'/>"></span>
                             </div>
-                            <div class="file-btn">
 
+                            <div class="file-btn">
                                 <button data-role="remove" type="button" class="btn-close | flex-shrink-0" aria-label="첨부 취소" aria-describedby="<c:out value='${fibId}'/>File<c:out value='${fibIndex.index}'/>"></button>
                             </div>
                         </li>
                     </c:forEach>
                 </ul>
             </c:when>
+            
             <c:otherwise>
                 <input type="hidden" data-role="id" name="<c:out value='${fibName}'/>" value="<c:out value='${param.fileId}'/>">
                 <div data-role="current" class="file-item | border | rounded | bg-body | d-inline-flex | align-items-center | gap-2" ${empty param.fileId ? 'hidden' : ''} role="group" aria-label="첨부파일">
@@ -149,31 +175,35 @@
         commonPicker.files = transfer.files;
     }
     function renderSelection() {
-        selection.textContent = '';
+        selection.querySelectorAll('[data-pending="true"]').forEach(function (row) { row.remove(); });
         pendingFiles.filter(function (entry) { return !entry.cancelled && !entry.settled; }).forEach(function (entry) {
             var item = document.createElement('li');
-            item.className = 'file-item border rounded bg-body d-inline-flex align-items-center gap-2';
+            item.setAttribute('data-pending', 'true');
+            item.className = 'file-item | border | rounded | bg-body | bg-body-tertiary | d-inline-flex | align-items-center | gap-2';
             var label = document.createElement('span');
             label.id = box.id + 'Pending' + entry.key;
             label.className = 'file-name';
             label.textContent = entry.file.name + ' (' + formatSize(entry.file.size) + ')';
             var cancel = document.createElement('button');
             cancel.type = 'button';
-            cancel.className = 'btn-close flex-shrink-0';
+            cancel.className = 'btn-close | flex-shrink-0';
             cancel.setAttribute('data-role', 'cancel');
             cancel.setAttribute('data-key', String(entry.key));
             cancel.setAttribute('aria-label', '업로드 취소');
             cancel.setAttribute('aria-describedby', label.id);
             item.appendChild(label);
+            
             if (activeBatch) {
                 var spinner = document.createElement('span');
-                spinner.className = 'spinner-border spinner-border-sm text-secondary';
+                spinner.className = 'spinner-border | spinner-border-sm | text-secondary';
                 spinner.setAttribute('aria-hidden', 'true');
                 item.appendChild(spinner);
             }
+            
             item.appendChild(cancel);
             selection.appendChild(item);
         });
+        
         selection.hidden = selection.children.length === 0;
         selectButton.disabled = commonPicker.disabled;
     }
@@ -272,10 +302,11 @@
         function renderMultiple() {
             renderSelection();
             var fileRows = list.querySelectorAll('[data-role="file"]');
+            var tempRows = selection.querySelectorAll('[data-temp="true"]');
             count.textContent = fileRows.length;
             emptyMultiple.hidden = fileRows.length > 0;
             emptyMultiple.classList.toggle('d-none', fileRows.length > 0);
-            Array.prototype.forEach.call(fileRows, function (row) {
+            Array.prototype.forEach.call(Array.from(fileRows).concat(Array.from(tempRows)), function (row) {
                 row.querySelector('[data-role="remove"]').disabled = busyMultiple;
             });
         }
@@ -324,54 +355,22 @@
         }
 
         function createFileRow(file) {
-            var row = document.createElement('li');
-            row.setAttribute('data-role', 'file');
+            var template = role('file-template');
+            var row = template.content.firstElementChild.cloneNode(true);
             row.setAttribute('data-file-id', String(file.fileId));
             row.setAttribute('data-file-name', file.originalName);
             row.setAttribute('data-download-url', file.downloadUrl);
-            row.className = 'file-item border rounded bg-body d-inline-flex align-items-center gap-2';
-
-            var hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.setAttribute('data-role', 'id');
-            hidden.name = box.getAttribute('data-field-name');
-            hidden.value = String(file.fileId);
-
-            var fileName = document.createElement('span');
-            fileName.setAttribute('data-role', 'name');
+            row.querySelector('[data-role="id"]').value = String(file.fileId);
+            var fileName = row.querySelector('[data-role="name"]');
             fileName.id = box.id + 'UploadedFile' + (++rowSequence);
-            var fileInfo = document.createElement('div');
-            fileInfo.className = 'file-name';
-            var fileSize = document.createElement('span');
-            fileSize.className = 'file-size';
-            var formattedSize = formatSize(file.fileSize);
-            fileSize.textContent = formattedSize ? '(' + formattedSize + ')' : '';
             fileName.textContent = file.originalName;
-
-            var downloadLink = document.createElement('a');
-            downloadLink.setAttribute('data-role', 'download');
-            downloadLink.className = 'link-body-emphasis text-decoration-none';
-            downloadLink.setAttribute('aria-describedby', fileName.id);
+            var downloadLink = row.querySelector('[data-role="download"]');
             downloadLink.href = file.downloadUrl;
-            downloadLink.setAttribute('download', '');
-            downloadLink.appendChild(fileName);
-
-            var remove = document.createElement('button');
-            remove.type = 'button';
-            remove.setAttribute('data-role', 'remove');
-            remove.className = 'btn-close flex-shrink-0';
-            remove.setAttribute('aria-describedby', fileName.id);
-            remove.setAttribute('aria-label', '첨부 취소');
-
-            row.appendChild(hidden);
-            fileInfo.appendChild(downloadLink);
-            fileInfo.appendChild(fileSize);
-            row.appendChild(fileInfo);
-            var actions = document.createElement('div');
-            actions.className = 'file-btn';
-            actions.appendChild(remove);
-            row.appendChild(actions);
-            list.appendChild(row);
+            downloadLink.setAttribute('aria-describedby', fileName.id);
+            var formattedSize = formatSize(file.fileSize);
+            row.querySelector('[data-role="size"]').textContent = formattedSize ? '(' + formattedSize + ')' : '';
+            row.querySelector('[data-role="remove"]').setAttribute('aria-describedby', fileName.id);
+            selection.appendChild(row);
             renderMultiple();
         }
 
@@ -456,7 +455,7 @@
             }
         }
 
-        list.addEventListener('click', function (event) {
+        function handleAttachmentRemove(event) {
             var button = event.target.closest('[data-role="remove"]');
             if (!button || busyMultiple) { return; }
             var row = button.closest('[data-role="file"]');
@@ -479,7 +478,9 @@
             } else if (window.confirm('첨부를 제거하시겠습니까?')) {
                 removeFileRow(row);
             }
-        });
+        }
+        list.addEventListener('click', handleAttachmentRemove);
+        selection.addEventListener('click', handleAttachmentRemove);
 
         if (form) {
             form.addEventListener('submit', function (event) {
@@ -516,6 +517,9 @@
         fileSize: role('size').getAttribute('data-size'),
         downloadUrl: download.getAttribute('href')
     } : null;
+    var savedRowParent = currentRow.parentNode;
+    var savedRowNext = currentRow.nextSibling;
+    var singleTempRow = null;
     var current = original;
     var busy = false;
     var lockedButtons = [];
@@ -528,15 +532,29 @@
 
     function render() {
         renderSelection();
-        count.textContent = current ? '1' : '0';
+        var temporary = isDraft(current);
+        if (temporary) {
+            if (!singleTempRow) {
+                singleTempRow = document.createElement('li');
+                singleTempRow.setAttribute('data-temp', 'true');
+                singleTempRow.appendChild(currentRow);
+                selection.appendChild(singleTempRow);
+            }
+        } else if (singleTempRow) {
+            savedRowParent.insertBefore(currentRow, savedRowNext);
+            singleTempRow.remove();
+            singleTempRow = null;
+        }
+        selection.hidden = selection.children.length === 0;
+        count.textContent = current && !temporary ? '1' : '0';
         var currentSize = current ? formatSize(current.fileSize) : '';
         role('size').textContent = currentSize ? '(' + currentSize + ')' : '';
         var previousValue = idInput.value;
         idInput.value = current ? String(current.fileId) : '';
         currentRow.hidden = !current;
         currentRow.classList.toggle('d-none', !current);
-        emptyRow.hidden = !!current;
-        emptyRow.classList.toggle('d-none', !!current);
+        emptyRow.hidden = !!current && !temporary;
+        emptyRow.classList.toggle('d-none', !!current && !temporary);
         name.textContent = current ? current.originalName : '';
         if (current) { download.setAttribute('href', current.downloadUrl); }
         else { download.removeAttribute('href'); }
