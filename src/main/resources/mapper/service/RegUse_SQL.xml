@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RegOptionDAO">
+
+	<resultMap id="regFilterResultMap" type="RegFilterVO">
+		<id property="rid" column="rid"/>
+		<result property="parentRegId" column="p_reg_id"/>
+		<result property="parentCode" column="p_code"/>
+		<result property="parentName" column="p_name"/>
+		<result property="code" column="code"/>
+		<result property="name" column="name"/>
+	</resultMap>
+
+	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 행정구역 전체를 조회 -->
+	<select id="selectRegDetail" parameterType="RegFilterVO" resultMap="regFilterResultMap">
+		SELECT c.rid, c.p_reg_id, c.code, c.name,
+			p.code AS p_code, p.name AS p_name
+		FROM tb_reg c
+		JOIN tb_reg p ON p.rid = c.p_reg_id
+		<where>
+			<if test="parentCode != null and parentCode != ''">
+				AND p.code = #{parentCode}
+			</if>
+			<if test="parentRegId != null">
+				AND c.p_reg_id = #{parentRegId}
+			</if>
+			<if test="code != null and code != ''">
+				AND c.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND c.name LIKE '%' || #{name} || '%'
+			</if>
+			AND c.status = 'Y'
+		</where>
+		ORDER BY c.rid
+	</select>
+
+	<!-- 행정구역의 루트 코드만 조회 -->
+	<select id="selectRegRoot" parameterType="RegFilterVO" resultMap="regFilterResultMap">
+		SELECT c.rid, c.p_reg_id, c.code, c.name,
+			NULL AS p_code, NULL AS p_name
+		FROM tb_reg c
+		<where>
+			c.p_reg_id IS NULL
+			<if test="code != null and code != ''">
+				AND c.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND c.name LIKE '%' || #{name} || '%'
+			</if>
+			AND c.status = 'Y'
+		</where>
+		ORDER BY c.rid
+	</select>
+
+    <select id="selectRegParents" parameterType="RegFilterVO" resultMap="regFilterResultMap">
+        SELECT c.rid, c.p_reg_id, c.code, c.name, p.code AS p_code, p.name AS p_name
+        FROM tb_reg c LEFT JOIN tb_reg p ON p.rid = c.p_reg_id
+        WHERE c.status = 'Y' ORDER BY c.level, c.code, c.rid
+    </select>
+</mapper>

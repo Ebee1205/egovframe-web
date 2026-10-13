@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="regDAO">
+
+	<!-- 수정/삭제 대상은 잠가서 존재 확인과 변경을 한 트랜잭션에서 처리한다. -->
+	<select id="selectRegForUpdate" parameterType="RegVO" resultMap="regResultMap">
+		SELECT rid, p_reg_id, code, name, level, ST_AsEWKT(geom) AS geom, status, c_date, u_date
+		FROM tb_reg WHERE rid = #{rid} FOR UPDATE
+	</select>
+	<select id="selectRegChildCount" parameterType="RegVO" resultType="int">
+		SELECT COUNT(*) FROM tb_reg WHERE p_reg_id = #{rid}
+	</select>
+    <select id="selectDuplicateRegCount" parameterType="RegVO" resultType="int">
+        SELECT COUNT(*) FROM tb_reg
+        WHERE code = #{code}
+        <if test="rid != null">AND rid &lt;&gt; #{rid}</if>
+    </select>
+    <select id="isValidGeometry" parameterType="RegVO" resultType="boolean">
+        SELECT ST_GeometryType(g) IN ('ST_Polygon', 'ST_MultiPolygon')
+            AND NOT ST_IsEmpty(g) AND ST_IsValid(g)
+        FROM (SELECT ST_GeomFromEWKT(#{geom, jdbcType=VARCHAR}) AS g) AS geometry_input
+    </select>
+	<resultMap id="regResultMap" type="RegVO">
+		<id property="rid" column="rid"/>
+		<result property="parentRegId" column="p_reg_id"/>
+		<result property="parentCode" column="p_code"/>
+		<result property="parentName" column="p_name"/>
+		<result property="code" column="code"/>
+		<result property="name" column="name"/>
+		<result property="level" column="level"/>
+		<result property="geom" column="geom"/>
+		<result property="status" column="status"/>
+		<result property="cDate" column="c_date"/>
+		<result property="uDate" column="u_date"/>
+	</resultMap>
+
+	<sql id="regColumns">
+		c.rid, c.p_reg_id, c.code, c.name, c.level, ST_AsEWKT(c.geom) AS geom, c.status, c.c_date, c.u_date,
+		p.code AS p_code, p.name AS p_name
+	</sql>
+
+	<select id="selectReg" parameterType="RegVO" resultMap="regResultMap">
+		SELECT <include refid="regColumns"/>
+		FROM tb_reg c
+		LEFT JOIN tb_reg p ON p.rid = c.p_reg_id
+		WHERE c.rid = #{rid}
+	</select>
+
+	<sql id="regListWhere">
+		<where>
+			<if test="parentRegId != null">
+				AND c.p_reg_id = #{parentRegId}
+			</if>
+			<if test="code != null and code != ''">
+				AND c.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND c.name LIKE '%' || #{name} || '%'
+			</if>
+			<if test="level != null">
+				AND c.level = #{level}
+			</if>
+			<if test="status != null and status != ''">
+				AND c.status = #{status}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectRegList" parameterType="RegVO" resultMap="regResultMap">
+		SELECT <include refid="regColumns"/>
+		FROM tb_reg c
+		LEFT JOIN tb_reg p ON p.rid = c.p_reg_id
+		<include refid="regListWhere"/>
+		ORDER BY c.level, c.p_reg_id NULLS FIRST, c.rid
+		<if test="pageSize > 0">
+			LIMIT #{pageSize} OFFSET #{firstIndex}
+		</if>
+	</select>
+
+	<select id="selectRegListCnt" parameterType="RegVO" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_reg c
+		<include refid="regListWhere"/>
+	</select>
+
+	<insert id="insertReg" parameterType="RegVO">
+		INSERT INTO tb_reg (
+			p_reg_id, code, name, level, geom, status, c_date, u_date
+		) VALUES (
+			#{parentRegId, jdbcType=BIGINT}, #{code}, #{name}, #{level}, ST_GeomFromEWKT(#{geom, jdbcType=VARCHAR}), #{status},
+			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
+			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
+		)
+		<selectKey keyProperty="rid" resultType="long" order="AFTER">
+			SELECT currval(pg_get_serial_sequence('tb_reg', 'rid'))
+		</selectKey>
+	</insert>
+
+	<update id="updateReg" parameterType="RegVO">
+		UPDATE tb_reg
+		SET p_reg_id = #{parentRegId, jdbcType=BIGINT},
+			code = #{code},
+			name = #{name},
+			level = #{level},
+			geom = ST_GeomFromEWKT(#{geom, jdbcType=VARCHAR}),
+			status = #{status},
+			u_date = CURRENT_TIMESTAMP
+		WHERE rid = #{rid}
+	</update>
+
+	<delete id="deleteReg" parameterType="RegVO">
+		DELETE FROM tb_reg
+		WHERE rid = #{rid}
+	</delete>
+
+</mapper>

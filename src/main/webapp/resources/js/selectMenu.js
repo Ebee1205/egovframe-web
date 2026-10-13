@@ -26,12 +26,12 @@ const pageList = [
         path: '/code/list.do',
         icon: 'cil-speedometer',
       },
-      // {
-      //   page: 'RegionList',
-      //   name: '지역코드',
-      //   path: '/region/list.do',
-      //   icon: 'cil-speedometer',
-      // },
+      {
+        page: 'RegionList',
+        name: '지역코드',
+        path: '/region/list.do',
+        icon: 'cil-speedometer',
+      },
     ],
   },
   {

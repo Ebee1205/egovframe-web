@@ -23,7 +23,9 @@
 		<typeAlias alias="EventFilterVO" type="com.event.service.EventFilterVO" />
 		<typeAlias alias="EventCmtVO"			 type="com.event.service.EventCmtVO" />
 		<typeAlias alias="EventCmtFilterVO" type="com.event.service.EventCmtFilterVO" />
-	</typeAliases>
+	    <typeAlias alias="RegVO" type="com.reg.service.RegDetailVO" />
+        <typeAlias alias="RegFilterVO" type="com.reg.service.RegFilterVO" />
+    </typeAliases>
 
 	<mappers>
 		<mapper resource="mapper/service/User_SQL.xml" />
@@ -33,6 +35,8 @@
 		<mapper resource="mapper/service/Event_SQL.xml" />
 		<mapper resource="mapper/service/EventCmt_SQL.xml" />
 	    <mapper resource="mapper/service/File_SQL.xml" />
-	</mappers>
+	    <mapper resource="mapper/service/Reg_SQL.xml" />
+        <mapper resource="mapper/service/RegUse_SQL.xml" />
+    </mappers>
     
 </configuration>
