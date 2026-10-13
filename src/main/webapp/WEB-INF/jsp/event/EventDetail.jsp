@@ -42,7 +42,7 @@
                 data-success-text="수정이 완료되었습니다."
             >
                 <input type="hidden" name="eid" value="${event.eid}">
-                <input type="hidden" name="rid" value="${event.rid}">
+                <input type="hidden" name="reg_id" value="${event.reg_id}">
                 <input type="hidden" name="lat" value="${empty event.lat ? '' : event.lat.toPlainString()}">
                 <input type="hidden" name="lon" value="${empty event.lon ? '' : event.lon.toPlainString()}">
                 <div>

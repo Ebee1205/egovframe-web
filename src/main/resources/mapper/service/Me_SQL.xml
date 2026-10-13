@@ -8,11 +8,11 @@
         <result property="nickname" column="nickname"/>
         <result property="type" column="type"/>
         <result property="status" column="status"/>
-        <result property="rid" column="rid"/>
+        <result property="reg_id" column="reg_id"/>
     </resultMap>
 
     <sql id="meColumns">
-        uid, email, nickname, type, status, rid
+        uid, email, nickname, type, status, reg_id
     </sql>
 
     <select id="selectMe" parameterType="long" resultMap="meResultMap">

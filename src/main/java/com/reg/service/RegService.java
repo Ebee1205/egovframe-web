@@ -17,10 +17,6 @@ public interface RegService {
 	List<RegFilterVO> selectRegParents() throws Exception;
 
 	void insertReg(RegDetailVO regVO) throws Exception;
-
-	void updateReg(RegDetailVO regVO) throws Exception;
-
-	void deleteReg(RegDetailVO regVO) throws Exception;
 	/** 행정구역 관리 규칙 위반을 공통 응답으로 전달하기 위한 예외이다. */
 	class RegException extends RuntimeException {
 		private static final long serialVersionUID = 1L;

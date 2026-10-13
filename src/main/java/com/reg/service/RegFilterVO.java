@@ -7,7 +7,7 @@ public class RegFilterVO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	// 필드 선언부
-	private Long rid; // 행정구역 ID
+	private Long reg_id; // 행정구역 ID
 	private Long parentRegId; // 상위 행정구역 ID
 	private String parentCode; // 상위 행정구역
 	private String parentName; // 상위 행정구역명
@@ -18,12 +18,12 @@ public class RegFilterVO implements Serializable {
 
 	
 	// Getter / Setter
-    public Long getRid() {
-		return rid;
+    public Long getReg_id() {
+		return reg_id;
 	}
 
-	public void setRid(Long rid) {
-		this.rid = rid;
+	public void setReg_id(Long reg_id) {
+		this.reg_id = reg_id;
 	}
 
 	public Long getParentRegId() {

@@ -98,7 +98,7 @@
                                 <th scope="col">등록일</th>
                                 <th scope="col">수정일</th>
                                 <th scope="col" style="width: 60px;">상태</th>
-                                <th scope="col" style="width: 80px;">관리</th>
+                                <th scope="col" style="width: 80px;">action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,7 +110,7 @@
                                     <c:forEach var="event" items="${events}" varStatus="rowStatus">
                                         <tr>
                                             <td class="text-center"><c:out value="${filterVO.firstIndex + rowStatus.count}"/></td>
-                                            <td><c:out value="${event.rid}"/></td>
+                                            <td><c:out value="${event.reg_id}"/></td>
 
                                             <td><c:out value="${event.title}"/></td>
                                             <td>
@@ -218,12 +218,12 @@
             const table = doc.querySelector('.table-responsive table');
             if (!table) throw new Error('테이블을 찾을 수 없습니다.');
 
-            // 헤더 ("관리" 마지막 컬럼 제외)
+            // 헤더 ("action" 마지막 컬럼 제외)
             const headers = Array.from(table.querySelectorAll('thead th'))
                 .slice(0, -1)
                 .map(th => th.textContent.trim());
 
-            // 본문 ("관리" 마지막 컬럼 제외)
+            // 본문 ("action" 마지막 컬럼 제외)
             const rows = [];
             table.querySelectorAll('tbody tr').forEach(tr => {
                 const tds = tr.querySelectorAll('td');

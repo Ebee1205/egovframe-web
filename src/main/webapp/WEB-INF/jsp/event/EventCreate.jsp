@@ -30,7 +30,7 @@
             <c:url var="insertUrl" value="/event/insert.do"/>
             <form:form id="eventCreateForm" modelAttribute="eventCreateVO" action="${insertUrl}"
                        method="post" cssClass="form-container" accept-charset="UTF-8" novalidate="novalidate">
-                <input type="hidden" name="rid" value="1">
+                <input type="hidden" name="reg_id" value="1">
                 <input type="hidden" name="lat" value="">
                 <input type="hidden" name="lon" value="">
                 <div>

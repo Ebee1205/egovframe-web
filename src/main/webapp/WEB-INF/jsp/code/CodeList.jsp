@@ -87,7 +87,7 @@
                                 <th scope="col" style="width: 45px;">상태</th>
                                 <th scope="col" style="width: 160px;">등록일</th>
                                 <th scope="col" style="width: 160px;">수정일</th>
-                                <th scope="col" style="width: 108px;">관리</th>
+                                <th scope="col" style="width: 108px;">action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -201,12 +201,12 @@
             const table = doc.querySelector('.table-responsive table');
             if (!table) throw new Error('테이블을 찾을 수 없습니다.');
 
-            // 헤더 ("관리" 마지막 컬럼 제외)
+            // 헤더 ("action" 마지막 컬럼 제외)
             const headers = Array.from(table.querySelectorAll('thead th'))
                 .slice(0, -1)
                 .map(th => th.textContent.trim());
 
-            // 본문 ("관리" 마지막 컬럼 제외)
+            // 본문 ("action" 마지막 컬럼 제외)
             const rows = [];
             table.querySelectorAll('tbody tr').forEach(tr => {
                 const tds = tr.querySelectorAll('td');

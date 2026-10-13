@@ -12,7 +12,7 @@ public class MeVO implements Serializable {
     private String nickname;
     private String type;
     private String status;
-    private Long rid;
+    private Long reg_id;
 
     public Long getUid() {
         return uid;
@@ -54,11 +54,11 @@ public class MeVO implements Serializable {
         this.status = status;
     }
 
-    public Long getRid() {
-        return rid;
+    public Long getReg_id() {
+        return reg_id;
     }
 
-    public void setRid(Long rid) {
-        this.rid = rid;
+    public void setReg_id(Long reg_id) {
+        this.reg_id = reg_id;
     }
 }

@@ -20,7 +20,7 @@
                         <select id="regParentRegId" name="parentRegId" class="form-select" aria-describedby="regParentRegIdError">
                             <option value="">최상위 행정구역</option>
                             <c:forEach var="rootReg" items="${parentRegs}">
-                                <option value="${rootReg.rid}"><c:out value="${rootReg.name}"/> (<c:out value="${rootReg.code}"/>)</option>
+                                <option value="${rootReg.reg_id}"><c:out value="${rootReg.name}"/> (<c:out value="${rootReg.code}"/>)</option>
                             </c:forEach>
                         </select>
                         <div id="regParentRegIdError" data-error-for="parentRegId" class="invalid-feedback" style="white-space: pre-line;"></div>
@@ -34,12 +34,6 @@
                         <label for="regValue" class="form-label">코드</label>
                         <input id="regValue" name="code" type="text" class="form-control" maxlength="20" autocomplete="off" aria-describedby="regValueError">
                         <div id="regValueError" data-error-for="code" class="invalid-feedback" style="white-space: pre-line;"></div>
-                    </div>
-                    <div class="mt-3">
-                        <label for="regGeom" class="form-label">영역 (EWKT)</label>
-                        <textarea id="regGeom" name="geom" class="form-control" rows="3" aria-describedby="regGeomHelp regGeomError"></textarea>
-                        <div id="regGeomHelp" class="form-text">선택 입력. 예: SRID=4326;POLYGON((127 37,128 37,128 38,127 37))</div>
-                        <div id="regGeomError" data-error-for="geom" class="invalid-feedback"></div>
                     </div>
                     <div id="regCreateError" class="text-danger mt-3 d-none" role="alert"
                          aria-live="polite" style="white-space: pre-line;"></div>

@@ -25,7 +25,7 @@
                 <arg position="1" name="maxlength" key="20" resource="false"/>
                 <var><var-name>maxlength</var-name><var-value>20</var-value></var>
             </field>
-            <field property="rid" depends="required,long">
+            <field property="reg_id" depends="required,long">
                 <arg position="0" key="이벤트 지역 ID" resource="false"/>
             </field>
 

@@ -10,7 +10,6 @@ import org.springframework.context.MessageSource;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DefaultMessageCodesResolver;
@@ -43,23 +42,19 @@ public class RegController {
 		this.regService = regService;
 	}
 
-	@InitBinder({"regCreateVO", "regUpdateVO"})
-	public void initRegCreateBinder(WebDataBinder binder) {
-		if ("regUpdateVO".equals(binder.getObjectName())) {
-			binder.setAllowedFields("rid", "parentRegId", "name", "code", "geom", "status");
-		} else {
-			binder.setAllowedFields("parentRegId", "name", "code", "geom");
-		}
-		binder.setMessageCodesResolver(new DefaultMessageCodesResolver() {
-			@Override
-			public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
-				if ("typeMismatch".equals(errorCode) && "parentRegId".equals(field)) {
-					return new String[] { "errors.reg.parent" };
-				}
-				return super.resolveMessageCodes(errorCode, objectName, field, fieldType);
-			}
-		});
-	}
+    @InitBinder("regCreateVO")
+    public void initRegCreateBinder(WebDataBinder binder) {
+        binder.setAllowedFields("parentRegId", "name", "code");
+        binder.setMessageCodesResolver(new DefaultMessageCodesResolver() {
+            @Override
+            public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
+                if ("typeMismatch".equals(errorCode) && "parentRegId".equals(field)) {
+                    return new String[] { "errors.reg.parent" };
+                }
+                return super.resolveMessageCodes(errorCode, objectName, field, fieldType);
+            }
+        });
+    }
 
 	@RequestMapping("/region/list.do")
 	public String regList(RegDetailVO filterVO, Model model) throws Exception {
@@ -104,62 +99,17 @@ public class RegController {
 	}
 	
 	@RequestMapping(value = "/region/detail.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> detailReg(@RequestParam("rid") Long rid) throws Exception {
-		RegDetailVO query = new RegDetailVO(); query.setRid(validRegId(rid));
+	public ResponseEntity<String> detailReg(@RequestParam("reg_id") Long reg_id) throws Exception {
+		RegDetailVO query = new RegDetailVO(); query.setReg_id(validRegId(reg_id));
 		RegDetailVO code = regService.selectReg(query);
 		if (code == null) { throw new RegService.RegException(404, "REG_NOT_FOUND", "행정구역을 찾을 수 없습니다.", null); }
 		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("rid", code.getRid()); data.put("parentRegId", code.getParentRegId());
+		data.put("reg_id", code.getReg_id()); data.put("parentRegId", code.getParentRegId());
 		data.put("parentCode", code.getParentCode()); data.put("parentName", code.getParentName());
 		data.put("code", code.getCode()); data.put("name", code.getName()); data.put("level", code.getLevel());
-		data.put("geom", code.getGeom()); data.put("status", code.getStatus());
+		data.put("status", code.getStatus());
 		data.put("cDate", code.getCDate()); data.put("uDate", code.getUDate());
 		return ResponseEntity.ok(ComResponseVO.success(data, null).toJson());
-	}
-
-	@RequestMapping(value = "/region/update.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> updateReg(@ModelAttribute("regUpdateVO") RegDetailVO code,
-			BindingResult errors) throws Exception {
-		if (code.getName() != null) { code.setName(code.getName().trim()); }
-		if (code.getCode() != null) { code.setCode(code.getCode().trim()); }
-		beanValidator.validate(code, errors);
-		if (!errors.hasFieldErrors("rid") && (code.getRid() == null || code.getRid() <= 0)) {
-			errors.rejectValue("rid", "errors.reg.id", "행정구역 ID를 확인해주세요.");
-		}
-		if (!"Y".equals(code.getStatus()) && !"N".equals(code.getStatus())) {
-			errors.rejectValue("status", "errors.reg.status", "상태는 사용 또는 미사용으로 지정해주세요.");
-		}
-		if (errors.hasErrors()) {
-			return ResponseEntity.badRequest().body(ComResponseVO.validationFailure(errors, messageSource,
-					Locale.KOREAN, "VALIDATION_FAILED", "입력값을 확인해주세요.").toJson());
-		}
-		try { regService.updateReg(code); }
-		catch (DataIntegrityViolationException exception) {
-			errors.reject("errors.reg.conflict", "행정구역 코드 또는 상위 행정구역을 확인해주세요.");
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(ComResponseVO.validationFailure(errors,
-					messageSource, Locale.KOREAN, "REG_CONFLICT", "행정구역 정보를 확인해주세요.").toJson());
-		}
-		return ResponseEntity.ok(ComResponseVO.success(null, "행정구역이 수정되었습니다.").toJson());
-	}
-
-	@RequestMapping(value = "/region/delete.do", method = RequestMethod.POST)
-	public String deleteReg(@RequestParam(value = "rid", required = false) String rid,
-			RedirectAttributes redirectAttributes) throws Exception {
-		String message;
-		try {
-			RegDetailVO query = new RegDetailVO();
-			query.setRid(validRegId(rid == null ? null : Long.valueOf(rid)));
-			regService.deleteReg(query);
-			message = "행정구역이 삭제되었습니다.";
-		} catch (NumberFormatException exception) {
-			message = "행정구역 ID를 확인해주세요.";
-		} catch (RegService.RegException exception) {
-			message = exception.getMessage();
-		} catch (DataIntegrityViolationException exception) {
-			message = "다른 데이터에서 사용 중인 행정구역은 삭제할 수 없습니다.";
-		}
-		redirectAttributes.addFlashAttribute("regDeleteMessage", message);
-		return "redirect:/region/list.do";
 	}
 
 	@ExceptionHandler(RegService.RegException.class)
@@ -173,8 +123,8 @@ public class RegController {
 				.body(result.toJson());
 	}
 
-	private Long validRegId(Long rid) {
-		if (rid == null || rid <= 0) { throw new RegService.RegException(400, "REG_ID_INVALID", "행정구역 ID를 확인해주세요.", "rid"); }
-		return rid;
+	private Long validRegId(Long reg_id) {
+		if (reg_id == null || reg_id <= 0) { throw new RegService.RegException(400, "REG_ID_INVALID", "행정구역 ID를 확인해주세요.", "reg_id"); }
+		return reg_id;
 	}
 }

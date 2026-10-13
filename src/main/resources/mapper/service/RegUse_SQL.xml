@@ -3,7 +3,7 @@
 <mapper namespace="RegOptionDAO">
 
 	<resultMap id="regFilterResultMap" type="RegFilterVO">
-		<id property="rid" column="rid"/>
+		<id property="reg_id" column="reg_id"/>
 		<result property="parentRegId" column="p_reg_id"/>
 		<result property="parentCode" column="p_code"/>
 		<result property="parentName" column="p_name"/>
@@ -13,10 +13,10 @@
 
 	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 행정구역 전체를 조회 -->
 	<select id="selectRegDetail" parameterType="RegFilterVO" resultMap="regFilterResultMap">
-		SELECT c.rid, c.p_reg_id, c.code, c.name,
+		SELECT c.reg_id, c.p_reg_id, c.code, c.name,
 			p.code AS p_code, p.name AS p_name
 		FROM tb_reg c
-		JOIN tb_reg p ON p.rid = c.p_reg_id
+		JOIN tb_reg p ON p.reg_id = c.p_reg_id
 		<where>
 			<if test="parentCode != null and parentCode != ''">
 				AND p.code = #{parentCode}
@@ -32,12 +32,12 @@
 			</if>
 			AND c.status = 'Y'
 		</where>
-		ORDER BY c.rid
+		ORDER BY c.reg_id
 	</select>
 
 	<!-- 행정구역의 루트 코드만 조회 -->
 	<select id="selectRegRoot" parameterType="RegFilterVO" resultMap="regFilterResultMap">
-		SELECT c.rid, c.p_reg_id, c.code, c.name,
+		SELECT c.reg_id, c.p_reg_id, c.code, c.name,
 			NULL AS p_code, NULL AS p_name
 		FROM tb_reg c
 		<where>
@@ -50,12 +50,12 @@
 			</if>
 			AND c.status = 'Y'
 		</where>
-		ORDER BY c.rid
+		ORDER BY c.reg_id
 	</select>
 
     <select id="selectRegParents" parameterType="RegFilterVO" resultMap="regFilterResultMap">
-        SELECT c.rid, c.p_reg_id, c.code, c.name, p.code AS p_code, p.name AS p_name
-        FROM tb_reg c LEFT JOIN tb_reg p ON p.rid = c.p_reg_id
-        WHERE c.status = 'Y' ORDER BY c.level, c.code, c.rid
+        SELECT c.reg_id, c.p_reg_id, c.code, c.name, p.code AS p_code, p.name AS p_name
+        FROM tb_reg c LEFT JOIN tb_reg p ON p.reg_id = c.p_reg_id
+        WHERE c.status = 'Y' ORDER BY c.level, c.code, c.reg_id
     </select>
 </mapper>

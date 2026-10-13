@@ -165,7 +165,7 @@ public class EventController {
 	public String eventCreate(Model model) throws Exception {
 		if (!model.containsAttribute("eventCreateVO")) {
 			EventVO eventVO = new EventVO();
-			eventVO.setRid(1L);
+			eventVO.setReg_id(1L);
 			model.addAttribute("eventCreateVO", eventVO);
 		}
 		CodeFilterVO eventCtgFilter = new CodeFilterVO();
@@ -201,7 +201,7 @@ public class EventController {
 	@RequestMapping(value = "/event/insert.do", method = RequestMethod.POST)
 	public String eventInsert(@ModelAttribute("eventCreateVO") EventVO eventVO,
 			BindingResult bindingResult, Model model) throws Exception {
-		eventVO.setRid(1L);
+		eventVO.setReg_id(1L);
 		validatorFactory.getValidator("eventCreateVO", eventVO, bindingResult).validate();
 		if (bindingResult.hasErrors()) {
 			return eventCreate(model);

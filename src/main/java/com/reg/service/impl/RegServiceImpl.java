@@ -1,7 +1,6 @@
 package com.reg.service.impl;
 
 import java.util.List;
-import java.util.Objects;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,33 +43,6 @@ public class RegServiceImpl implements RegService {
         validateGeometry(vo);
         regDAO.insertReg(vo);
     }
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateReg(RegDetailVO vo) throws Exception {
-        RegDetailVO current = existingReg(vo);
-        validateValues(vo);
-        if (!Objects.equals(current.getParentRegId(), vo.getParentRegId())) {
-            // 하위 행정구역의 계층을 유지하기 위해 자식이 있는 노드의 이동은 제한한다.
-            if (regDAO.selectRegChildCount(current) > 0) {
-                throw error(409, "REG_HAS_CHILDREN", "하위 행정구역이 있으면 상위 행정구역을 변경할 수 없습니다.", "parentRegId");
-            }
-            assignLevel(vo);
-        } else {
-            vo.setLevel(current.getLevel());
-        }
-        checkDuplicate(vo);
-        validateGeometry(vo);
-        regDAO.updateReg(vo);
-    }
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteReg(RegDetailVO vo) throws Exception {
-        RegDetailVO current = existingReg(vo);
-        if (regDAO.selectRegChildCount(current) > 0) {
-            throw error(409, "REG_IN_USE", "하위 행정구역이 있는 행정구역은 삭제할 수 없습니다.", null);
-        }
-        regDAO.deleteReg(current);
-    }
     private void validateValues(RegDetailVO vo) {
         if (vo == null) { throw error(400, "REG_INVALID", "입력값을 확인해주세요.", null); }
         vo.setCode(vo.getCode() == null ? null : vo.getCode().trim());
@@ -88,10 +60,10 @@ public class RegServiceImpl implements RegService {
     }
     private void assignLevel(RegDetailVO vo) throws Exception {
         if (vo.getParentRegId() == null) { vo.setLevel(1); return; }
-        if (vo.getParentRegId() <= 0 || vo.getParentRegId().equals(vo.getRid())) {
+        if (vo.getParentRegId() <= 0 || vo.getParentRegId().equals(vo.getReg_id())) {
             throw error(400, "REG_PARENT_INVALID", "상위 행정구역 ID를 확인해주세요.", "parentRegId");
         }
-        RegDetailVO query = new RegDetailVO(); query.setRid(vo.getParentRegId());
+        RegDetailVO query = new RegDetailVO(); query.setReg_id(vo.getParentRegId());
         RegDetailVO parent = regDAO.selectRegForUpdate(query);
         if (parent == null || !"Y".equals(parent.getStatus())) {
             throw error(400, "REG_PARENT_INVALID", "사용 중인 상위 행정구역을 선택해주세요.", "parentRegId");
@@ -114,14 +86,6 @@ public class RegServiceImpl implements RegService {
         if (!valid) {
             throw error(400, "REG_GEOM_INVALID", "영역은 비어 있지 않은 유효한 Polygon 또는 MultiPolygon이어야 합니다.", "geom");
         }
-    }
-    private RegDetailVO existingReg(RegDetailVO vo) throws Exception {
-        if (vo == null || vo.getRid() == null || vo.getRid() <= 0) {
-            throw error(400, "REG_ID_INVALID", "행정구역 ID를 확인해주세요.", "rid");
-        }
-        RegDetailVO current = regDAO.selectRegForUpdate(vo);
-        if (current == null) { throw error(404, "REG_NOT_FOUND", "행정구역을 찾을 수 없습니다.", null); }
-        return current;
     }
     private RegException error(int status, String code, String message, String field) {
         return new RegException(status, code, message, field);

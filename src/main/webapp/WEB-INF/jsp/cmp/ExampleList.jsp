@@ -82,7 +82,7 @@
                                 <th scope="col">상태</th>
                                 <th scope="col">등록일</th>
                                 <th scope="col">수정일</th>
-                                <th scope="col">관리</th>
+                                <th scope="col">action</th>
                             </tr>
                         </thead>
                         <tbody>

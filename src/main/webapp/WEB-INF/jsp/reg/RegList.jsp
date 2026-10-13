@@ -42,7 +42,7 @@
                         id="parentRegId" name="parentRegId" autocomplete="off">
                         <option value="">전체</option>
                         <c:forEach var="code" items="${parentRegs}">
-                            <option value="${code.rid}" ${code.rid == filterVO.parentRegId ? 'selected' : ''}>
+                            <option value="${code.reg_id}" ${code.reg_id == filterVO.parentRegId ? 'selected' : ''}>
                                 <c:out value="${code.code}"/> - <c:out value="${code.name}"/>
                             </option>
                         </c:forEach>
@@ -83,17 +83,16 @@
                                 <th scope="col">코드</th>
                                 <th scope="col" style="width: 120px;">행정구역명</th>
                                 <th scope="col" style="width: 45px;">레벨</th>
-                                <th scope="col">영역 (EWKT)</th>
                                 <th scope="col" style="width: 45px;">상태</th>
                                 <th scope="col" style="width: 160px;">등록일</th>
                                 <th scope="col" style="width: 160px;">수정일</th>
-                                <th scope="col" style="width: 108px;">관리</th>
+                                <th scope="col" style="width: 108px;">action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty regs}">
-                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="11">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="10">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="code" items="${regs}" varStatus="rowStatus">
@@ -104,14 +103,12 @@
                                             <td><c:out value="${code.code}"/></td>
                                             <td><c:out value="${code.name}"/></td>
                                             <td><c:out value="${code.level}"/></td>
-                                            <td><c:choose><c:when test='${not empty code.geom}'>등록</c:when><c:otherwise>미등록</c:otherwise></c:choose></td>
                                             <td><c:out value="${code.status}"/></td>
                                             <td><fmt:formatDate value="${code.CDate}" pattern="yyyy-MM-dd HH:mm"/></td>
                                             <td><fmt:formatDate value="${code.UDate}" pattern="yyyy-MM-dd HH:mm"/></td>
 
                                             <td class="text-nowrap">
-                                                <button data-reg-action="edit" type="button" class="btn | btn-sm | btn-outline-primary" data-reg-id="${code.rid}" aria-label="<c:out value='${code.name}'/> 수정">수정</button>
-                                                <button type="button" class="btn | btn-sm | btn-outline-danger" data-reg-action="delete" data-reg-id="${code.rid}" aria-label="<c:out value='${code.name}'/> 삭제">삭제</button>
+                                                <button data-reg-action="detail" type="button" class="btn | btn-sm | btn-outline-primary" data-reg-id="${code.reg_id}" aria-label="<c:out value='${code.name}'/> 상세보기">상세보기</button>
                                             </td>
                                         </tr>
                                     </c:forEach>
@@ -147,20 +144,6 @@
     <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
     <jsp:include page="/WEB-INF/jsp/reg/RegCreateDialog.jsp" />
     <jsp:include page="/WEB-INF/jsp/reg/RegDetailDialog.jsp" />
-    <form id="regDeleteForm" method="post" action="<c:url value='/region/delete.do'/>">
-        <input type="hidden" name="rid">
-    </form>
-    <c:if test="${not empty regDeleteMessage}">
-        <div id="regDeleteMessage" hidden><c:out value="${regDeleteMessage}"/></div>
-        <script>
-        (function () {
-            var escaped = document.createElement('span');
-            escaped.textContent = document.getElementById('regDeleteMessage').textContent;
-            CmpDialog.open({title: '삭제 결과', text: escaped.innerHTML, isOneButton: true,
-                okButton: function () { CmpDialog.close(); }});
-        })();
-        </script>
-    </c:if>
 </body>
 
 <!-- SheetJS -->
@@ -201,12 +184,12 @@
             const table = doc.querySelector('.table-responsive table');
             if (!table) throw new Error('테이블을 찾을 수 없습니다.');
 
-            // 헤더 ("관리" 마지막 컬럼 제외)
+            // 헤더 ("action" 마지막 컬럼 제외)
             const headers = Array.from(table.querySelectorAll('thead th'))
                 .slice(0, -1)
                 .map(th => th.textContent.trim());
 
-            // 본문 ("관리" 마지막 컬럼 제외)
+            // 본문 ("action" 마지막 컬럼 제외)
             const rows = [];
             table.querySelectorAll('tbody tr').forEach(tr => {
                 const tds = tr.querySelectorAll('td');

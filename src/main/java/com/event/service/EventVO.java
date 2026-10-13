@@ -17,7 +17,7 @@ public class EventVO implements Serializable {
     private String title; // 제목
     private String ctg; // 분류
     private String status; // 상태
-    private Long rid; // 지역 ID
+    private Long reg_id; // 지역 ID
     private Date sDate; // 시작일
     private Date eDate; // 종료일
     private String dsc; // 내용
@@ -64,12 +64,12 @@ public class EventVO implements Serializable {
         this.status = status;
     }
 
-    public Long getRid() {
-        return rid;
+    public Long getReg_id() {
+        return reg_id;
     }
 
-    public void setRid(Long rid) {
-        this.rid = rid;
+    public void setReg_id(Long reg_id) {
+        this.reg_id = reg_id;
     }
 
     public Date getSDate() {

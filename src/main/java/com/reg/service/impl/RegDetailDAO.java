@@ -18,10 +18,6 @@ public class RegDetailDAO extends EgovAbstractMapper {
 		return selectOne("regDAO.selectRegForUpdate", regVO);
 	}
 
-	public int selectRegChildCount(RegDetailVO regVO) {
-		return selectOne("regDAO.selectRegChildCount", regVO);
-	}
-
 	public int selectDuplicateRegCount(RegDetailVO regVO) {
 		return selectOne("regDAO.selectDuplicateRegCount", regVO);
 	}
@@ -39,13 +35,5 @@ public class RegDetailDAO extends EgovAbstractMapper {
 
 	public void insertReg(RegDetailVO regVO) throws Exception {
 		insert("regDAO.insertReg", regVO);
-	}
-
-	public void updateReg(RegDetailVO regVO) throws Exception {
-		update("regDAO.updateReg", regVO);
-	}
-
-	public void deleteReg(RegDetailVO regVO) throws Exception {
-		delete("regDAO.deleteReg", regVO);
 	}
 }

@@ -35,20 +35,6 @@
             <form id="searchForm" class="search-box | bg-body-tertiary" method="get" action="<c:url value='/user/list.do'/>">
                 <input type="hidden" name="pageIndex" value="1" />
                 <div class="d-flex | flex-wrap | align-items-center | gap-2">
-                    <input
-                        class="form-control | input-box"
-                        type="search"
-                        placeholder="이메일 검색"
-                        id="email" name="email"
-                        value="<c:out value='${filterVO.email}'/>"
-                    />
-                    <input
-                        class="form-control | input-box"
-                        type="search"
-                        placeholder="닉네임 검색"
-                        id="nickname" name="nickname"
-                        value="<c:out value='${filterVO.nickname}'/>"
-                    />
                     <select 
                         class="form-select | input-box" 
                         placeholder="사용자 유형 선택"
@@ -71,6 +57,20 @@
                             </option>
                         </c:forEach>
                     </select>
+                    <input
+                        class="form-control | input-box"
+                        type="search"
+                        placeholder="이메일 검색"
+                        id="email" name="email"
+                        value="<c:out value='${filterVO.email}'/>"
+                    />
+                    <input
+                        class="form-control | input-box"
+                        type="search"
+                        placeholder="닉네임 검색"
+                        id="nickname" name="nickname"
+                        value="<c:out value='${filterVO.nickname}'/>"
+                    />
                 </div>
                 <button type="submit" class="btn | btn-primary">검색</button>
             </form>
@@ -124,7 +124,7 @@
                                                 </c:forEach>
                                                 <c:out value="${displayStatus}"/>
                                             </td>
-                                            <td><c:out value="${user.rid}"/></td>
+                                            <td><c:out value="${user.reg_id}"/></td>
                                             <td><a href="<c:url value='/user/detail.do'><c:param name='uid' value='${user.uid}'/></c:url>" class="btn | btn-outline-primary">상세</a></td>
                                         </tr>
                                     </c:forEach>

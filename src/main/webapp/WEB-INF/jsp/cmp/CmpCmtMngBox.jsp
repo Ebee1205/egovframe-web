@@ -39,7 +39,7 @@
                     <th scope="col" style="width: 110px;">작성자</th>
                     <th scope="col">내용</th>
                     <th scope="col" style="width: 150px;">작성일</th>
-                    <th scope="col" class="text-end" style="width: 190px;">관리</th>
+                    <th scope="col" class="text-end" style="width: 190px;">action</th>
                 </tr>
             </thead>
             <tbody>
@@ -208,7 +208,7 @@
     </div>
 </div>
 
-<!-- 현재 사용자 UID/타입에 따른 댓글·답글 관리 버튼 활성화 -->
+<!-- 현재 사용자 UID/타입에 따른 댓글·답글 action 버튼 활성화 -->
 <script>
 (function () {
     function readCurrentUser() {
