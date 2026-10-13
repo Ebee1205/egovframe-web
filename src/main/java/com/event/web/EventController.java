@@ -99,6 +99,23 @@ public class EventController {
 		}
 	}
 
+    /** Mobile service panel: use the existing newest-registration list, fixed at ten items. */
+    @RequestMapping(value = "/service/event/latest.do", method = RequestMethod.GET)
+    public String serviceEventLatest(Model model) throws Exception {
+        EventFilterVO filter = new EventFilterVO();
+        filter.setPageIndex(1);
+        filter.setPageSize(10);
+        model.addAttribute("events", eventService.selectEventList(filter));
+
+        CodeFilterVO categoryFilter = new CodeFilterVO();
+        categoryFilter.setParentCode("EVENT_CTG_ROOT");
+        model.addAttribute("eventCtgs", codeService.selectCmmCodeDetail(categoryFilter));
+        CodeFilterVO statusFilter = new CodeFilterVO();
+        statusFilter.setParentCode("EVENT_STAT_ROOT");
+        model.addAttribute("eventStatuses", codeService.selectCmmCodeDetail(statusFilter));
+        return "forward:/WEB-INF/jsp/service/event/ServiceEventList.jsp";
+    }
+
 	@RequestMapping("/event/list.do")
 	public String eventList(EventFilterVO filterVO, Model model) throws Exception {
 		model.addAttribute("events", eventService.selectEventList(filterVO));

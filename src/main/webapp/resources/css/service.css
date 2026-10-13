@@ -46,3 +46,17 @@
 /* 접힘 상태에서 화살표 방향 반전 (아이콘 교체 대신 회전) */
 .map-side-panel .fold-button svg { transition: transform .3s ease; }
 .map-side-panel.folded .fold-button svg { transform: rotate(180deg); }
+
+.service-events .event-card { overflow: hidden; }
+.service-events .event-summary { list-style: none; cursor: pointer; padding: 1rem; }
+.service-events .event-summary::-webkit-details-marker { display: none; }
+.service-events .event-summary:focus-visible { outline: 3px solid var(--cui-primary); outline-offset: -3px; }
+.service-events .event-title { overflow-wrap: anywhere; line-height: 1.5; }
+.service-events .event-meta { font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.service-events .event-chevron { flex-shrink: 0; transition: transform .15s ease; }
+.service-events details[open] .event-chevron { transform: rotate(180deg); }
+.service-events .event-description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.service-events .event-details { padding: 1rem; border-top: 1px solid var(--cui-border-color); }
+.service-events .event-details dt { color: var(--cui-secondary-color); font-size: .8125rem; font-weight: 400; }
+.service-events .event-details dd { overflow-wrap: anywhere; margin-bottom: .75rem; font-size: .875rem; }
+@media (prefers-reduced-motion: reduce) { .service-events .event-chevron { transition: none; } }
