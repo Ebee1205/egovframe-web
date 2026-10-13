@@ -46,12 +46,12 @@
                 <input type="hidden" name="lat" value="${empty event.lat ? '' : event.lat.toPlainString()}">
                 <input type="hidden" name="lon" value="${empty event.lon ? '' : event.lon.toPlainString()}">
                 <div>
-                    <label for="title" class="form-label">이벤트 제목</label>
+                    <label for="title" class="form-label | fw-semibold">이벤트 제목</label>
                     <input type="text" class="form-control" id="title" name="title" maxlength="300" required value="<c:out value='${event.title}'/>">
                 </div>
         
                 <div>
-                    <label for="ctg" class="form-label">이벤트 카테고리</label>
+                    <label for="ctg" class="form-label | fw-semibold">이벤트 카테고리</label>
                     <select 
                         class="form-select | input-box" 
                         placeholder="카테고리 선택"
@@ -67,11 +67,11 @@
         
                 <div class="row">
                     <div class="col">
-                        <label for="sDate" class="form-label">이벤트 시작일</label>
+                        <label for="sDate" class="form-label | fw-semibold">이벤트 시작일</label>
                         <input type="text" class="form-control" id="sDate" name="SDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.SDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                     <div class="col">
-                        <label for="eDate" class="form-label">이벤트 종료일</label>
+                        <label for="eDate" class="form-label | fw-semibold">이벤트 종료일</label>
                         <input type="text" class="form-control" id="eDate" name="EDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                 </div>
@@ -92,12 +92,12 @@
                 </div> -->
         
                 <div>
-                    <label for="address" class="form-label">이벤트 주소</label>
+                    <label for="address" class="form-label | fw-semibold">이벤트 주소</label>
                     <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
                 </div>
         
                 <div>
-                    <label for="dsc" class="form-label">이벤트 내용</label>
+                    <label for="dsc" class="form-label | fw-semibold">이벤트 내용</label>
                     <textarea class="form-control" id="dsc" name="dsc" rows="3" required><c:out value="${event.dsc}"/></textarea>
                 </div>
                 
@@ -115,7 +115,7 @@
                 </div>
         
                 <div>
-                    <label for="status" class="form-label">이벤트 상태</label>
+                    <label for="status" class="form-label | fw-semibold">이벤트 상태</label>
                     <select 
                         class="form-select | input-box" 
                         placeholder="상태 선택"

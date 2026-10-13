@@ -41,7 +41,9 @@
     data-multiple="<c:out value='${fibMultiple}'/>"
     data-field-name="<c:out value='${fibName}'/>" aria-busy="false"
     role="group" aria-labelledby="<c:out value='${fibId}'/>Label">
-    <label id="<c:out value='${fibId}'/>Label" for="<c:out value='${fibId}'/>Input" class="form-label fw-semibold upload-label"><c:out value="${empty param.label ? '첨부파일' : param.label}"/></label>
+
+    <label id="<c:out value='${fibId}'/>Label" for="<c:out value='${fibId}'/>Input" class="form-label | fw-semibold | upload-label"><c:out value="${empty param.label ? '첨부파일' : param.label}"/></label>
+
     <p id="<c:out value='${fibId}'/>Help" class="form-text upload-help">
         <c:out value="${empty param.description ? '선택한 파일은 한 번에 자동 업로드됩니다. X 버튼으로 첨부를 취소할 수 있습니다. 변경은 저장 시 반영됩니다.' : param.description}"/>
         <br>파일 형식: <c:out value="${empty param.accept ? '제한 없음' : param.accept}"/>
