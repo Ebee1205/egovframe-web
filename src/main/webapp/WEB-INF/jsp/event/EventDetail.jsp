@@ -250,7 +250,9 @@
 	            });
 	
 	            // 2. 이미지 파일 가져오기 → 정규화
-	            const images = [];
+	            const attachments = files.map(function (file) {
+	                return { name: file.name, image: null };
+	            });
 	            for (let i = 0; i < files.length; i++) {
 	                const f = files[i];
 	                const ext = getExt(f.name);
@@ -258,7 +260,7 @@
 	                    try {
 	                        const res = await fetch(f.url, { credentials: 'same-origin' });
 	                        if (!res.ok) throw new Error('HTTP ' + res.status);
-	                        images.push(await toExcelImage(await res.blob(), ext));
+	                        attachments[i].image = await toExcelImage(await res.blob(), ext);
 	                    } catch (err) {
 	                        console.error('이미지 처리 실패:', f.name, err);
 	                    }
@@ -317,28 +319,35 @@
 	                return total + Math.max(1, Math.ceil(line.length / 80));
 	            }, 0);
 	            ws.getRow(7).height = Math.min(409, Math.max(120, descriptionLines * 15 + 10));
-	            put('A8:E8', '첨부파일', labelStyle);
-
-	            // 7. 9행~: 첨부 이미지 (한 장당 한 행, A~E 병합)
-	            for (let i = 0; i < images.length; i++) {
-	                const img = images[i];
-	                const rowNo = 9 + i;                                        // 엑셀 행 번호(1-base)
-	                const fit = Math.min(1, IMG_MAX_W / img.width, IMG_MAX_H / img.height);
-	                const dw = Math.round(img.width * fit);
-	                const dh = Math.round(img.height * fit);
-
-	                put('A' + rowNo + ':E' + rowNo, '', centerStyle);
-	                ws.getRow(rowNo).height = dh * 0.75 + 8;                    // px → pt + 여백
-
-	                const imageId = wb.addImage({ buffer: img.buffer, extension: img.extension });
-	                ws.addImage(imageId, {
-	                    tl: { col: 0.05, row: rowNo - 1 + 0.03 },               // 0-base 위치 + 약간의 여백
-	                    ext: { width: dw, height: dh },
-	                    editAs: 'oneCell'
-	                });
+	            if (attachments.length > 0) {
+	                put('A8:E8', '첨부파일', labelStyle);
 	            }
 
-	            const statusRow = 9 + images.length;
+	            // 7. 9행~: 첨부 파일 (한 파일당 한 행, A~E 병합)
+	            for (let i = 0; i < attachments.length; i++) {
+	                const attachment = attachments[i];
+	                const rowNo = 9 + i;                                        // 엑셀 행 번호(1-base)
+
+	                put('A' + rowNo + ':E' + rowNo, attachment.name, attachment.image ? centerStyle : longStyle);
+	                if (attachment.image) {
+	                    const img = attachment.image;
+	                    const fit = Math.min(1, IMG_MAX_W / img.width, IMG_MAX_H / img.height);
+	                    const dw = Math.round(img.width * fit);
+	                    const dh = Math.round(img.height * fit);
+	                    ws.getRow(rowNo).height = dh * 0.75 + 8;                // px → pt + 여백
+
+	                    const imageId = wb.addImage({ buffer: img.buffer, extension: img.extension });
+	                    ws.addImage(imageId, {
+	                        tl: { col: 0.05, row: rowNo - 1 + 0.03 },           // 0-base 위치 + 약간의 여백
+	                        ext: { width: dw, height: dh },
+	                        editAs: 'oneCell'
+	                    });
+	                } else {
+	                    ws.getRow(rowNo).height = 24;
+	                }
+	            }
+
+	            const statusRow = attachments.length > 0 ? 9 + attachments.length : 8;
 	            put('A' + statusRow, '이벤트 상태', labelStyle);
 	            put('B' + statusRow + ':E' + statusRow, d.status, centerStyle);
 
