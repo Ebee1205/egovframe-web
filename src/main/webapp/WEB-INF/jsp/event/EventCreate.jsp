@@ -12,7 +12,7 @@
     <title>이벤트 등록</title>
     <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>">
     <link rel="stylesheet" href="<c:url value='/resources/css/base.css'/>">
-    <link rel="stylesheet" href="<c:url value='/resources/css/form.css'/>">
+    <link rel="stylesheet" href="<c:url value='/resources/css/form.css'><c:param name='v' value='611b8dbd6edd'/></c:url>">
 </head>
 <body>
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>

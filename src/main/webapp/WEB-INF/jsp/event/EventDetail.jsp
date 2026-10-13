@@ -12,7 +12,7 @@
     <title>이벤트 상세</title>
     <link rel="stylesheet" href="<c:url value='/resources/coreui-5.8.0-dist/css/coreui.css'/>" />
     <link href="<c:url value='/resources/css/base.css'/>" rel="stylesheet" type="text/css">
-    <link href="<c:url value='/resources/css/form.css'/>" rel="stylesheet" type="text/css">
+    <link href="<c:url value='/resources/css/form.css'><c:param name='v' value='611b8dbd6edd'/></c:url>" rel="stylesheet" type="text/css">
 </head>
 <body>
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
@@ -108,6 +108,7 @@
                         <jsp:param name="name" value="fileIds" />
                         <jsp:param name="multiple" value="true" />
                         <jsp:param name="label" value="첨부 파일" />
+                        <jsp:param name="description" value="이벤트 관련 파일을 여러 개 첨부할 수 있습니다. 선택한 파일은 한 번에 자동 업로드됩니다. X 버튼으로 첨부를 취소하고, 하단의 수정 버튼을 눌러 반영해주세요." />
                         <jsp:param name="accept" value="${fileAccept}" />
                         <jsp:param name="maxSize" value="${fileMaxSize}" />
                     </jsp:include>
