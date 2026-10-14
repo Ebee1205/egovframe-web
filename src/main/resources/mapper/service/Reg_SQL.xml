@@ -11,6 +11,8 @@
 		<result property="name" column="name"/>
 		<result property="level" column="level"/>
 		<result property="geom" column="geom"/>
+		<result property="lat" column="lat"/>
+		<result property="lon" column="lon"/>
 		<result property="status" column="status"/>
 		<result property="cDate" column="c_date"/>
 		<result property="uDate" column="u_date"/>
@@ -25,6 +27,20 @@
 		SELECT <include refid="regColumns"/>, ST_AsEWKT(c.geom) AS geom
 		FROM tb_reg c
 		LEFT JOIN tb_reg p ON p.reg_id = c.p_reg_id
+		WHERE c.reg_id = #{reg_id}
+	</select>
+
+	<select id="selectRegDetailMap" parameterType="RegVO" resultMap="regResultMap">
+		SELECT <include refid="regColumns"/>,
+			ST_AsGeoJSON(m.g) AS geom,
+			ST_Y(ST_PointOnSurface(m.g)) AS lat,
+			ST_X(ST_PointOnSurface(m.g)) AS lon
+		FROM tb_reg c
+		LEFT JOIN tb_reg p ON p.reg_id = c.p_reg_id
+		CROSS JOIN LATERAL (
+			SELECT ST_Transform(
+				CASE WHEN ST_SRID(c.geom) = 0 THEN ST_SetSRID(c.geom, 4326) ELSE c.geom END, 4326) AS g
+		) m
 		WHERE c.reg_id = #{reg_id}
 	</select>
 

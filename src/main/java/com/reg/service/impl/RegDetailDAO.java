@@ -14,6 +14,10 @@ public class RegDetailDAO extends EgovAbstractMapper {
 		return selectOne("regDAO.selectReg", regVO);
 	}
 
+	public RegDetailVO selectRegDetailMap(RegDetailVO regVO) throws Exception {
+		return selectOne("regDAO.selectRegDetailMap", regVO);
+	}
+
 	public List<RegDetailVO> selectRegList(RegDetailVO regVO) throws Exception {
 		return selectList("regDAO.selectRegList", regVO);
 	}

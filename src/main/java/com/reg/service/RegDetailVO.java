@@ -1,6 +1,7 @@
 package com.reg.service;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import com.cmm.service.ComFilterVO;
@@ -18,6 +19,8 @@ public class RegDetailVO extends ComFilterVO implements Serializable {
 	private String name; // 행정구역명
 	private Integer level; // 행정구역 레벨
 	private String geom; // 영역 EWKT (SRID 보존, Polygon/MultiPolygon)
+	private BigDecimal lat; // 대표점 위도
+	private BigDecimal lon; // 대표점 경도
 	private String status; // 상태
 	private Date cDate; // 생성일
 	private Date uDate; // 수정일
@@ -86,6 +89,22 @@ public class RegDetailVO extends ComFilterVO implements Serializable {
 
 	public void setGeom(String geom) {
 		this.geom = geom;
+	}
+
+	public BigDecimal getLat() {
+		return lat;
+	}
+
+	public void setLat(BigDecimal lat) {
+		this.lat = lat;
+	}
+
+	public BigDecimal getLon() {
+		return lon;
+	}
+
+	public void setLon(BigDecimal lon) {
+		this.lon = lon;
 	}
 
 	public String getStatus() {

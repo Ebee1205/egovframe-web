@@ -6,6 +6,8 @@ public interface RegService {
 
 	RegDetailVO selectReg(RegDetailVO regVO) throws Exception;
 
+	RegDetailVO selectRegDetailMap(RegDetailVO regVO) throws Exception;
+
 	List<RegDetailVO> selectRegList(RegDetailVO regVO) throws Exception;
 
 	int selectRegListCnt(RegDetailVO regVO) throws Exception;

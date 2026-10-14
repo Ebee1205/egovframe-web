@@ -17,6 +17,8 @@ public class RegServiceImpl implements RegService {
     @Override
     public RegDetailVO selectReg(RegDetailVO vo) throws Exception { return regDAO.selectReg(vo); }
     @Override
+    public RegDetailVO selectRegDetailMap(RegDetailVO vo) throws Exception { return regDAO.selectRegDetailMap(vo); }
+    @Override
     public List<RegDetailVO> selectRegList(RegDetailVO vo) throws Exception {
         if (vo.getPageIndex() < 1) { vo.setPageIndex(1); }
         vo.setFirstIndex(vo.getPageSize() > 0 ? (vo.getPageIndex() - 1) * vo.getPageSize() : 0);
