@@ -161,14 +161,15 @@
                         <ul class="pagination | justify-content-center">
                             <c:forEach var="i" begin="1" end="${totalPage}">
                                 <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
+                                    <c:url var="eventPageUrl" value="/event/list.do">
+                                        <c:param name="pageIndex" value="${i}"/>
+                                        <c:param name="title" value="${filterVO.title}"/>
+                                        <c:param name="ctg" value="${filterVO.ctg}"/>
+                                        <c:param name="reg_id" value="${filterVO.reg_id}"/>
+                                        <c:param name="parentRegId" value="${filterVO.parentRegId}"/>
+                                    </c:url>
                                     <a class="page-link"
-                                        href="<c:url value='/event/list.do'>
-                                                <c:param name='pageIndex' value='${i}'/>
-                                                <c:param name='title' value='${filterVO.title}'/>
-                                                <c:param name='ctg' value='${filterVO.ctg}'/>
-                                                <c:param name='reg_id' value='${filterVO.reg_id}'/>
-                                                <c:param name='parentRegId' value='${filterVO.parentRegId}'/>
-                                              </c:url>">
+                                        href="<c:out value='${eventPageUrl}'/>">
                                         <c:out value="${i}"/>
                                     </a>
                                 </li>
