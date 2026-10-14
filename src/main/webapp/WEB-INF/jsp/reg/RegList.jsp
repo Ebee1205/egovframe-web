@@ -68,7 +68,7 @@
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
                     <div>
 	                    <a id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</a>
-	                    <a id="openRegCreate" type="button" class="btn | btn-outline-secondary">신규 등록</a>
+	                    <a id="openRegMap" type="button" class="btn | btn-outline-secondary">지도 보기</a>
                     </div>
                 </div>
 
@@ -79,9 +79,9 @@
                             <tr>
                                 <th scope="col" style="width: 45px;">NO</th>
                                 <th scope="col">상위 행정구역</th>
-                                <th scope="col" style="width: 120px;">상위 행정구역명</th>
+                                <th scope="col" style="width: 150px;">상위 행정구역명</th>
                                 <th scope="col">코드</th>
-                                <th scope="col" style="width: 120px;">행정구역명</th>
+                                <th scope="col" style="width: 150px;">행정구역명</th>
                                 <th scope="col" style="width: 45px;">레벨</th>
                                 <th scope="col" style="width: 45px;">상태</th>
                                 <th scope="col" style="width: 160px;">등록일</th>
@@ -229,7 +229,6 @@
         </div>
     </div>
     <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
-    <jsp:include page="/WEB-INF/jsp/reg/RegCreateDialog.jsp" />
     <jsp:include page="/WEB-INF/jsp/reg/RegDetailDialog.jsp" />
 </body>
 

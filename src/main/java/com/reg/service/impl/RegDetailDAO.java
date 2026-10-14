@@ -10,17 +10,6 @@ import com.reg.service.RegDetailVO;
 @Repository
 public class RegDetailDAO extends EgovAbstractMapper {
 
-    public boolean isValidGeometry(RegDetailVO vo) {
-        return Boolean.TRUE.equals(selectOne("regDAO.isValidGeometry", vo));
-    }
-
-	public RegDetailVO selectRegForUpdate(RegDetailVO regVO) {
-		return selectOne("regDAO.selectRegForUpdate", regVO);
-	}
-
-	public int selectDuplicateRegCount(RegDetailVO regVO) {
-		return selectOne("regDAO.selectDuplicateRegCount", regVO);
-	}
 	public RegDetailVO selectReg(RegDetailVO regVO) throws Exception {
 		return selectOne("regDAO.selectReg", regVO);
 	}
@@ -31,9 +20,5 @@ public class RegDetailDAO extends EgovAbstractMapper {
 
 	public int selectRegListCnt(RegDetailVO regVO) throws Exception {
 		return selectOne("regDAO.selectRegListCnt", regVO);
-	}
-
-	public void insertReg(RegDetailVO regVO) throws Exception {
-		insert("regDAO.insertReg", regVO);
 	}
 }

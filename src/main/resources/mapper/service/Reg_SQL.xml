@@ -2,21 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="regDAO">
 
-	<!-- 등록 시 상위 행정구역을 잠가 계층을 확인한다. -->
-	<select id="selectRegForUpdate" parameterType="RegVO" resultMap="regResultMap">
-		SELECT reg_id, p_reg_id, code, name, level, ST_AsEWKT(geom) AS geom, status, c_date, u_date
-		FROM tb_reg WHERE reg_id = #{reg_id} FOR UPDATE
-	</select>
-    <select id="selectDuplicateRegCount" parameterType="RegVO" resultType="int">
-        SELECT COUNT(*) FROM tb_reg
-        WHERE code = #{code}
-        <if test="reg_id != null">AND reg_id &lt;&gt; #{reg_id}</if>
-    </select>
-    <select id="isValidGeometry" parameterType="RegVO" resultType="boolean">
-        SELECT ST_GeometryType(g) IN ('ST_Polygon', 'ST_MultiPolygon')
-            AND NOT ST_IsEmpty(g) AND ST_IsValid(g)
-        FROM (SELECT ST_GeomFromEWKT(#{geom, jdbcType=VARCHAR}) AS g) AS geometry_input
-    </select>
 	<resultMap id="regResultMap" type="RegVO">
 		<id property="reg_id" column="reg_id"/>
 		<result property="parentRegId" column="p_reg_id"/>
@@ -79,18 +64,5 @@
 		FROM tb_reg c
 		<include refid="regListWhere"/>
 	</select>
-
-	<insert id="insertReg" parameterType="RegVO">
-		INSERT INTO tb_reg (
-			p_reg_id, code, name, level, geom, status, c_date, u_date
-		) VALUES (
-			#{parentRegId, jdbcType=BIGINT}, #{code}, #{name}, #{level}, ST_GeomFromEWKT(#{geom, jdbcType=VARCHAR}), #{status},
-			COALESCE(#{cDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
-			COALESCE(#{uDate, jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
-		)
-		<selectKey keyProperty="reg_id" resultType="long" order="AFTER">
-			SELECT currval(pg_get_serial_sequence('tb_reg', 'reg_id'))
-		</selectKey>
-	</insert>
 
 </mapper>

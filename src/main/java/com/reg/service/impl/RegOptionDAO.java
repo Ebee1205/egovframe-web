@@ -22,7 +22,7 @@ public class RegOptionDAO extends EgovAbstractMapper {
         return selectList("RegOptionDAO.selectRegRoot", vo);
     }
 
-    /** 다단계 행정구역 등록 시 상위 항목으로 사용할 전체 사용 중인 행정구역을 조회한다. */
+    /** 그룹 구성에 사용할 전체 사용 중인 행정구역을 조회한다. */
     public List<RegFilterVO> selectRegParents(RegFilterVO vo) throws Exception {
         return selectList("RegOptionDAO.selectRegParents", vo);
     }
