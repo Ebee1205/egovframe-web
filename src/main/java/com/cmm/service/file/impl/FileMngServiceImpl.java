@@ -37,12 +37,12 @@ public class FileMngServiceImpl implements FileMngService {
 
     private void location(FileVO file) {
         if (!storage.getLocation().equals(file.getFileStreCours())) {
-            throw new FileMngUtil.FileException(409, "FILE_STORAGE_MISMATCH", "파일이 저장된 저장소 설정을 확인해주세요.", null);
+            throw new FileMngUtil.FileException(409, "FILE_STORAGE_MISMATCH", null);
         }
     }
     private FileVO find(Long id, boolean lock) {
         FileVO file = lock ? dao.selectFileForUpdate(FileMngUtil.id(id)) : dao.selectFileInf(FileMngUtil.id(id));
-        if (file == null) { throw new FileMngUtil.FileException(404, "FILE_NOT_FOUND", "파일을 찾을 수 없습니다.", "fileId"); }
+        if (file == null) { throw new FileMngUtil.FileException(404, "FILE_NOT_FOUND", "fileId"); }
         return file;
     }
     private void cleanup(String key) {
@@ -107,7 +107,7 @@ public class FileMngServiceImpl implements FileMngService {
         FileVO stored = find(file.getFileId(), false);
         location(stored);
         if (!stored.getStreFileNm().equals(file.getStreFileNm())) {
-            throw new FileMngUtil.FileException(409, "FILE_CHANGED", "파일이 변경되었습니다. 다시 다운로드해주세요.", null);
+            throw new FileMngUtil.FileException(409, "FILE_CHANGED", null);
         }
         return storage.open(stored.getStreFileNm());
     }
@@ -127,7 +127,7 @@ public class FileMngServiceImpl implements FileMngService {
                 || file.getOrignlFileNm() == null || file.getOrignlFileNm().length() > 255
                 || file.getFileExtsn() == null || file.getFileExtsn().length() > 20
                 || file.getStreFileNm() == null || file.getStreFileNm().length() > 255) {
-            throw FileMngUtil.bad("FILE_METADATA_INVALID", "파일 정보를 확인해주세요.", "file");
+            throw FileMngUtil.bad("FILE_METADATA_INVALID", "file");
         }
         location(file);
         try (InputStream input = storage.open(file.getStreFileNm())) { /* Verify the saved object exists. */ }
@@ -143,7 +143,7 @@ public class FileMngServiceImpl implements FileMngService {
         return ids.toString();
     }
     @Override public void updateFileInfs(List<FileVO> files) {
-        if (files == null || files.isEmpty()) { throw FileMngUtil.bad("FILE_LIST_EMPTY", "파일 목록을 확인해주세요.", "files"); }
+        if (files == null || files.isEmpty()) { throw FileMngUtil.bad("FILE_LIST_EMPTY", "files"); }
         List<FileVO> sorted = new ArrayList<>(files);
         for (FileVO file : sorted) { FileMngUtil.id(file == null ? null : file.getFileId()); }
         sorted.sort(Comparator.comparing(FileVO::getFileId));
@@ -159,7 +159,7 @@ public class FileMngServiceImpl implements FileMngService {
         dao.deleteFileInf(stored.getFileId()); commitCleanup(stored.getStreFileNm());
     }
     @Override public void deleteFileInfs(List<FileVO> files) {
-        if (files == null || files.isEmpty()) { throw FileMngUtil.bad("FILE_LIST_EMPTY", "파일 목록을 확인해주세요.", "files"); }
+        if (files == null || files.isEmpty()) { throw FileMngUtil.bad("FILE_LIST_EMPTY", "files"); }
         List<FileVO> sorted = new ArrayList<>(files);
         for (FileVO file : sorted) { FileMngUtil.id(file == null ? null : file.getFileId()); }
         sorted.sort(Comparator.comparing(FileVO::getFileId));

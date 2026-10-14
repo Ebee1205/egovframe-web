@@ -3,10 +3,13 @@ package com.cmm.service.file;
 import java.io.Serializable;
 import java.util.Date;
 
-/** Metadata corresponding to one tb_file row; storage paths are never client input. */
 public class FileVO implements Serializable {
+
     private static final long serialVersionUID = 1L;
+    
+    // 필드 선언부
     private Long fileId;
+    
     private String fileStreCours;
     private String streFileNm;
     private String orignlFileNm;
@@ -15,11 +18,13 @@ public class FileVO implements Serializable {
     private Long fileSize;
     private Date cDate;
     private boolean imagesOnly;
+    
     private java.util.List<String> imageExtensions;
 
     public java.util.List<String> getImageExtensions() {
     	return imageExtensions;
     }
+    
     public void setImageExtensions(java.util.List<String> value) {
     	imageExtensions = value;
     }

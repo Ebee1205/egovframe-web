@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,14 +28,19 @@ import com.cmm.service.file.impl.FileMngUtil;
 public class FileController {
     private static final String JSON = "application/json;charset=UTF-8";
     private final FileMngService service;
-    public FileController(FileMngService service) { this.service = service; }
+    private final MessageSource messageSource;
+    public FileController(FileMngService service, MessageSource messageSource) {
+        this.service = service;
+        this.messageSource = messageSource;
+    }
 
     @RequestMapping(value = "/upload.do", method = RequestMethod.POST, produces = JSON)
     public ResponseEntity<String> upload(@RequestParam("files") List<MultipartFile> files,
             @RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) throws IOException {
         List<Map<String, Object>> data = new ArrayList<>();
         for (FileVO file : service.uploadFiles(files, description)) { data.add(FileMngUtil.responseData(file, request.getContextPath())); }
-        return ResponseEntity.status(201).body(ComResponseVO.success(data, "파일이 등록되었습니다.").toJson());
+        return ResponseEntity.status(201).body(ComResponseVO.success(data,
+                messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson());
     }
     @RequestMapping(value = "/list.do", method = RequestMethod.GET, produces = JSON)
     public ResponseEntity<String> list(@RequestParam(value = "keyword", required = false) String keyword,
@@ -58,13 +65,16 @@ public class FileController {
             @RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) throws IOException {
         FileVO file = service.updateFile(fileId, replacement, description);
         return ResponseEntity.ok(ComResponseVO.success(FileMngUtil.responseData(file, request.getContextPath()),
-                "파일이 수정되었습니다.").toJson());
+                messageSource.getMessage("file.success.update", null, Locale.KOREAN)).toJson());
     }
     @RequestMapping(value = "/delete.do", method = {RequestMethod.POST, RequestMethod.DELETE}, produces = JSON)
     public ResponseEntity<String> delete(@RequestParam("fileId") Long fileId) {
         FileVO file = new FileVO(); file.setFileId(fileId); service.deleteFileInf(file);
-        return ResponseEntity.ok(ComResponseVO.success(null, "파일이 삭제되었습니다.").toJson());
+        return ResponseEntity.ok(ComResponseVO.success(null,
+                messageSource.getMessage("file.success.delete", null, Locale.KOREAN)).toJson());
     }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handle(Exception exception) { return FileMngUtil.errorResponse(exception); }
+    public ResponseEntity<String> handle(Exception exception) {
+        return FileMngUtil.errorResponse(exception, messageSource);
+    }
 }

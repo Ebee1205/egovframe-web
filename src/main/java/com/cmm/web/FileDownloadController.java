@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,11 +19,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.FileVO;
 import com.cmm.service.file.impl.FileMngUtil;
+import java.util.Locale;
 
 @Controller
 public class FileDownloadController {
     private final FileMngService service;
-    public FileDownloadController(FileMngService service) { this.service = service; }
+    private final MessageSource messageSource;
+    public FileDownloadController(FileMngService service, MessageSource messageSource) {
+        this.service = service;
+        this.messageSource = messageSource;
+    }
 
     @RequestMapping(value = {"/cmm/file/download.do"}, method = RequestMethod.GET)
     public void download(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws IOException {
@@ -46,6 +52,6 @@ public class FileDownloadController {
             throw new IOException("Download failed after response was committed.", exception);
         }
         response.reset();
-        return FileMngUtil.errorResponse(exception);
+        return FileMngUtil.errorResponse(exception, messageSource);
     }
 }
