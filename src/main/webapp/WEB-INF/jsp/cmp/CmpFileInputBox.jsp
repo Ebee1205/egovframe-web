@@ -479,6 +479,29 @@
                 removeFileRow(row);
             }
         }
+        // 현재 화면의 첨부를 비우며 새로 업로드한 임시 파일만 서버에서 정리한다.
+        box.reset = async function () {
+            if (busyMultiple) { throw new Error('첨부파일 처리가 끝난 후 초기화해주세요.'); }
+            setBusyMultiple(true);
+            try {
+                var rows = Array.from(list.querySelectorAll('[data-role="file"]'))
+                    .concat(Array.from(selection.querySelectorAll('[data-role="file"]')));
+                for (var row of rows) {
+                    if (row.getAttribute('data-original') !== 'true') {
+                        var body = new URLSearchParams();
+                        body.set('fileId', row.getAttribute('data-file-id'));
+                        await requestMultiple(box.getAttribute('data-delete-url'), body);
+                    }
+                    row.remove();
+                }
+                pendingFiles = [];
+                pickerMultiple.value = '';
+                tellMultiple('');
+            } finally {
+                setBusyMultiple(false);
+            }
+        };
+
         list.addEventListener('click', handleAttachmentRemove);
         selection.addEventListener('click', handleAttachmentRemove);
 

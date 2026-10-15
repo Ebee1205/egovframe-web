@@ -28,7 +28,11 @@
 
         <div class="form-btn-box">
             <a href="<c:url value='/event/list.do'/>" class="btn | btn-outline-secondary">목록</a>
-            <button id="btnExcelDialog" type="button" class="btn | btn-outline-success">엑셀 업로드</button>
+
+			<div>
+	            <button id="btnResetEvent" type="button" class="btn | btn-outline-secondary">초기화</button>
+	            <button id="btnExcelDialog" type="button" class="btn | btn-outline-success">엑셀 업로드</button>
+			</div>
         </div>
 
         <div class="p-3 | align-items-center">
@@ -220,6 +224,66 @@
                 });
             });
         })();
-    </script>
+    
+(function () {
+    var button = document.getElementById('btnResetEvent');
+    var form = document.getElementById('eventCreateForm');
+    var attachment = document.getElementById('eventAttachment');
+    var parser = document.getElementById('eventExcelAttachment');
+
+    function attachmentBusy() {
+        return attachment && attachment.getAttribute('aria-busy') === 'true';
+    }
+    button.addEventListener('click', function () {
+        if (attachmentBusy()) {
+            alert('첨부파일 처리가 끝난 후 초기화해주세요.');
+            return;
+        }
+        CmpDialog.open({
+            title: '초기화 확인',
+            text: '입력한 내용을 모두 초기화하시겠습니까?',
+            okText: '확인',
+            cancelText: '취소',
+            okButton: async function () {
+                CmpDialog.close();
+                if (attachmentBusy()) {
+                    alert('첨부파일 처리가 끝난 후 초기화해주세요.');
+                    return;
+                }
+                button.disabled = true;
+                try {
+                    if (attachment && typeof attachment.reset === 'function') {
+                        await attachment.reset();
+                    }
+                    if (parser && typeof parser.reset === 'function') { parser.reset(); }
+                    Array.from(form.elements).forEach(function (field) {
+                        if (field.tagName === 'BUTTON' || ['submit', 'button', 'reset'].indexOf(field.type) >= 0) { return; }
+                        // CSRF 등 시스템 hidden 값은 유지하고 이벤트 입력값만 비운다.
+                        if (field.type === 'hidden' && ['reg_id', 'lat', 'lon', 'fileIds'].indexOf(field.name) < 0) { return; }
+                        if (field.type === 'checkbox' || field.type === 'radio') {
+                            field.checked = false;
+                        } else if (field.tagName === 'SELECT') {
+                            Array.from(field.options).forEach(function (option) { option.selected = false; });
+                            field.value = '';
+                        } else {
+                            field.value = '';
+                        }
+                        field.classList.remove('is-invalid', 'is-valid');
+                        field.removeAttribute('aria-invalid');
+                    });
+                    updateChildRegions(true);
+                    form.querySelectorAll('[id$="Error"]').forEach(function (error) { error.textContent = ''; });
+                    document.getElementById('title').focus();
+                } catch (error) {
+                    alert(error.message || '초기화하지 못했습니다. 다시 시도해주세요.');
+                } finally {
+                    button.disabled = false;
+                }
+            }
+        });
+    });
+})();
+
+</script>
 </body>
 </html>
