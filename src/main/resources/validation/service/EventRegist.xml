@@ -65,9 +65,6 @@
                 <var><var-name>min</var-name><var-value>-180</var-value></var>
                 <var><var-name>max</var-name><var-value>180</var-value></var>
             </field>
-            <field property="fileId" depends="long">
-                <arg position="0" key="파일 ID" resource="false"/>
-            </field>
         </form>
         <!-- 등록은 수정 규칙을 재사용하되 자동 생성 ID는 검증에서 제외한다. -->
         <form name="eventCreateVO" extends="eventVO">
