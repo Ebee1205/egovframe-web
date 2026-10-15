@@ -18,7 +18,7 @@
     <noscript>자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>
 
     <!-- Leftnav -->
-    <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpLeftnav.jsp" />
+    <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpLeftnav.jsp" />
     <!--// Leftnav -->
 
     <div class="wrapper | map-layout | service-map-layout | d-flex | flex-column | vh-100">
@@ -26,7 +26,7 @@
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
 
-        <jsp:include page="/WEB-INF/jsp/service/cmp/ServiceCmpMap.jsp" />
+        <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpMap.jsp" />
     </div>
 </body>
 </html>

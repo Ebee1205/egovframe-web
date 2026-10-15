@@ -1,4 +1,4 @@
-package com.map.web;
+package com.overview.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,23 +9,17 @@ import com.code.service.CodeService;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-public class MapViewController {
+public class OverviewController {
 
     private final EventService eventService;
     private final CodeService codeService;
 
-    public MapViewController(EventService eventService, CodeService codeService) {
+    public OverviewController(EventService eventService, CodeService codeService) {
         this.eventService = eventService;
         this.codeService = codeService;
     }
 
-    @RequestMapping("/content/map.do")
-    public String mapContent() {
-        return "forward:/WEB-INF/jsp/map/MapView.jsp";
-    }
-
-
-    @RequestMapping("/service/map.do")
+    @RequestMapping("/overview/map.do")
     public String mapService(Model model) throws Exception {
         EventFilterVO filter = new EventFilterVO();
         filter.setPageIndex(1);
@@ -38,6 +32,6 @@ public class MapViewController {
         CodeFilterVO statusFilter = new CodeFilterVO();
         statusFilter.setParentCode("EVENT_STAT_ROOT");
         model.addAttribute("eventStatuses", codeService.selectCmmCodeDetail(statusFilter));
-        return "forward:/WEB-INF/jsp/service/ServiceView.jsp";
+        return "forward:/WEB-INF/jsp/overview/Overview.jsp";
     }
 }

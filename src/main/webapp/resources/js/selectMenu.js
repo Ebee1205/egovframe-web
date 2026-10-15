@@ -49,12 +49,12 @@ const pageList = [
       //   path: '/store/list.do',
       //   icon: 'cil-speedometer',
       // },
-      {
+/*      {
         page: 'MapView',
         name: '지도 보기',
         path: '/content/map.do',
         icon: 'cil-speedometer',
-      },
+      },*/
     ],
   },
 ];

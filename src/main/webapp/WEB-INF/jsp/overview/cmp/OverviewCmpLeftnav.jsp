@@ -12,7 +12,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${fn:contains(uri, '/map') ? 'active' : ''}"
-               href="<c:url value='/service/map.do'/>"
+               href="<c:url value='/overview/map.do'/>"
                title="지도" aria-label="지도">
                 <span class="nav-icon material-symbols-outlined">map</span>
                 <span class="visually-hidden">지도</span>
@@ -21,7 +21,7 @@
 
         <!-- <li class="nav-item">
             <a class="nav-link ${fn:contains(uri, '/event') ? 'active' : ''}"
-               href="<c:url value='/service/event.do'/>"
+               href="<c:url value='/overview/event.do'/>"
                title="이벤트정보" aria-label="이벤트정보">
                 <span class="nav-icon material-symbols-outlined">celebration</span>
                 <span class="visually-hidden">이벤트정보</span>
@@ -30,7 +30,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${fn:contains(uri, '/store') ? 'active' : ''}"
-               href="<c:url value='/service/store.do'/>"
+               href="<c:url value='/overview/store.do'/>"
                title="가게정보" aria-label="가게정보">
                 <span class="nav-icon material-symbols-outlined">storefront</span>
                 <span class="visually-hidden">가게정보</span>
