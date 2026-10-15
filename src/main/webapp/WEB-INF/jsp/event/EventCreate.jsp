@@ -26,6 +26,11 @@
             <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpTitle.jsp" />
         </div>
 
+        <div class="form-btn-box">
+            <a href="<c:url value='/event/list.do'/>" class="btn | btn-outline-secondary">목록</a>
+            <button id="btnExcelDialog" type="button" class="btn | btn-outline-success">엑셀 업로드</button>
+        </div>
+
         <div class="p-3 | align-items-center">
             <c:url var="insertUrl" value="/event/insert.do"/>
             <form:form id="eventCreateForm" modelAttribute="eventCreateVO" action="${insertUrl}"
@@ -135,14 +140,24 @@
             <div></div>
             <div>
                 <button type="submit" form="eventCreateForm" class="btn | btn-outline-secondary">등록</button>
-                <a href="<c:url value='/event/list.do'/>" class="btn | btn-outline-secondary">목록</a>
             </div>
         </div>
+        <jsp:include page="/WEB-INF/jsp/event/EventCreateXlsDialog.jsp" />
         <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
     </div>
 
     <validator:javascript formName="eventCreateVO" method="validateEventCreateVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
     <script>
+        (function () {
+            var excelDialogButton = document.getElementById('btnExcelDialog');
+            var excelDialogElement = document.getElementById('eventCreateXlsModal');
+            var excelDialog = coreui.Modal.getOrCreateInstance(excelDialogElement);
+
+            excelDialogButton.addEventListener('click', function () {
+                excelDialog.show();
+            });
+        })();
+
 	    const parentRegion = document.getElementById('parentRegId');
 	    const childRegion = document.getElementById('reg_id');
 	
@@ -163,6 +178,7 @@
 	    parentRegion.addEventListener('change', function () {
 	        updateChildRegions(true);
 	    });
+
 	    updateChildRegions(false);
     
         window.alert = function (message) {
