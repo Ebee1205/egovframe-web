@@ -3,6 +3,7 @@ package com.cmm.service.file.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -23,6 +26,7 @@ import com.cmm.service.file.FileVO;
 /** 업로드 스트림을 파싱하며 파일 저장소 및 파일 DB를 사용하지 않는다. */
 @Component
 public class FileParserUtil {
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
     private final FileMngUtil fileMngUtil;
 
     public FileParserUtil(FileMngUtil fileMngUtil) {
@@ -58,7 +62,12 @@ public class FileParserUtil {
                         boolean hasValue = false;
                         for (int column = 0; column < row.getLastCellNum(); column++) {
                             Cell cell = row.getCell(column, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                            String value = formatter.formatCellValue(cell);
+                            CellType type = cell == null ? CellType.BLANK : cell.getCellType();
+                            if (type == CellType.FORMULA) { type = cell.getCachedFormulaResultType(); }
+                            String value = cell != null && type == CellType.NUMERIC
+                                    && DateUtil.isCellDateFormatted(cell)
+                                    ? cell.getLocalDateTimeCellValue().format(DATE_TIME_FORMAT)
+                                    : formatter.formatCellValue(cell);
                             cells.add(value);
                             hasValue |= !value.trim().isEmpty();
                         }
