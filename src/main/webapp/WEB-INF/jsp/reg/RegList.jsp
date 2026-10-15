@@ -68,7 +68,7 @@
                     <p class="table-info-text">총 <c:out value="${filterVO.totalCnt}"/>건</p>
                     <div>
 	                    <a id="btnExcel" class="btn | btn-outline-success">엑셀 다운로드</a>
-	                    <a id="openRegMap" type="button" class="btn | btn-outline-secondary">지도 보기</a>
+	                    <!-- <a id="openRegMap" type="button" class="btn | btn-outline-secondary">지도 보기</a> -->
                     </div>
                 </div>
 

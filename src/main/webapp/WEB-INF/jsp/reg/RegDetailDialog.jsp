@@ -188,8 +188,9 @@
                 target: 'regMapCanvas',
                 layers: [baseLayer, vectorLayer],
                 view: view,
+                interactions: [],
                 controls: [
-                    new ol.control.Attribution({collapsible: true}),
+                    new ol.control.Attribution({collapsible: false}),
                     new ol.control.ScaleLine()
                 ]
             });
