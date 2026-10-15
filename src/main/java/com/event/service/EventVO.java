@@ -23,6 +23,7 @@ public class EventVO implements Serializable {
     private Date eDate; // 종료일
     private String dsc; // 내용
     private String address; // 주소
+    private Long gid; // tb_geo.geo_id
     private BigDecimal lat; // 위도
     private BigDecimal lon; // 경도
     private List<Long> fileIds = new ArrayList<Long>(); // 첨부 파일 ID 목록
@@ -113,6 +114,15 @@ public class EventVO implements Serializable {
         this.address = address;
     }
 
+    public Long getGid() {
+        return gid;
+    }
+
+    public void setGid(Long gid) {
+        this.gid = gid;
+    }
+
+    // Coordinates are form/map data loaded from tb_geo, not columns of tb_event.
     public BigDecimal getLat() {
         return lat;
     }

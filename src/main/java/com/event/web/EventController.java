@@ -79,7 +79,7 @@ public class EventController {
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		if ("eventCreateVO".equals(binder.getObjectName())) {
-			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "createdBy", "fileIds");
+			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "lat", "lon", "createdBy", "fileIds");
 		}
 	}
 

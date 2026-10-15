@@ -1,6 +1,7 @@
 package com.event.service.impl;
 
 import java.util.List;
+import java.math.BigDecimal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -63,6 +64,7 @@ public class EventServiceImpl implements EventService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void insertEvent(EventVO eventVO) throws Exception {
+		prepareEventGeo(eventVO, null);
 		eventDAO.insertEvent(eventVO);
 		insertEventFiles(eventVO);
 	}
@@ -70,9 +72,41 @@ public class EventServiceImpl implements EventService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateEvent(EventVO eventVO) throws Exception {
+		EventVO current = eventDAO.selectEventForGeoUpdate(eventVO);
+		if (current == null) {
+			throw new IllegalArgumentException("이벤트를 찾을 수 없습니다.");
+		}
+		prepareEventGeo(eventVO, current);
 		eventDAO.updateEvent(eventVO);
 		eventDAO.deleteEventFiles(eventVO);
 		insertEventFiles(eventVO);
+	}
+
+	private void prepareEventGeo(EventVO eventVO, EventVO current) throws Exception {
+		BigDecimal lat = eventVO.getLat();
+		BigDecimal lon = eventVO.getLon();
+		// Never trust a form-supplied gid. Missing coordinates preserve the stored link.
+		eventVO.setGid(current == null ? null : current.getGid());
+		if (lat == null && lon == null) {
+			return;
+		}
+		if (lat == null || lon == null) {
+			throw new IllegalArgumentException("위도와 경도를 함께 입력해주세요.");
+		}
+		if (lat.compareTo(BigDecimal.valueOf(-90)) < 0 || lat.compareTo(BigDecimal.valueOf(90)) > 0
+				|| lon.compareTo(BigDecimal.valueOf(-180)) < 0 || lon.compareTo(BigDecimal.valueOf(180)) > 0) {
+			throw new IllegalArgumentException("위도는 -90~90, 경도는 -180~180 범위여야 합니다.");
+		}
+		lat = lat.setScale(7, java.math.RoundingMode.HALF_UP);
+		lon = lon.setScale(7, java.math.RoundingMode.HALF_UP);
+		eventVO.setLat(lat);
+		eventVO.setLon(lon);
+		if (current != null && current.getGid() != null && current.getLat() != null && current.getLon() != null
+				&& lat.compareTo(current.getLat()) == 0 && lon.compareTo(current.getLon()) == 0) {
+			return;
+		}
+		// A geo row can be shared: allocate a new point instead of moving other events.
+		eventDAO.insertEventGeo(eventVO);
 	}
 
 	private void insertEventFiles(EventVO eventVO) throws Exception {

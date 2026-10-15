@@ -28,6 +28,14 @@ public class EventDAO extends EgovAbstractMapper {
 		return selectOne("eventDAO.selectEventListCnt", filterVO);
 	}
 
+	public EventVO selectEventForGeoUpdate(EventVO eventVO) throws Exception {
+		return selectOne("eventDAO.selectEventForGeoUpdate", eventVO);
+	}
+
+	public void insertEventGeo(EventVO eventVO) throws Exception {
+		insert("eventDAO.insertEventGeo", eventVO);
+	}
+
 	public void insertEvent(EventVO eventVO) throws Exception {
 		insert("eventDAO.insertEvent", eventVO);
 	}
