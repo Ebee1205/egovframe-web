@@ -50,6 +50,18 @@
 		</repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Keep API, Core and the SLF4J binding aligned with POI. -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-bom</artifactId>
+                <version>2.24.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 	<dependencies>
         <dependency>
             <groupId>org.apache.poi</groupId>
