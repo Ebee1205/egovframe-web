@@ -73,27 +73,6 @@ public class EventController {
 		this.messageSource = messageSource;
 	}
 
-	/** 이벤트 첨부 업로드는 업무 서비스에서 event 접두사를 지정한다. */
-	@RequestMapping(value = "/event/file/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> eventFileUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
-			@RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) {
-		try {
-			List<Map<String, Object>> data = new java.util.ArrayList<>();
-			for (FileVO file : eventService.uploadEventFiles(files, description)) {
-				data.add(FileMngUtil.responseData(file, request.getContextPath()));
-			}
-			return ResponseEntity.status(201).body(ComResponseVO.success(data,
-					messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson());
-		} catch (Exception exception) {
-			return FileMngUtil.errorResponse(exception, messageSource);
-		}
-	}
-
-	/** 파일 크기 제한 등 요청 파싱 단계의 오류도 공통 응답으로 반환한다. */
-	@ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
-	public ResponseEntity<String> eventFileUploadError(org.springframework.web.multipart.MultipartException exception) {
-		return FileMngUtil.errorResponse(exception, messageSource);
-	}
 	@InitBinder({"eventVO", "eventCreateVO"})
 	public void initEventBinder(WebDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
