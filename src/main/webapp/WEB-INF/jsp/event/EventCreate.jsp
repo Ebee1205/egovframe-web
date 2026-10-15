@@ -34,12 +34,12 @@
                 <input type="hidden" name="lat" value="">
                 <input type="hidden" name="lon" value="">
                 <div>
-                    <label for="title" class="form-label">이벤트 제목</label>
+                    <label for="title" class="form-label | fw-semibold">이벤트 제목</label>
                     <form:input path="title" id="title" cssClass="form-control" maxlength="300" required="required" aria-describedby="titleError"/>
                     <form:errors path="title" id="titleError" cssClass="text-danger" element="div" htmlEscape="true"/>
                 </div>
                 <div>
-                    <label for="ctg" class="form-label">이벤트 카테고리</label>
+                    <label for="ctg" class="form-label | fw-semibold">이벤트 카테고리</label>
                     <form:select path="ctg" id="ctg" cssClass="form-select | input-box" required="required" aria-describedby="ctgError">
                         <form:option value="" label="카테고리 선택"/>
                         <form:options items="${eventCtgs}" itemValue="code" itemLabel="name"/>
@@ -48,26 +48,61 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <label for="sDate" class="form-label">이벤트 시작일</label>
+                        <label for="sDate" class="form-label | fw-semibold">이벤트 시작일</label>
                         <form:input path="SDate" id="sDate" cssClass="form-control" required="required" maxlength="16" placeholder="yyyy-MM-dd HH:mm" aria-describedby="sDateError"/>
                         <form:errors path="SDate" id="sDateError" cssClass="text-danger" element="div" htmlEscape="true"/>
                     </div>
                     <div class="col">
-                        <label for="eDate" class="form-label">이벤트 종료일</label>
+                        <label for="eDate" class="form-label | fw-semibold">이벤트 종료일</label>
                         <form:input path="EDate" id="eDate" cssClass="form-control" required="required" maxlength="16" placeholder="yyyy-MM-dd HH:mm" aria-describedby="eDateError"/>
                         <form:errors path="EDate" id="eDateError" cssClass="text-danger" element="div" htmlEscape="true"/>
                     </div>
                 </div>
+                
+                <c:set var="eventParentRegId" value=""/>
+                <c:forEach var="reg" items="${childRegs}">
+                    <c:if test="${reg.reg_id == event.reg_id}">
+                        <c:set var="eventParentRegId" value="${reg.parentRegId}"/>
+                    </c:if>
+                </c:forEach>
+            	<div class="d-flex | gap-4 | w-100">        		
+	                <div>
+	                    <label for="parentRegId" class="form-label | fw-semibold">이벤트 지역</label>
+	                    <div class="d-flex | gap-2">
+		                    <select class="form-select | input-box" id="parentRegId" name="parentRegId" aria-label="시도 선택">
+		                        <option value="">전체 지역</option>
+		                        <c:forEach var="reg" items="${rootRegs}">
+		                            <option value="${reg.reg_id}" ${reg.reg_id == eventParentRegId || reg.reg_id == event.reg_id ? 'selected' : ''}>
+		                                <c:out value="${reg.name}"/>
+		                            </option>
+		                        </c:forEach>
+		                    </select>
+		                    <select class="form-select | input-box" id="reg_id" name="reg_id" aria-label="시군구 선택"
+		                        ${empty eventParentRegId ? 'disabled' : ''}>
+		                        <option value="">전체 시(구)</option>
+		                        <c:forEach var="reg" items="${childRegs}">
+		                            <c:if test="${not empty reg.parentRegId}">
+		                                <option value="${reg.reg_id}" data-parent-id="${reg.parentRegId}"
+		                                    ${reg.reg_id == event.reg_id ? 'selected' : ''}>
+		                                    <c:out value="${reg.name}"/>
+		                                </option>
+		                            </c:if>
+		                        </c:forEach>
+		                    </select>
+	                    </div>
+	                </div>
+	                <div class="w-100">
+	                    <label for="address" class="form-label | fw-semibold">이벤트 주소</label>
+	                    <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
+	                </div>
+        		</div>
+        		
                 <div>
-                    <label for="address" class="form-label">이벤트 주소</label>
-                    <form:input path="address" id="address" cssClass="form-control" maxlength="500" aria-describedby="addressError"/>
-                    <form:errors path="address" id="addressError" cssClass="text-danger" element="div" htmlEscape="true"/>
-                </div>
-                <div>
-                    <label for="dsc" class="form-label">이벤트 내용</label>
+                    <label for="dsc" class="form-label | fw-semibold">이벤트 내용</label>
                     <form:textarea path="dsc" id="dsc" cssClass="form-control" rows="3" maxlength="1000" required="required" aria-describedby="dscError"/>
                     <form:errors path="dsc" id="dscError" cssClass="text-danger" element="div" htmlEscape="true"/>
                 </div>
+                
                 <div>
                     <jsp:include page="/WEB-INF/jsp/cmp/CmpFileInputBox.jsp">
                         <jsp:param name="id" value="eventAttachment" />
@@ -79,8 +114,9 @@
                         <jsp:param name="maxSize" value="${fileMaxSize}" />
                     </jsp:include>
                 </div>
+                
                 <div>
-                    <label for="status" class="form-label">이벤트 상태</label>
+                    <label for="status" class="form-label | fw-semibold">이벤트 상태</label>
                     <form:select path="status" id="status" cssClass="form-select | input-box" required="required" aria-describedby="statusError">
                         <form:option value="" label="상태 선택"/>
                         <form:options items="${eventStatuses}" itemValue="code" itemLabel="name"/>
@@ -88,7 +124,7 @@
                     <form:errors path="status" id="statusError" cssClass="text-danger" element="div" htmlEscape="true"/>
                 </div>
                 <div>
-                    <label for="createdBy" class="form-label">등록자 ID</label>
+                    <label for="createdBy" class="form-label | fw-semibold">등록자 ID</label>
                     <form:input path="createdBy" id="createdBy" cssClass="form-control" inputmode="numeric" required="required" aria-describedby="createdByError"/>
                     <form:errors path="createdBy" id="createdByError" cssClass="text-danger" element="div" htmlEscape="true"/>
                 </div>
@@ -107,6 +143,28 @@
 
     <validator:javascript formName="eventCreateVO" method="validateEventCreateVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
     <script>
+	    const parentRegion = document.getElementById('parentRegId');
+	    const childRegion = document.getElementById('reg_id');
+	
+	    function updateChildRegions(resetSelection) {
+	        const parentId = parentRegion.value;
+	        childRegion.disabled = !parentId;
+	        if (resetSelection) { childRegion.value = ''; }
+	        Array.from(childRegion.options).forEach(function (option) {
+	            if (option.value) {
+	                option.hidden = !parentId || option.dataset.parentId !== parentId;
+	            }
+	        });
+	        if (childRegion.selectedOptions.length && childRegion.selectedOptions[0].hidden) {
+	            childRegion.value = '';
+	        }
+	    }
+	
+	    parentRegion.addEventListener('change', function () {
+	        updateChildRegions(true);
+	    });
+	    updateChildRegions(false);
+    
         window.alert = function (message) {
             CmpDialog.open({
                 title: '입력 확인',
@@ -117,6 +175,7 @@
                 }
             });
         };
+        
 
         (function () {
             var form = document.getElementById('eventCreateForm');

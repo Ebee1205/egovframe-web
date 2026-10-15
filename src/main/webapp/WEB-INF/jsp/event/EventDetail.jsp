@@ -42,7 +42,6 @@
                 data-success-text="수정이 완료되었습니다."
             >
                 <input type="hidden" name="eid" value="${event.eid}">
-                <input type="hidden" name="reg_id" value="${event.reg_id}">
                 <input type="hidden" name="lat" value="${empty event.lat ? '' : event.lat.toPlainString()}">
                 <input type="hidden" name="lon" value="${empty event.lon ? '' : event.lon.toPlainString()}">
                 <div>
@@ -90,11 +89,44 @@
                         </c:forEach>
                     </select>
                 </div> -->
-        
-                <div>
-                    <label for="address" class="form-label | fw-semibold">이벤트 주소</label>
-                    <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
-                </div>
+                
+                <c:set var="eventParentRegId" value=""/>
+                <c:forEach var="reg" items="${childRegs}">
+                    <c:if test="${reg.reg_id == event.reg_id}">
+                        <c:set var="eventParentRegId" value="${reg.parentRegId}"/>
+                    </c:if>
+                </c:forEach>
+            	<div class="d-flex | gap-4 | w-100">        		
+	                <div>
+	                    <label for="parentRegId" class="form-label | fw-semibold">이벤트 지역</label>
+	                    <div class="d-flex | gap-2">
+		                    <select class="form-select | input-box" id="parentRegId" name="parentRegId" aria-label="시도 선택">
+		                        <option value="">전체 지역</option>
+		                        <c:forEach var="reg" items="${rootRegs}">
+		                            <option value="${reg.reg_id}" ${reg.reg_id == eventParentRegId || reg.reg_id == event.reg_id ? 'selected' : ''}>
+		                                <c:out value="${reg.name}"/>
+		                            </option>
+		                        </c:forEach>
+		                    </select>
+		                    <select class="form-select | input-box" id="reg_id" name="reg_id" aria-label="시군구 선택"
+		                        ${empty eventParentRegId ? 'disabled' : ''}>
+		                        <option value="">전체 시(구)</option>
+		                        <c:forEach var="reg" items="${childRegs}">
+		                            <c:if test="${not empty reg.parentRegId}">
+		                                <option value="${reg.reg_id}" data-parent-id="${reg.parentRegId}"
+		                                    ${reg.reg_id == event.reg_id ? 'selected' : ''}>
+		                                    <c:out value="${reg.name}"/>
+		                                </option>
+		                            </c:if>
+		                        </c:forEach>
+		                    </select>
+	                    </div>
+	                </div>
+	                <div class="w-100">
+	                    <label for="address" class="form-label | fw-semibold">이벤트 주소</label>
+	                    <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
+	                </div>
+        		</div>
         
                 <div>
                     <label for="dsc" class="form-label | fw-semibold">이벤트 내용</label>
@@ -113,7 +145,7 @@
                         <jsp:param name="maxSize" value="${fileMaxSize}" />
                     </jsp:include>
                 </div>
-        
+
                 <div>
                     <label for="status" class="form-label | fw-semibold">이벤트 상태</label>
                     <select 
@@ -191,6 +223,31 @@
     
 	<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 	<script>
+	
+	    const parentRegion = document.getElementById('parentRegId');
+	    const childRegion = document.getElementById('reg_id');
+	
+	    function updateChildRegions(resetSelection) {
+	        const parentId = parentRegion.value;
+	        childRegion.disabled = !parentId;
+	        if (resetSelection) { childRegion.value = ''; }
+	        Array.from(childRegion.options).forEach(function (option) {
+	            if (option.value) {
+	                option.hidden = !parentId || option.dataset.parentId !== parentId;
+	            }
+	        });
+	        if (childRegion.selectedOptions.length && childRegion.selectedOptions[0].hidden) {
+	            childRegion.value = '';
+	        }
+	    }
+	
+	    parentRegion.addEventListener('change', function () {
+	        updateChildRegions(true);
+	    });
+	    updateChildRegions(false);
+
+	
+
 	    const IMG_EXT = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
 	    const IMG_MAX_W = 570;    // 엑셀 A~E열 전체 너비(px)에 맞춤
 	    const IMG_MAX_H = 400;    // 이미지 한 장의 최대 표시 높이(px)

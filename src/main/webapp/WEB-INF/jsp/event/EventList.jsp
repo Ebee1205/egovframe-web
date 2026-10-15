@@ -95,7 +95,7 @@
                         <thead class="table-light | text-center">
                             <tr>
                                 <th scope="col" style="width: 45px;">NO</th>
-                                <th scope="col" style="width: 80px;">지역</th>
+                                <th scope="col" style="width: 100px;">지역</th>
                                 <th scope="col" style="width: 200px;">제목</th>
                                 <th scope="col" style="width: 80px;">분류</th>
                                 <th scope="col">시작일</th>
@@ -196,6 +196,7 @@
     const btn = document.getElementById('btnExcel');
     const form = document.getElementById('searchForm');
     const listUrl = '<c:url value="/event/list.do"/>';
+    
     const parentRegion = document.getElementById('parentRegId');
     const childRegion = document.getElementById('reg_id');
 
