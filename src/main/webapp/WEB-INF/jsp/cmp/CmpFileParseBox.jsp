@@ -3,7 +3,7 @@
 <%--
   단일 파일 파싱 컴포넌트: 선택 즉시 업로드하고 data[0].fileContent를 반환한다.
   props: id, label, description, accept, maxSize, uploadUrl
-  API: await element.uploadFile(file), element.getFileContent()
+  API: await element.uploadFile(file), element.getFileContent(), element.reset()
   이벤트: file-input-box:change -> detail.fileContent (재선택/첨부 취소 시 null로 초기화)
   파일 ID, 다운로드 및 삭제 API는 사용하지 않는다.
 --%>
@@ -75,11 +75,14 @@
     var status = role('status');
     var dropzone = role('dropzone');
     var form = box.closest('form');
+    var modal = box.closest('.modal');
     var maxSize = Number(box.getAttribute('data-max-size'));
     var busy = false;
     var selectedFile = null;
     var fileContent = null;
     var dragDepth = 0;
+    var requestVersion = 0;
+    var activeRequest = null;
 
     function formatSize(bytes) {
         if (bytes < 1024) { return bytes + ' B'; }
@@ -134,6 +137,9 @@
     box.uploadFile = async function (file) {
         if (busy) { throw new Error('파일 처리가 끝난 후 다시 선택해주세요.'); }
         if (!file) { throw new Error('파일을 선택해주세요.'); }
+        var version = ++requestVersion;
+        var controller = new AbortController();
+        activeRequest = controller;
         clearError();
         selectedFile = file;
         fileContent = null;
@@ -154,10 +160,13 @@
             selectLabel.textContent = '파일 재선택';
             var body = new FormData();
             body.append('files', file);
-            var response = await fetch(box.getAttribute('data-upload-url'), {method: 'POST', body: body});
+            var response = await fetch(box.getAttribute('data-upload-url'), {
+                method: 'POST', body: body, signal: controller.signal
+            });
             var result;
             try { result = await response.json(); }
             catch (parseError) { throw new Error('서버 응답을 확인할 수 없습니다. 다시 시도해주세요.'); }
+            if (version !== requestVersion) { return null; }
             if (!response.ok || !result || !result.code || result.code.resultCode !== 'SUCCESS') {
                 throw new Error(errorMessage(result));
             }
@@ -169,10 +178,14 @@
             fileContent = data[0].fileContent;
             clearError();
         } catch (error) {
+            if (version !== requestVersion) { return null; }
             showError(error.message || '파일을 읽지 못했습니다. 다시 선택해주세요.');
             throw error;
         } finally {
-            setBusy(false);
+            if (version === requestVersion) {
+                activeRequest = null;
+                setBusy(false);
+            }
         }
         var parsedContent = fileContent;
         notify();
@@ -180,8 +193,12 @@
     };
     box.getFileContent = function () { return fileContent; };
 
-    removeButton.addEventListener('click', function () {
-        if (busy || !selectedFile) { return; }
+    box.reset = function () {
+        requestVersion++;
+        if (activeRequest) {
+            activeRequest.abort();
+            activeRequest = null;
+        }
         selectedFile = null;
         fileContent = null;
         picker.value = '';
@@ -189,10 +206,24 @@
         size.textContent = '';
         fileList.hidden = true;
         selectLabel.textContent = '파일 선택';
+        dragDepth = 0;
+        dropzone.classList.remove('is-dragover');
         clearError();
+        setBusy(false);
         notify();
+    };
+
+    removeButton.addEventListener('click', function () {
+        if (busy || !selectedFile) { return; }
+        box.reset();
         selectButton.focus();
     });
+
+    if (modal) {
+        modal.addEventListener('hidden.coreui.modal', function (event) {
+            if (event.target === modal) { box.reset(); }
+        });
+    }
 
     function choose(files) {
         if (busy || !files || !files.length) { return; }
