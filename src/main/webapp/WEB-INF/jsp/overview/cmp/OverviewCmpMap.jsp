@@ -10,6 +10,11 @@
 <div class="map-body | p-0">
 
     <div id="map"></div>
+    
+    <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpSideBar.jsp">
+    <jsp:param name="contentPage"
+               value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
+	</jsp:include>
 
     <div class="map-bottom-right">
 
