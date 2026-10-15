@@ -1,5 +1,5 @@
 /* 사이드 패널 */
-.sidebar.app-sidebar ~ .service-map-layout {
+.sidebar.app-sidebar ~ .overview-map-layout {
     width: calc(100% - var(--cui-sidebar-narrow-width, 4rem));
     margin-inline-start: var(--cui-sidebar-narrow-width, 4rem);
 }
@@ -47,16 +47,16 @@
 .map-side-panel .fold-button svg { transition: transform .3s ease; }
 .map-side-panel.folded .fold-button svg { transform: rotate(180deg); }
 
-.service-events .event-card { overflow: hidden; }
-.service-events .event-summary { list-style: none; cursor: pointer; padding: 1rem; }
-.service-events .event-summary::-webkit-details-marker { display: none; }
-.service-events .event-summary:focus-visible { outline: 3px solid var(--cui-primary); outline-offset: -3px; }
-.service-events .event-title { overflow-wrap: anywhere; line-height: 1.5; }
-.service-events .event-meta { font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
-.service-events .event-chevron { flex-shrink: 0; transition: transform .15s ease; }
-.service-events details[open] .event-chevron { transform: rotate(180deg); }
-.service-events .event-description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
-.service-events .event-details { padding: 1rem; border-top: 1px solid var(--cui-border-color); }
-.service-events .event-details dt { color: var(--cui-secondary-color); font-size: .8125rem; font-weight: 400; }
-.service-events .event-details dd { overflow-wrap: anywhere; margin-bottom: .75rem; font-size: .875rem; }
-@media (prefers-reduced-motion: reduce) { .service-events .event-chevron { transition: none; } }
+.overview-events .event-card { overflow: hidden; }
+.overview-events .event-summary { list-style: none; cursor: pointer; padding: 1rem; }
+.overview-events .event-summary::-webkit-details-marker { display: none; }
+.overview-events .event-summary:focus-visible { outline: 3px solid var(--cui-primary); outline-offset: -3px; }
+.overview-events .event-title { overflow-wrap: anywhere; line-height: 1.5; }
+.overview-events .event-meta { font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.overview-events .event-chevron { flex-shrink: 0; transition: transform .15s ease; }
+.overview-events details[open] .event-chevron { transform: rotate(180deg); }
+.overview-events .event-description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.overview-events .event-details { padding: 1rem; border-top: 1px solid var(--cui-border-color); }
+.overview-events .event-details dt { color: var(--cui-secondary-color); font-size: .8125rem; font-weight: 400; }
+.overview-events .event-details dd { overflow-wrap: anywhere; margin-bottom: .75rem; font-size: .875rem; }
+@media (prefers-reduced-motion: reduce) { .overview-events .event-chevron { transition: none; } }

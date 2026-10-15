@@ -12,7 +12,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${fn:contains(uri, '/map') ? 'active' : ''}"
-               href="<c:url value='/overview/map.do'/>"
+               href="<c:url value='/overview.do'/>"
                title="지도" aria-label="지도">
                 <span class="nav-icon material-symbols-outlined">map</span>
                 <span class="visually-hidden">지도</span>

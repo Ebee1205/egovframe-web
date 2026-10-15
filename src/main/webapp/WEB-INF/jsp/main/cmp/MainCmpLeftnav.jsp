@@ -21,7 +21,7 @@
     <div class="sidebar-footer | border-top | d-flex">
         <button class="sidebar-toggler" type="button"
             aria-label="지도 서비스로 이동"
-            onclick="window.location.href='<c:url value='/overview/map.do'/>'"></button>
+            onclick="window.location.href='<c:url value='/overview.do'/>'"></button>
     </div>
 </div>
 <!--// Leftnav -->
