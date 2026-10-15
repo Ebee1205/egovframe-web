@@ -34,8 +34,9 @@ import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 import com.cmm.service.ComResponseVO;
 import com.cmm.service.file.FileMngService;
-import com.cmm.service.file.ExcelFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
+import com.cmm.service.file.impl.FileParserUtil;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,7 +63,7 @@ public class EventFileController {
 
 	private final EventService eventService;
 	@Autowired
-	private ExcelFileParser excelFileParser;
+	private FileParserUtil excelFileParser;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
 	private final RegService regService;
@@ -107,6 +108,19 @@ public class EventFileController {
 	@ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
 	public ResponseEntity<String> eventFileUploadError(org.springframework.web.multipart.MultipartException exception) {
 		return FileMngUtil.errorResponse(exception, messageSource);
+	}
+
+	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
+	@RequestMapping(value = "/event/file/template/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
+			@RequestParam(value = "fileCn", required = false) String description) {
+		try {
+			List<Map<String, Object>> data = excelFileParser.parse(files, description);
+			return ResponseEntity.ok(ComResponseVO.success(data,
+					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
+		} catch (Exception exception) {
+			return FileMngUtil.errorResponse(exception, messageSource);
+		}
 	}
 
 	@RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)

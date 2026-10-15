@@ -158,6 +158,16 @@
             });
         })();
 
+        const component = document.getElementById('eventExcelAttachment');
+        const fileContent = component.getFileContent();
+
+        component.addEventListener('file-input-box:change', function (event) {
+            const fileContent = event.detail.fileContent;
+            if (fileContent) {
+                console.log(fileContent.sheets);
+            }
+        });
+        
 	    const parentRegion = document.getElementById('parentRegId');
 	    const childRegion = document.getElementById('reg_id');
 	

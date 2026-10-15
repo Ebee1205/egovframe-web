@@ -123,7 +123,7 @@ public class FileMngUtil {
         if (count < 1 || count > maxFiles) { throw bad("FILE_COUNT_INVALID", "files"); }
     }
 
-    public FileVO describe(MultipartFile upload, String location, String description, String prefix, int number) {
+    public FileVO validate(MultipartFile upload) {
         if (upload == null || upload.isEmpty()) { throw bad("FILE_EMPTY", "files"); }
         String name = upload.getOriginalFilename();
 
@@ -146,9 +146,14 @@ public class FileMngUtil {
         file.setOrignlFileNm(name);
         file.setFileExtsn(extension);
         file.setFileSize(upload.getSize());
+        return file;
+    }
+
+    public FileVO describe(MultipartFile upload, String location, String description, String prefix, int number) {
+        FileVO file = validate(upload);
         file.setFileCn(description);
         file.setFileStreCours(location);
-        file.setStreFileNm(formatFileName(prefix, extension, number));
+        file.setStreFileNm(formatFileName(prefix, file.getFileExtsn(), number));
         file.setCDate(new Date());
         return file;
     }

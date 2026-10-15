@@ -16,7 +16,7 @@
                 </a>
                 
                 <div class="mt-4">
-                    <jsp:include page="/WEB-INF/jsp/cmp/CmpFileInputBox.jsp">
+                    <jsp:include page="/WEB-INF/jsp/cmp/CmpFileParseBox.jsp">
                         <jsp:param name="id" value="eventExcelAttachment" />
                         <jsp:param name="uploadUrl" value="/event/file/template/upload.do" />
                         <jsp:param name="name" value="fileIds" />
@@ -32,6 +32,7 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">업로드</button>
             </div>
         </div>
     </div>
