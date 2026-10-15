@@ -14,7 +14,7 @@
                 <arg0 key="code.name"/>
                 <arg1 name="maxlength" key="100" resource="false"/>
                 <var><var-name>maxlength</var-name><var-value>100</var-value></var>
-                <var><var-name>mask</var-name><var-value>^[A-Za-z가-힣]+$</var-value></var>
+                <var><var-name>mask</var-name><var-value>^[A-Za-z가-힣 ]+$</var-value></var>
             </field>
             <field property="code" depends="required,maxlength,mask">
                 <msg name="mask" key="errors.englishUpperCase"/>
