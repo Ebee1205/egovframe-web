@@ -1,8 +1,12 @@
 /**
  * Shared point-marker layer. Coordinates use EPSG:4326 (lon/lat).
- * items: [{ id, lat, lon, title, label, ...customData }]
- * options: { items, onSelect(item, {fromMap}), getPadding(size), style(item, selected) }
- * Returns { setItems(items), has(id), select(id), fitAll(), destroy() }.
+ * items: [{ id, lat, lon, title, color?, hoverColor?, icon?, ...customData }]
+ * options: { items, color, hoverColor, opacity, selectedOpacity, hoverOpacity,
+ *   icon, onSelect(item, {fromMap}), getPadding(size), style(item, selected, hovered) }
+ * Appearance may be supplied per item or shared in options. icon accepts a URL
+ * or ol.style.Icon options (src, anchor, width, height, scale, etc.). Images keep
+ * their original colors unless icon.color explicitly supplies an OpenLayers tint.
+ * Returns { setItems(items), has(id), select(id), hover(id|null), fitAll(), destroy() }.
  * UI bindings and application-specific data belong to the caller.
  */
 export function createMapMarker(map, options = {}) {
@@ -12,6 +16,7 @@ export function createMapMarker(map, options = {}) {
     const layer = new ol.layer.Vector({source});
     const entries = new Map();
     let selected = null;
+    let hovered = null;
     let disposed = false;
     let fitFrame = null;
     const target = map.getTargetElement();
@@ -19,20 +24,44 @@ export function createMapMarker(map, options = {}) {
     const originalCursor = target.style.cursor;
     map.addLayer(layer);
 
-    function markerStyle(item, active) {
-        if (options.style) return options.style(item, active);
-        return new ol.style.Style({
-            image: new ol.style.Circle({
+    function markerStyle(item, active, over) {
+        if (options.style) return options.style(item, active, over);
+        const color = over ? (item.hoverColor ?? options.hoverColor ?? '#4645ab')
+            : (item.color ?? options.color ?? '#5856d6');
+        const opacity = over ? (item.hoverOpacity ?? options.hoverOpacity ?? 1)
+            : active ? (item.selectedOpacity ?? options.selectedOpacity ?? 1)
+            : (item.opacity ?? options.opacity ?? 0.5);
+        const icon = item.icon ?? options.icon;
+        let image;
+        if (icon) {
+            const config = typeof icon === 'string' ? {src: icon} : {...icon};
+            image = new ol.style.Icon({...config, opacity: (config.opacity ?? 1) * opacity});
+        } else {
+            image = new ol.style.Circle({
                 radius: active ? 18 : 15,
-                fill: new ol.style.Fill({color: active ? '#b54708' : '#0d6efd'}),
+                fill: new ol.style.Fill({color}),
                 stroke: new ol.style.Stroke({color: '#fff', width: 3})
-            }),
-            text: new ol.style.Text({
-                text: String(item.label), font: 'bold 13px sans-serif',
-                fill: new ol.style.Fill({color: '#fff'})
-            }),
-            zIndex: active ? 2 : 1
+            });
+            image.setOpacity(opacity);
+        }
+        return new ol.style.Style({
+            image,
+            zIndex: over ? 3 : active ? 2 : 1
         });
+    }
+
+    function refresh(entry) {
+        if (entry) entry.feature.setStyle(markerStyle(entry.item, entry === selected, entry === hovered));
+    }
+
+    function hover(id) {
+        if (disposed) return;
+        const next = id == null ? null : (entries.get(String(id)) || null);
+        if (next === hovered) return;
+        const previous = hovered;
+        hovered = next;
+        refresh(previous);
+        refresh(hovered);
     }
 
     function fit(geometry, maxZoom) {
@@ -49,9 +78,10 @@ export function createMapMarker(map, options = {}) {
         if (disposed) return false;
         const entry = entries.get(String(id));
         if (!entry) return false;
-        if (selected) selected.feature.setStyle(markerStyle(selected.item, false));
+        const previous = selected;
         selected = entry;
-        entry.feature.setStyle(markerStyle(entry.item, true));
+        refresh(previous);
+        refresh(entry);
         // Let the caller reveal its list/panel before calculating viewport padding.
         if (options.onSelect) options.onSelect(entry.item, {fromMap});
         fit(entry.feature.getGeometry(), Math.max(view.getZoom() || 0, 15));
@@ -66,11 +96,12 @@ export function createMapMarker(map, options = {}) {
         if (disposed) return;
         if (fitFrame !== null) cancelAnimationFrame(fitFrame);
         selected = null;
+        hovered = null;
         entries.clear();
         source.clear();
         target.style.cursor = originalCursor;
         target.title = originalTitle;
-        (items || []).forEach(function (data, index) {
+        (items || []).forEach(function (data) {
             const lat = Number(data.lat);
             const lon = Number(data.lon);
             const id = data.id == null ? '' : String(data.id);
@@ -79,12 +110,12 @@ export function createMapMarker(map, options = {}) {
                 || String(data.lat).trim() === '' || String(data.lon).trim() === ''
                 || !Number.isFinite(lat) || !Number.isFinite(lon)
                 || lat < -85.05112878 || lat > 85.05112878 || lon < -180 || lon > 180) return;
-            const item = {...data, label: data.label == null ? index + 1 : data.label};
+            const item = {...data};
             const feature = new ol.Feature({
                 geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat], view.getProjection())),
                 markerId: id
             });
-            feature.setStyle(markerStyle(item, false));
+            feature.setStyle(markerStyle(item, false, false));
             entries.set(id, {item, feature});
             source.addFeature(feature);
         });
@@ -104,11 +135,18 @@ export function createMapMarker(map, options = {}) {
         if (event.dragging) return;
         const feature = featureAt(event.pixel);
         const entry = feature && entries.get(feature.get('markerId'));
+        hover(entry ? feature.get('markerId') : null);
         target.style.cursor = entry ? 'pointer' : originalCursor;
         target.title = entry ? String(entry.item.title || '') : originalTitle;
     }
     map.on('singleclick', handleClick);
     map.on('pointermove', handlePointer);
+    function handleLeave() {
+        hover(null);
+        target.style.cursor = originalCursor;
+        target.title = originalTitle;
+    }
+    target.addEventListener('pointerleave', handleLeave);
     setItems(options.items);
 
     function destroy() {
@@ -117,6 +155,7 @@ export function createMapMarker(map, options = {}) {
         if (fitFrame !== null) cancelAnimationFrame(fitFrame);
         map.un('singleclick', handleClick);
         map.un('pointermove', handlePointer);
+        target.removeEventListener('pointerleave', handleLeave);
         map.removeLayer(layer);
         source.clear();
         entries.clear();
@@ -124,5 +163,5 @@ export function createMapMarker(map, options = {}) {
         target.title = originalTitle;
     }
     function has(id) { return !disposed && entries.has(String(id)); }
-    return {setItems, has, select, fitAll, destroy};
+    return {setItems, has, select, hover, fitAll, destroy};
 }

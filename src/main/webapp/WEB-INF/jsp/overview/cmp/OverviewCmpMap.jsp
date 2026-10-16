@@ -133,13 +133,18 @@
     var eventCards = Array.from(document.querySelectorAll('[data-overview-event]'));
     var sidePanel = document.getElementById('mapSidePanel');
     var eventMarkers = createMapMarker(map, {
-        items: eventCards.map(function (card, index) {
+        color: '#5856d6',
+        hoverColor: '#4645ab',
+        opacity: 0.5,
+        selectedOpacity: 1,
+        hoverOpacity: 1,
+        // Supply icon: '/path/to/marker.svg' or {src, width, anchor, ...} as needed.
+        items: eventCards.map(function (card) {
             return {
                 id: card.dataset.overviewEvent,
                 lat: card.dataset.lat,
                 lon: card.dataset.lon,
                 title: card.querySelector('.event-title').textContent.trim(),
-                label: index + 1,
                 card: card
             };
         }),
@@ -170,6 +175,10 @@
         card.addEventListener('click', function () {
             if (hasLocation) eventMarkers.select(card.dataset.overviewEvent);
         });
+        card.addEventListener('mouseenter', function () {
+            if (hasLocation) eventMarkers.hover(card.dataset.overviewEvent);
+        });
+        card.addEventListener('mouseleave', function () { eventMarkers.hover(null); });
         card.addEventListener('keydown', function (event) {
             if (hasLocation && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault();
