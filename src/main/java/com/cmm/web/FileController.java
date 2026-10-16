@@ -38,10 +38,16 @@ public class FileController {
     public ResponseEntity<String> upload(@RequestParam("files") List<MultipartFile> files,
             @RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) throws IOException {
         List<Map<String, Object>> data = new ArrayList<>();
-        for (FileVO file : service.uploadFiles(files, description)) { data.add(FileMngUtil.responseData(file, request.getContextPath())); }
-        return ResponseEntity.status(201).body(ComResponseVO.success(data,
-                messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson());
+        for (FileVO file : service.uploadFiles(files, description)) { 
+        	data.add(FileMngUtil.responseData(file, request.getContextPath())); 
+        }
+        return ResponseEntity.status(201).body(
+        		ComResponseVO.success(
+        			data,
+        			messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson()
+        		);
     }
+
     @RequestMapping(value = "/list.do", method = RequestMethod.GET, produces = JSON)
     public ResponseEntity<String> list(@RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "imagesOnly", defaultValue = "false") boolean imagesOnly,
@@ -53,12 +59,14 @@ public class FileController {
         Map<String, Object> data = new LinkedHashMap<>(); data.put("items", items);
         return ResponseEntity.ok(ComResponseVO.success(data, null).toJson());
     }
+
     @RequestMapping(value = "/detail.do", method = RequestMethod.GET, produces = JSON)
     public ResponseEntity<String> detail(@RequestParam("fileId") Long fileId, HttpServletRequest request) {
         FileVO query = new FileVO(); query.setFileId(fileId);
         return ResponseEntity.ok(ComResponseVO.success(FileMngUtil.responseData(service.selectFileInf(query),
                 request.getContextPath()), null).toJson());
     }
+
     @RequestMapping(value = "/update.do", method = RequestMethod.POST, produces = JSON)
     public ResponseEntity<String> update(@RequestParam("fileId") Long fileId,
             @RequestParam(value = "file", required = false) MultipartFile replacement,
@@ -67,12 +75,14 @@ public class FileController {
         return ResponseEntity.ok(ComResponseVO.success(FileMngUtil.responseData(file, request.getContextPath()),
                 messageSource.getMessage("file.success.update", null, Locale.KOREAN)).toJson());
     }
+
     @RequestMapping(value = "/delete.do", method = {RequestMethod.POST, RequestMethod.DELETE}, produces = JSON)
     public ResponseEntity<String> delete(@RequestParam("fileId") Long fileId) {
         FileVO file = new FileVO(); file.setFileId(fileId); service.deleteFileInf(file);
         return ResponseEntity.ok(ComResponseVO.success(null,
                 messageSource.getMessage("file.success.delete", null, Locale.KOREAN)).toJson());
     }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handle(Exception exception) {
         return FileMngUtil.errorResponse(exception, messageSource);

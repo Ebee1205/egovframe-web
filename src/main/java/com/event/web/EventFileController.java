@@ -78,8 +78,11 @@ public class EventFileController {
 	@Autowired
 	private DefaultValidatorFactory validatorFactory;
 
-	public EventFileController(EventService eventService, EventCmtService eventCmtService, CodeService codeService,
-			FileMngService fileMngService, RegService regService, MessageSource messageSource) {
+	public EventFileController(
+		EventService eventService, EventCmtService eventCmtService,  
+		CodeService codeService, FileMngService fileMngService, RegService regService, 
+		MessageSource messageSource
+	) {
 		this.eventService = eventService;
 		this.eventCmtService = eventCmtService;
 		this.codeService = codeService;
@@ -91,14 +94,17 @@ public class EventFileController {
 	/** 이벤트 첨부 업로드는 업무 서비스에서 event 접두사를 지정한다. */
 	@RequestMapping(value = "/event/file/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> eventFileUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
-			@RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) {
+		@RequestParam(value = "fileCn", required = false) String description, HttpServletRequest request) {
 		try {
 			List<Map<String, Object>> data = new java.util.ArrayList<>();
 			for (FileVO file : eventService.uploadEventFiles(files, description)) {
 				data.add(FileMngUtil.responseData(file, request.getContextPath()));
 			}
-			return ResponseEntity.status(201).body(ComResponseVO.success(data,
-					messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson());
+			return ResponseEntity.status(201).body(
+				ComResponseVO.success(
+					data,
+					messageSource.getMessage("file.success.upload", null, Locale.KOREAN)).toJson()
+				);
 		} catch (Exception exception) {
 			return FileMngUtil.errorResponse(exception, messageSource);
 		}
@@ -124,7 +130,7 @@ public class EventFileController {
 	}
 
 	@RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)
-	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException {
+	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {
 		Path template = Paths.get("D:/document/files/template/event_detail_template.xlsx").normalize();
 		if (!Files.isRegularFile(template)) {
 			throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -132,6 +138,7 @@ public class EventFileController {
 		}
 
 		try (InputStream input = Files.newInputStream(template)) {
+			// TODO 템플릿 경로 하드코딩
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 			response.setContentLengthLong(Files.size(template));
 			response.setHeader("Content-Disposition", ContentDisposition.attachment()

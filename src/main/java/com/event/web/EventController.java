@@ -176,6 +176,7 @@ public class EventController {
 		CodeFilterVO tagFilter = new CodeFilterVO();
 		tagFilter.setParentCode("TAG_ROOT");
 		model.addAttribute("tags", codeService.selectCmmCodeDetail(tagFilter));
+		
 		EventVO formEvent = (EventVO) model.asMap().get("eventCreateVO");
 		List<FileVO> eventFiles = new java.util.ArrayList<FileVO>();
 		for (Long fileId : formEvent.getFileIds()) {

@@ -31,10 +31,6 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public List<FileVO> uploadEventFiles(List<MultipartFile> files, String description) throws IOException {
-		return fileMngService.uploadFiles(files, description, "event");
-	}
-	@Override
 	public EventVO selectEvent(EventVO eventVO) throws Exception {
 		EventVO event = eventDAO.selectEvent(eventVO);
 		if (event != null) {
@@ -109,6 +105,11 @@ public class EventServiceImpl implements EventService {
 		eventDAO.insertEventGeo(eventVO);
 	}
 
+	@Override
+	public List<FileVO> uploadEventFiles(List<MultipartFile> files, String description) throws IOException {
+		return fileMngService.uploadFiles(files, description, "event");
+	}
+	
 	private void insertEventFiles(EventVO eventVO) throws Exception {
 		List<Long> fileIds = eventVO.getFileIds();
 		if (fileIds == null || fileIds.isEmpty()) {
