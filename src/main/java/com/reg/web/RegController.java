@@ -63,8 +63,9 @@ public class RegController {
 		data.put("reg_id", code.getReg_id());
 		data.put("code", code.getCode());
 		data.put("name", code.getName());
-		data.put("lat", code.getLat());
-		data.put("lon", code.getLon());
+		// Map coordinates use doubles so JSON-B consistently emits JSON numbers.
+		data.put("lat", code.getLat() == null ? null : code.getLat().doubleValue());
+		data.put("lon", code.getLon() == null ? null : code.getLon().doubleValue());
 		data.put("geom", code.getGeom());
 
 		return ResponseEntity.ok(ComResponseVO.success(data, null).toJson());
