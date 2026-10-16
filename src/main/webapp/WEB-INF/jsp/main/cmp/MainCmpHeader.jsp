@@ -98,7 +98,13 @@
       loaded = true;
       fetch('<c:url value="/me/list.do"/>')
         .then(function (res) { return res.json(); })
-        .then(renderMenu)
+        .then(function (users) {
+          if (!me && users.length > 0) {
+            saveMe(users[0]);
+            renderAvatar();
+          }
+          renderMenu(users);
+        })
         .catch(function () { loaded = false; });
     }
 
@@ -111,6 +117,7 @@
       if (!wrapper.contains(e.target)) { setOpen(false); }
     });
     renderAvatar();
+    if (!me) { loadUsers(); }
   })();
 </script>
 <!--// Header -->
