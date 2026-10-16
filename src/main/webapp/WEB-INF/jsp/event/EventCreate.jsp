@@ -132,11 +132,7 @@
                     </form:select>
                     <form:errors path="status" id="statusError" cssClass="text-danger" element="div" htmlEscape="true"/>
                 </div>
-                <div>
-                    <label for="createdBy" class="form-label | fw-semibold">등록자 ID</label>
-                    <form:input path="createdBy" id="createdBy" cssClass="form-control" inputmode="numeric" required="required" aria-describedby="createdByError"/>
-                    <form:errors path="createdBy" id="createdByError" cssClass="text-danger" element="div" htmlEscape="true"/>
-                </div>
+                <form:hidden path="createdBy" id="createdBy"/>
             </form:form>
         </div>
 
@@ -152,6 +148,30 @@
 
     <validator:javascript formName="eventCreateVO" method="validateEventCreateVO" staticJavascript="true" dynamicJavascript="true" xhtml="true" cdata="false"/>
     <script>
+        var syncEventCreatedBy = (function () {
+            var input = document.getElementById('createdBy');
+            var form = document.getElementById('eventCreateForm');
+            function sync() {
+                var uid = '';
+                try {
+                    var user = JSON.parse(localStorage.getItem('_user_info'));
+                    if (user && user.uid != null && /^[1-9]\d*$/.test(String(user.uid))) {
+                        uid = String(user.uid);
+                    }
+                } catch (error) { /* Missing or unavailable user storage leaves the field empty. */ }
+                input.value = uid;
+                return uid;
+            }
+            document.addEventListener('current-user-changed', sync);
+            window.addEventListener('storage', function (event) {
+                if (event.key === '_user_info' || event.key === null) sync();
+            });
+            window.addEventListener('focus', sync);
+            form.addEventListener('reset', function () { requestAnimationFrame(sync); });
+            sync();
+            return sync;
+        })();
+
         (function () {
             var excelDialogButton = document.getElementById('btnExcelDialog');
             var excelDialogElement = document.getElementById('eventCreateXlsModal');
@@ -211,6 +231,7 @@
             var form = document.getElementById('eventCreateForm');
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
+                syncEventCreatedBy();
                 if (!validateEventCreateVO(form)) { return; }
                 CmpDialog.open({
                     title: '등록 확인',
@@ -219,6 +240,8 @@
                     cancelText: '취소',
                     okButton: function () {
                         CmpDialog.close();
+                        syncEventCreatedBy();
+                        if (!validateEventCreateVO(form)) { return; }
                         HTMLFormElement.prototype.submit.call(form);
                     }
                 });
@@ -272,6 +295,7 @@
                         field.removeAttribute('aria-invalid');
                     });
                     updateChildRegions(true);
+                    syncEventCreatedBy();
                     form.querySelectorAll('[id$="Error"]').forEach(function (error) { error.textContent = ''; });
                     document.getElementById('title').focus();
                 } catch (error) {
