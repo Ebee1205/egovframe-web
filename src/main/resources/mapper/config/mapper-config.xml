@@ -28,13 +28,13 @@
     </typeAliases>
 
 	<mappers>
+	    <mapper resource="mapper/cmm/File_SQL.xml" />
 		<mapper resource="mapper/service/User_SQL.xml" />
 		<mapper resource="mapper/service/Me_SQL.xml" />
 		<mapper resource="mapper/service/Code_SQL.xml" />
 		<mapper resource="mapper/service/CodeUse_SQL.xml" />
 		<mapper resource="mapper/service/Event_SQL.xml" />
 		<mapper resource="mapper/service/EventCmt_SQL.xml" />
-	    <mapper resource="mapper/service/File_SQL.xml" />
 	    <mapper resource="mapper/service/Reg_SQL.xml" />
         <mapper resource="mapper/service/RegUse_SQL.xml" />
     </mappers>
