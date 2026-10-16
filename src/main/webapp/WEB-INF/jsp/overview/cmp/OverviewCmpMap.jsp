@@ -44,6 +44,7 @@
 
 <script type="module">
     import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js"/>';
+    import { createMapMarker } from '<c:url value="/resources/js/MapMarker.js"/>';
 
     var meta = mapMeta.get();
 
@@ -128,6 +129,54 @@
 
 
     var view = map.getView();
+    // Event-list UI bindings stay here; the marker component accepts any point data.
+    var eventCards = Array.from(document.querySelectorAll('[data-overview-event]'));
+    var sidePanel = document.getElementById('mapSidePanel');
+    var eventMarkers = createMapMarker(map, {
+        items: eventCards.map(function (card, index) {
+            return {
+                id: card.dataset.overviewEvent,
+                lat: card.dataset.lat,
+                lon: card.dataset.lon,
+                title: card.querySelector('.event-title').textContent.trim(),
+                label: index + 1,
+                card: card
+            };
+        }),
+        getPadding: function (size) {
+            var panelWidth = sidePanel && !sidePanel.classList.contains('folded') ? sidePanel.offsetWidth + 24 : 0;
+            return [40, Math.min(64, size[0] * 0.1), Math.min(100, size[1] * 0.2),
+                Math.min(panelWidth + 40, size[0] * 0.6)];
+        },
+        onSelect: function (item, selection) {
+            eventCards.forEach(function (card) {
+                var active = card === item.card;
+                card.classList.toggle('is-map-selected', active);
+                card.setAttribute('aria-pressed', String(active));
+            });
+            if (selection.fromMap) {
+                if (sidePanel && sidePanel.classList.contains('folded')) sidePanel.querySelector('.fold-button').click();
+                item.card.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+            }
+        }
+    });
+    eventCards.forEach(function (card) {
+        var hasLocation = eventMarkers.has(card.dataset.overviewEvent);
+        card.classList.toggle('is-map-interactive', hasLocation);
+        card.setAttribute('aria-disabled', String(!hasLocation));
+        card.tabIndex = hasLocation ? 0 : -1;
+        card.title = hasLocation ? '지도에서 위치 보기' : '위치 정보 없음';
+        card.setAttribute('aria-label', card.querySelector('.event-title').textContent.trim() + '. ' + card.title);
+        card.addEventListener('click', function () {
+            if (hasLocation) eventMarkers.select(card.dataset.overviewEvent);
+        });
+        card.addEventListener('keydown', function (event) {
+            if (hasLocation && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault();
+                eventMarkers.select(card.dataset.overviewEvent);
+            }
+        });
+    });
 
 
     // =========================

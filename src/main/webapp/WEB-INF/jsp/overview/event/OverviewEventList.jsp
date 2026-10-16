@@ -3,8 +3,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<section class="overview-events" aria-labelledby="serviceEventHeading">
-    <header class="d-flex | align-items-start | justify-content-between | gap-2 | mb-4">
+<section class="p-2 | overview-events" aria-labelledby="serviceEventHeading">
+    <header class="d-flex | p-2 | align-items-start | justify-content-between | gap-2 | mb-4">
         <div>
             <h2 id="serviceEventHeading" class="h5 | fw-semibold | mb-1">새로 올라온 이벤트</h2>
             <p class="text-body-secondary | small | mb-0">최신 10개</p>
@@ -23,7 +23,7 @@
         </c:when>
         
         <c:otherwise>
-            <div class="d-flex | flex-column | gap-4">
+            <div class="d-flex | flex-column | gap-2">
             
                 <c:forEach var="event" items="${events}" begin="0" end="9">
                    <c:set var="serviceEventCtg" value="${event.ctg}"/>
@@ -39,7 +39,11 @@
                        </c:if>
                   </c:forEach>
 
-                    <div class="card | event-card">
+                    <div class="card | event-card"
+                         role="button" tabindex="-1" aria-pressed="false" aria-disabled="true"
+                         data-overview-event="<c:out value='${event.eid}'/>"
+                         data-lat="<c:out value='${event.lat}'/>"
+                         data-lon="<c:out value='${event.lon}'/>">
                             <div class="d-flex | flex-wrap | align-items-center | gap-2 | mb-2">
                                 <c:if test="${not empty serviceEventCtg}">
                                     <span class="badge | bg-primary-subtle | text-primary-emphasis"><c:out value="${serviceEventCtg}"/></span>

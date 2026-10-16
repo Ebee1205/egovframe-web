@@ -50,7 +50,29 @@
 .overview-events .event-card { 
     overflow: hidden; 
     border: 0px; 
+    padding: 8px;
+    transition: background-color .15s ease, box-shadow .15s ease;
 }
+
+.overview-events .event-card.is-map-interactive {
+    cursor: pointer;
+}
+.overview-events .event-card.is-map-interactive:hover {
+    background-color: #f5f5f5;
+}
+.overview-events .event-card.is-map-interactive:focus-visible {
+    outline-offset: -2px;
+}
+.overview-events .event-card.is-map-interactive:active {
+    background-color: #f5f5f5;
+}
+.overview-events .event-card.is-map-selected {
+    background-color: #f5f5f5;
+}
+@media (prefers-reduced-motion: reduce) {
+    .overview-events .event-card { transition: none; }
+}
+
 .overview-events .event-summary { 
     list-style: none; 
     cursor: pointer; 
