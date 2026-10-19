@@ -32,6 +32,24 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Component
 public class FileMngUtil {
+    /** 생성한 파일을 저장소/DB에 저장하지 않고 내려준다. 호출자가 응답 스트림을 소유한다. */
+    public static void download(javax.servlet.http.HttpServletResponse response, String fileName,
+            String mediaType, byte[] content) throws IOException {
+        if (content == null || fileName == null || fileName.trim().isEmpty()
+                || fileName.chars().anyMatch(c -> c < 32 || c == 127)
+                || fileName.contains("/") || fileName.contains("\\")) {
+            throw new IllegalArgumentException("다운로드 파일명과 내용이 올바르지 않습니다.");
+        }
+        response.setContentType(mediaType);
+        response.setContentLengthLong(content.length);
+        response.setHeader("Content-Disposition", org.springframework.http.ContentDisposition.attachment()
+                .filename(fileName, java.nio.charset.StandardCharsets.UTF_8).build().toString());
+        response.setHeader("X-Content-Type-Options", "nosniff");
+        response.setHeader("Cache-Control", "private, no-store");
+        response.getOutputStream().write(content);
+        response.flushBuffer();
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileMngUtil.class);
     private final Set<String> extensions;
     private final long maxSize;

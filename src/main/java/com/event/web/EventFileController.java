@@ -64,6 +64,8 @@ public class EventFileController {
 	private final EventService eventService;
 	@Autowired
 	private ExcelFileParserUtil excelFileParser;
+	@Autowired
+	private com.cmm.service.excel.ExcelFileWriter excelFileWriter;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
 	private final RegService regService;
@@ -150,6 +152,37 @@ public class EventFileController {
 			response.flushBuffer();
 		}
 	}
-	
-	
+
+    /** 상세 화면의 DOM 다운로드. 브라우저 입력 대신 저장된 이벤트 정보를 사용한다. */
+    @RequestMapping(value = "/event/file/detail/dom.do", method = RequestMethod.GET)
+    public void eventFileDetailDom(@RequestParam("eid") Long eid, HttpServletResponse response) throws Exception {
+        if (eid == null || eid <= 0) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "이벤트 ID가 올바르지 않습니다.");
+        }
+        EventVO query = new EventVO();
+        query.setEid(eid);
+        EventVO event = eventService.selectEvent(query);
+        if (event == null) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다.");
+        }
+        String statusName = event.getStatus();
+        CodeFilterVO filter = new CodeFilterVO();
+        filter.setParentCode("EVENT_STAT_ROOT");
+        for (CodeFilterVO code : codeService.selectCmmCodeDetail(filter)) {
+            if (java.util.Objects.equals(code.getCode(), event.getStatus())) {
+                statusName = code.getName();
+                break;
+            }
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("event", event);
+        data.put("statusName", statusName);
+        excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data,
+                "classpath:excel/event_detail_excel.xml", null);
+    }
+
+	@RequestMapping(value = "/event/file/detail/sax.do", method = RequestMethod.GET)
+	public void eventFileTemaplteSax(HttpServletResponse response) throws IOException {
+
+	}
 }

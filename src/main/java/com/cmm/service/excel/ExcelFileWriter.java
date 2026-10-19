@@ -12,9 +12,33 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Primary;
+import javax.servlet.http.HttpServletResponse;
+import com.cmm.service.excel.impl.ExcelDomFileWriter;
+import com.cmm.service.file.impl.FileMngUtil;
 
 @Component
+@Primary
 public class ExcelFileWriter {
+
+    /** 기존 ExcelTemplate 오버로드와 null 인자 호환성을 유지하기 위한 별도 XML API. */
+    public byte[] writeXml(Object data, String classpathXml) throws IOException {
+        return writeXml(data, classpathXml, null);
+    }
+
+    public byte[] writeXml(Object data, String classpathXml, ExcelStyle style) throws IOException {
+        return new ExcelDomFileWriter().write(data, classpathXml, style);
+    }
+
+    public byte[] writeXmlTemplate(String classpathXml, ExcelStyle style) throws IOException {
+        return writeXml(null, classpathXml, style);
+    }
+
+    public void downloadXml(HttpServletResponse response, String fileName, Object data,
+            String classpathXml, ExcelStyle style) throws IOException {
+        byte[] content = writeXml(data, classpathXml, style);
+        FileMngUtil.download(response, fileName, FileMngUtil.contentType("xlsx"), content);
+    }
 
     // 기본 스타일로 생성
     public <T> byte[] write(

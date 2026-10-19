@@ -187,6 +187,11 @@
 				    data-e-date="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>"
 				    data-dsc="<c:out value='${event.dsc}'/>"
 				    data-status="<c:out value='${eventStatusName}'/>">엑셀 다운로드</a>
+                
+                <c:url var="eventDomExcelUrl" value="/event/file/detail/dom.do">
+                    <c:param name="eid" value="${event.eid}"/>
+                </c:url>                
+                <a id="btnExcelDom" class="btn | btn-outline-success" href="<c:out value='${eventDomExcelUrl}'/>">엑셀 DOM 다운로드</a>
 				    
                 <button type="submit" form="eventUpdateForm" class="btn | btn-outline-secondary">수정</button>
                 <form action="<c:url value='/event/delete.do'/>" 
