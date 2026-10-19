@@ -30,17 +30,27 @@ public class LocalFileStorage implements FileStorage {
     }
 
     private Path resolve(String key, boolean createParents) throws IOException {
-        if (key == null || !key.matches("[A-Za-z0-9_-]+(?:[./][A-Za-z0-9_-]+)*")
-                || key.contains("..")) { throw new IllegalArgumentException("Invalid storage key."); }
+        if (key == null 
+    		|| !key.matches("[A-Za-z0-9_-]+(?:[./][A-Za-z0-9_-]+)*")
+            || key.contains("..")) { throw new IllegalArgumentException("Invalid storage key."); 
+        }
         Files.createDirectories(directory);
+        
         Path root = directory.toRealPath();
         Path target = root.resolve(key).normalize();
-        if (!target.startsWith(root) || target.equals(root)) { throw new IllegalArgumentException("Invalid storage key."); }
+        
+        if (!target.startsWith(root) || target.equals(root)) { 
+        	throw new IllegalArgumentException("Invalid storage key."); 
+        }
+        
         Path parent = root;
         Path relative = root.relativize(target.getParent());
+        
         for (Path segment : relative) {
             parent = parent.resolve(segment);
-            if (Files.isSymbolicLink(parent)) { throw new IOException("Symbolic links are not allowed in storage paths."); }
+            if (Files.isSymbolicLink(parent)) { 
+            	throw new IOException("Symbolic links are not allowed in storage paths."); 
+            }
             if (createParents && !Files.exists(parent, LinkOption.NOFOLLOW_LINKS)) {
                 try { Files.createDirectory(parent); }
                 catch (java.nio.file.FileAlreadyExistsException concurrentCreation) {
@@ -51,7 +61,10 @@ public class LocalFileStorage implements FileStorage {
                 throw new IOException("Storage parent is not a directory.");
             }
         }
-        if (Files.isSymbolicLink(target)) { throw new IOException("Symbolic links are not allowed for stored files."); }
+        
+        if (Files.isSymbolicLink(target)) { 
+        	throw new IOException("Symbolic links are not allowed for stored files."); 
+    	}
         return target;
     }
 

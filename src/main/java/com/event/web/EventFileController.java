@@ -33,9 +33,9 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 import com.cmm.service.ComResponseVO;
+import com.cmm.service.excel.impl.ExcelFileParserUtil;
 import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.impl.FileMngUtil;
-import com.cmm.service.file.impl.FileParserUtil;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
@@ -63,7 +63,7 @@ public class EventFileController {
 
 	private final EventService eventService;
 	@Autowired
-	private FileParserUtil excelFileParser;
+	private ExcelFileParserUtil excelFileParser;
 	private final EventCmtService eventCmtService;
 	private final CodeService codeService;
 	private final RegService regService;

@@ -203,7 +203,9 @@
     function updateChildRegions(resetSelection) {
         const parentId = parentRegion.value;
         childRegion.disabled = !parentId;
-        if (resetSelection) { childRegion.value = ''; }
+        if (resetSelection) { 
+        	childRegion.value = ''; 
+        }
         Array.from(childRegion.options).forEach(function (option) {
             if (option.value) {
                 option.hidden = !parentId || option.dataset.parentId !== parentId;
@@ -260,7 +262,7 @@
                 const tds = tr.querySelectorAll('td');
                 if (tds.length === 1 && tds[0].hasAttribute('colspan')) return; // 데이터 없음 행
                 rows.push(Array.from(tds).slice(0, -1).map(td => td.textContent.trim()));
-            });
+            }); 
 
             if (rows.length === 0) {
                 alert('다운로드할 데이터가 없습니다.');
@@ -283,9 +285,11 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '이벤트 목록');
             XLSX.writeFile(wb, '이벤트목록_' + timestamp() + '.xlsx');
+            
         } catch (e) {
             console.error(e);
             alert('엑셀 다운로드 중 오류가 발생했습니다.\n' + e.message);
+            
         } finally {
             btn.disabled = false;
             btn.textContent = originText;

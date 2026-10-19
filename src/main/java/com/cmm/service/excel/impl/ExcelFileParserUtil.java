@@ -1,4 +1,5 @@
-package com.cmm.service.file.impl;
+package com.cmm.service.excel.impl;
+
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,14 +23,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cmm.service.file.FileVO;
+import com.cmm.service.file.impl.FileMngUtil;
 
 /** 업로드 스트림을 파싱하며 파일 저장소 및 파일 DB를 사용하지 않는다. */
 @Component
-public class FileParserUtil {
+public class ExcelFileParserUtil {
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
     private final FileMngUtil fileMngUtil;
 
-    public FileParserUtil(FileMngUtil fileMngUtil) {
+    public ExcelFileParserUtil(FileMngUtil fileMngUtil) {
         this.fileMngUtil = fileMngUtil;
     }
 

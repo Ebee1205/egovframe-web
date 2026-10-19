@@ -32,7 +32,7 @@ public final class ComResponseVO<T> {
         return new ComResponseVO<>(data, Collections.emptyList(), "SUCCESS", message);
     }
 
-    public static <T> ComResponseVO<T> fail(String resultCode, String message) {
+    public static <T> ComResponseVO<T> fail(String resultCode, String message) {                            
         return new ComResponseVO<>(null, Collections.emptyList(), resultCode, message);
     }
 
@@ -42,6 +42,7 @@ public final class ComResponseVO<T> {
         return new ComResponseVO<>(null,
                 Collections.singletonList(new FieldError(field, errorCode, fieldMessage)), resultCode, message);
     }
+    
     /** Preserve every field error, including multiple errors on the same field. */
     public static ComResponseVO<Void> validationFailure(Errors errors, MessageSource messageSource,
             Locale locale, String resultCode, String defaultMessage) {

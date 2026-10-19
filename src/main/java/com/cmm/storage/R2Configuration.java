@@ -25,14 +25,15 @@ public class R2Configuration {
 
     @Bean
     public FileStorage fileStorage(
-            @Value("${Globals.R2.Endpoint:}") String endpoint,
-            @Value("${Globals.R2.AccessKeyId:}") String accessKeyId,
-            @Value("${Globals.R2.SecretAccessKey:}") String secretAccessKey,
-            @Value("${Globals.R2.Bucket:}") String bucket,
-            @Value("${Globals.File.LocalPath:D:/document/files}") String localPath,
-            ObjectProvider<S3Client> s3ClientProvider) {
-        int configuredR2Values = configured(endpoint) + configured(accessKeyId)
-                + configured(secretAccessKey) + configured(bucket);
+        @Value("${Globals.R2.Endpoint:}") String endpoint,
+        @Value("${Globals.R2.AccessKeyId:}") String accessKeyId,
+        @Value("${Globals.R2.SecretAccessKey:}") String secretAccessKey,
+        @Value("${Globals.R2.Bucket:}") String bucket,
+        @Value("${Globals.File.LocalPath:D:/document/files}") String localPath,
+        
+        ObjectProvider<S3Client> s3ClientProvider) {
+	        int configuredR2Values = configured(endpoint) + configured(accessKeyId)
+	                + configured(secretAccessKey) + configured(bucket);
         if (configuredR2Values == 0) {
             return new LocalFileStorage(Paths.get(required(localPath, "Globals.File.LocalPath")));
         }
@@ -48,9 +49,9 @@ public class R2Configuration {
     @Bean(name = "r2S3Client", destroyMethod = "close")
     @Lazy
     public S3Client r2S3Client(
-            @Value("${Globals.R2.Endpoint:}") String endpoint,
-            @Value("${Globals.R2.AccessKeyId:}") String accessKeyId,
-            @Value("${Globals.R2.SecretAccessKey:}") String secretAccessKey) {
+        @Value("${Globals.R2.Endpoint:}") String endpoint,
+        @Value("${Globals.R2.AccessKeyId:}") String accessKeyId,
+        @Value("${Globals.R2.SecretAccessKey:}") String secretAccessKey) {
         URI endpointUri = URI.create(required(endpoint, "Globals.R2.Endpoint"));
         if (!"https".equalsIgnoreCase(endpointUri.getScheme())
                 || endpointUri.getHost() == null || endpointUri.getUserInfo() != null
@@ -77,8 +78,8 @@ public class R2Configuration {
                 .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
                 .responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED)
                 .build();
-    }
-
+	    }
+	
     static String required(String value, String propertyName) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalStateException("Set " + propertyName + " in config/globals.properties.");
