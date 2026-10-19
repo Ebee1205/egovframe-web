@@ -138,14 +138,18 @@ public class FileMngUtil {
         
         int dot = name.lastIndexOf('.');
         String extension = dot > 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
+        
         if (!extensions.contains(extension) || extension.length() > 20) {
             throw bad("FILE_EXTENSION_NOT_ALLOWED", "files");
         }
+        
         if (upload.getSize() > maxSize) { throw new FileException(413, "FILE_TOO_LARGE", "files"); }
+        
         FileVO file = new FileVO();
         file.setOrignlFileNm(name);
         file.setFileExtsn(extension);
         file.setFileSize(upload.getSize());
+        
         return file;
     }
 

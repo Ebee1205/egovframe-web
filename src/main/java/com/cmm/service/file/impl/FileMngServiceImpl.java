@@ -180,7 +180,7 @@ public class FileMngServiceImpl implements FileMngService {
     @Override public void deleteFileInf(FileVO file) {
         FileVO stored = find(file == null ? null : file.getFileId(), true);
         location(stored);
-        // 
+
         // FK rejection or DB rollback leaves the stored object untouched.
         dao.deleteFileInf(stored.getFileId()); commitCleanup(stored.getStreFileNm());
     }
