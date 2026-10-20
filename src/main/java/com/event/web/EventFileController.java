@@ -1,11 +1,6 @@
 package com.event.web;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
@@ -38,7 +32,6 @@ import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.impl.FileMngUtil;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.servlet.http.HttpServletRequest;
@@ -162,10 +155,8 @@ public class EventFileController {
 	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
 			@RequestParam(value = "fileCn", required = false) String description) {
 		try {
-			List<Map<String, Object>> data = excelFileParser.parse(files, description);
-			// excel XML로 parsing?(처음부터 parser에 XML참조하도록) vs validation XMl-parsed data(이미 parsing된 json을 가공해서 XML이랑 비교) 맵핑
+			List<Map<String, Object>> data = excelFileParser.parseXml(files, description, "classpath:excel/EventDetail_Excel.xml");
 			
-			// FileMngService.write로 다운로드 할 수 있게 제공
 			
 			return ResponseEntity.ok(ComResponseVO.success(data,
 					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
@@ -175,24 +166,8 @@ public class EventFileController {
 	}
 
 	@RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)
-	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {
-		Path template = Paths.get("D:/document/files/template/event_detail_template.xlsx").normalize();
-		if (!Files.isRegularFile(template)) {
-			throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND,
-					"이벤트 엑셀 양식 파일을 찾을 수 없습니다.");
-		}
-
-		try (InputStream input = Files.newInputStream(template)) {
-			// TODO 템플릿 경로 하드코딩
-			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			response.setContentLengthLong(Files.size(template));
-			response.setHeader("Content-Disposition", ContentDisposition.attachment()
-			        .filename("이벤트_등록_양식.xlsx", StandardCharsets.UTF_8)
-			        .build().toString());
-			response.setHeader("X-Content-Type-Options", "nosniff");
-			response.setHeader("Cache-Control", "private, no-store");
-			StreamUtils.copy(input, response.getOutputStream());
-			response.flushBuffer();
-		}
-	}
+	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException {
+        excelFileWriter.downloadXml(response, "이벤트_등록_양식.xlsx", null,
+                "classpath:excel/EventDetail_Excel.xml", null);
+    }
 }

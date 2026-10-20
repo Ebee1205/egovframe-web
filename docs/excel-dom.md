@@ -1,30 +1,60 @@
-# XML DOM 엑셀 다운로드
+# 공통 XML 양식을 사용하는 엑셀 입출력
 
-`src/main/resources/excel/event_detail_excel.xml`은 원래 빈 파일이었다. 새 구조는
-`EventDetail.jsp`의 ExcelJS 다운로드 레이아웃을 기준으로 정의했다.
+```text
+classpath:excel/*_Excel.xml
+            |
+     ExcelTemplate.load()
+            |
+      불변 Definition
+         /       \
+ExcelFileWriter   ExcelFileParser (구현: ExcelFileParserUtil)
+       |                      |
+    XLSX 생성            업로드 XLSX/XLS → 중첩 Map
+       |
+ FileMngUtil.download()
+```
 
-## 호출
+XML 파싱과 매핑 검증은 `ExcelTemplate`만 담당한다.
+`ExcelDomFileWriter`는 해석된 양식으로 셀을 출력하며 XML DOM 객체를 사용하지 않는다.
+Writer/Parser는 생성 시 같은 Template 컴포넌트를 주입받는다. 이미 읽은 Definition 하나를
+양쪽에 전달하면 XML을 다시 읽지 않고 동일한 규칙을 공유할 수 있다.
+
+## 사용
 
 ```java
+ExcelTemplate.Definition template = excelTemplate.load(
+        "classpath:excel/EventDetail_Excel.xml");
+
 Map<String, Object> data = new HashMap<>();
 data.put("event", eventVO);
 data.put("statusName", "진행중");
-byte[] bytes = excelFileWriter.writeXml(data,
-        "classpath:excel/event_detail_excel.xml", new DefaultExcelStyle());
-excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data,
-        "excel/event_detail_excel.xml", null);
+
+byte[] bytes = excelFileWriter.writeMapped(data, template, excelStyle);
+Map<String, Object> parsed = excelFileParser.parseMapped(upload, template);
 ```
 
-- GET `/event/file/template/dom.do`: 값이 비어 있는 XML 양식 다운로드.
-- GET `/event/file/detail/dom.do?eid=1`: DB의 이벤트와 상태 이름을 조회해 다운로드.
-- 상세 JSP의 `엑셀 DOM 다운로드` 버튼에서 두 번째 경로를 호출한다.
-- 기존 `write(List, ExcelTemplate[, ExcelStyle])`, `writeTemplate`과 브라우저 ExcelJS 다운로드는 유지한다.
-- `/event/file/template/sax.do`는 기존 시험용 자리이며 이번 DOM 구현 범위에 포함하지 않았다.
+경로를 받는 기존 `writeXml`/`downloadXml`도 내부에서 ExcelTemplate을 사용한다.
+단일 업로드는 `excelFileParser.parseXml(upload, classpathXml)`로도 처리할 수 있다.
 
-## XML 구조 v1
+## 업무 호출
 
-루트는 `<excel version="1">`, 그 아래 한 개 이상의 `<sheet name="...">`을 둔다.
-시트 자식은 순서대로 처리한다.
+- GET `/event/file/template/download.do`: EventDetail_Excel.xml로 빈 양식을 생성한다.
+  과거 로컬 XLSX 고정 경로를 대체한다.
+- POST `/event/file/template/upload.do`: 같은 XML로 업로드 양식의 시트명·고정 문구·병합 범위를 확인하고 속성을 읽는다.
+  기존 `fileContent.sheets` 미리보기를 유지하며 `fileContent.data`에 매핑 결과를 추가한다.
+- GET `/event/file/detail/dom.do?eid=1`: 저장된 이벤트를 같은 양식으로 내려준다.
+- 기존 범용 `parse(files, description)`은 XML 검증 없이 셀 미리보기만 반환한다.
+- SAX 시험용 경로는 이번 변경에 포함하지 않는다.
+
+## 매핑 결과
+
+`property="event.title"`은 `{event: {title: ...}}`로 반환한다.
+`repeat items="event.attachedFiles"`는 `{event: {attachedFiles: [{orignlFileNm: ...}, ...]}}`가 된다.
+숫자는 Double, 논리값은 Boolean, 날짜 형식 숫자 셀은 Date, 빈 값은 null이다.
+수식은 실행하지 않고 파일에 저장된 계산 결과만 읽는다. 결과를 EventVO에 저장하거나
+코드 이름을 코드 값으로 바꾸는 일은 업무 서비스의 책임이다.
+
+## XML v1
 
 ```xml
 <excel version="1">
@@ -40,31 +70,27 @@ excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data,
 </excel>
 ```
 
-- `column.index`는 1부터 시작하며 `width` 단위는 글자 수다. 생략 시 `ExcelStyle.getColumnWidth`를 적용한다.
-- `cell.range`는 A1 형식 단일 셀 또는 병합 범위다. 범위 전체에 테두리와 스타일을 적용한다.
-- `text`(고정 문자열), `property`(Map 키 또는 JavaBean 속성 경로) 중 하나를 지정한다.
-- `style`은 `header`, `body`를 지원한다. 기본값은 text이면 header, property이면 body다.
-- `format`은 Excel 표시 형식, `align`은 POI 수평 정렬 값, `height`는 행 높이(pt, 1~409)다.
-- 숫자·논리값·Date·LocalDate·LocalDateTime을 원래 셀 형식으로 기록한다. 문자열은 수식으로 실행하지 않는다.
-- `repeat`는 Iterable의 항목마다 내부 셀을 한 행씩 이동시켜 출력한다. 내부 셀 범위는 같은 행에 있어야 한다.
-  뒤에 나오는 셀도 항목 수만큼 이동하므로 반복 시작 행에 적은 후속 셀이 마지막 행 뒤로 밀린다.
-- null 루트 데이터는 빈 양식으로 처리한다. null 중간 값은 빈 셀이다. 존재하지 않는 Map 키/Bean 속성은 오류로 보고한다.
-- classpath 스트림으로 읽으므로 배포 WAR에서 동작하며 로컬 절대 파일 경로에 의존하지 않는다.
-  XML DTD/외부 엔티티는 허용하지 않는다.
-
-DOM 방식은 첨부 **파일명**을 반복 행으로 출력한다. 기존 브라우저 ExcelJS 방식의 첨부 이미지 삽입은 기존 버튼에서 제공한다.
-첨부가 없어도 XML의 첨부파일 제목 행은 유지한다. 내용 행은 줄바꿈이 가능한 120pt 높이로 출력한다.
+- `column.index`는 1부터 시작한다. `width`는 글자 수이며 생략하면 ExcelStyle의 열 너비를 사용한다.
+- `cell.range`는 단일 셀 또는 병합 범위이다. `text`와 `property` 중 하나를 지정한다.
+- `style`: header/body, `format`: Excel 표시 형식, `align`: 수평 정렬, `height`: 행 높이(pt).
+- repeat 내부 셀은 동일한 한 행이어야 한다. 항목마다 한 행씩 증가하며 후속 셀도 항목 수만큼 이동한다.
+- 역매핑 시 repeat 뒤의 고정 text와 병합 범위를 찾아 개수를 결정한다.
+  고정 text가 없거나 경계가 여러 곳이면 추측하지 않고 오류를 반환한다.
+- XML 해석 시 잘못된 범위·스타일·중복 셀 등을 검증하며 DTD와 외부 엔티티를 차단한다.
+- 첨부파일은 파일명만 매핑한다. 첨부 이미지 삽입은 기존 브라우저 ExcelJS 다운로드를 사용한다.
 
 ## 검증
 
-`mvn -o test`로 컴파일한 뒤 다음 독립 검증을 실행한다(Windows, Maven 테스트 의존성 classpath 필요).
+`mvn -o test`로 컴파일한 뒤 별도 회귀 검증을 실행한다.
 
-```text
-java -cp "target/test-classes;target/classes;<테스트 의존성 classpath>" com.cmm.service.excel.ExcelDomWriterCheck
+```powershell
+$repo = Join-Path $env:USERPROFILE '.m2/repository'
+$cp = "target/test-classes;target/classes;target/egovframe-web-event-1.0.0/WEB-INF/lib/*;" +
+      "$repo/org/springframework/spring-test/5.3.37/spring-test-5.3.37.jar;" +
+      "$repo/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar"
+java -cp $cp com.cmm.service.excel.ExcelDomWriterCheck
 ```
 
-검증은 빈 양식, Bean/Map 매핑, 첨부 반복/후속 행 이동, 날짜/숫자/논리 셀, 사용자 스타일,
-병합 테두리, 기존 API 호환성, 다운로드 헤더/본문 및 잘못된 XML·외부 엔티티 차단을 확인한다.
-
-실행 결과: Maven 오프라인 test 및 package 빌드 성공. 독립 검증 37개 항목 통과.
-실제 DB·웹서버를 사용한 브라우저 다운로드는 별도 확인이 필요하다.
+의존성 폴더가 없으면 먼저 `mvn -o package`를 실행한다. 회귀 검증은 동일 Definition의
+생성/역매핑/재생성, 빈 반복·첨부 이름과 경계 문구 충돌, 자료형·스타일,
+잘못된 XML/양식, 컨트롤러 입출력을 확인한다. 실제 DB 및 브라우저 다운로드는 별도 확인 대상이다.
