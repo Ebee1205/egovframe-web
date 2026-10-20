@@ -36,7 +36,7 @@ public class ExcelDomFileWriter {
             styles.put("body", selected.createBodyStyle(workbook));
             for (SheetMapping definition : template.getSheets()) {
                 Sheet sheet = workbook.createSheet(definition.getName());
-                sheet.setDefaultRowHeightInPoints(24);
+                sheet.setDefaultRowHeightInPoints(definition.getDefaultRowHeight());
                 int offset = 0;
                 for (Mapping mapping : definition.getMappings()) {
                     if (mapping instanceof ColumnMapping) {
@@ -70,7 +70,7 @@ public class ExcelDomFileWriter {
         String format = mapping.getFormat();
         if (format.isEmpty() && (value instanceof Date || value instanceof LocalDateTime)) format = "yyyy-mm-dd hh:mm";
         else if (format.isEmpty() && value instanceof LocalDate) format = "yyyy-mm-dd";
-        String key = mapping.getStyle() + "|" + format + "|" + mapping.getAlignment();
+        String key = mapping.getStyle() + "|" + format + "|" + mapping.getAlignment() + "|" + mapping.getVertical();
         CellStyle style = styles.get(key);
         if (style == null) {
             style = workbook.createCellStyle();
@@ -78,6 +78,7 @@ public class ExcelDomFileWriter {
             style.setWrapText(true);
             if (!format.isEmpty()) style.setDataFormat(workbook.createDataFormat().getFormat(format));
             if (mapping.getAlignment() != null) style.setAlignment(mapping.getAlignment());
+            if (mapping.getVertical() != null) style.setVerticalAlignment(mapping.getVertical());
             styles.put(key, style);
         }
         for (int rowIndex = range.getFirstRow(); rowIndex <= range.getLastRow(); rowIndex++) {

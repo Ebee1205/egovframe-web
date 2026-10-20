@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.springframework.core.io.ClassPathResource;
@@ -26,6 +27,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /** XML 해석은 이 클래스만 담당한다. Writer/Parser는 동일한 불변 Definition을 참조한다. */
 @Component
 public class ExcelTemplate {
+	
     public Definition load(String resource) throws IOException {
         if (resource == null || resource.trim().isEmpty()) {
             throw new IllegalArgumentException("XML classpath 경로가 필요합니다.");
@@ -41,11 +43,15 @@ public class ExcelTemplate {
             for (Element sheet : children(root)) {
                 requireTag(sheet, "sheet");
                 String name = WorkbookUtil.createSafeSheetName(required(sheet, "name"));
+                
                 if (!names.add(name.toLowerCase(Locale.ROOT))) throw new IOException("중복된 시트 이름: " + name);
                 List<Mapping> mappings = new ArrayList<>();
                 Set<Integer> columns = new HashSet<>();
+                
                 for (Element element : children(sheet)) {
+                	
                     switch (element.getTagName()) {
+                    
                     case "column":
                         int index = Integer.parseInt(required(element, "index")) - 1;
                         if (index < 0 || index >= SpreadsheetVersion.EXCEL2007.getMaxColumns() || !columns.add(index)) {
@@ -61,7 +67,10 @@ public class ExcelTemplate {
                         }
                         mappings.add(new ColumnMapping(index, width));
                         break;
-                    case "cell": mappings.add(cell(element)); break;
+                        
+                    case "cell": 
+                    	mappings.add(cell(element)); break;
+                    
                     case "repeat":
                         List<CellMapping> cells = new ArrayList<>();
                         int row = -1;
@@ -80,19 +89,30 @@ public class ExcelTemplate {
                         validateOverlap(cells);
                         mappings.add(new RepeatMapping(property(element, "items"), cells));
                         break;
-                    default: throw new IOException("지원하지 않는 XML 요소: " + element.getTagName());
+                        
+                    default: 
+                    	throw new IOException("지원하지 않는 XML 요소: " + element.getTagName());
+                    	
                     }
                 }
+                
                 List<CellMapping> fixed = new ArrayList<>();
+                
                 for (Mapping mapping : mappings) if (mapping instanceof CellMapping) fixed.add((CellMapping) mapping);
                 validateOverlap(fixed);
+                
                 if (fixed.isEmpty() && mappings.stream().noneMatch(m -> m instanceof RepeatMapping)) {
                     throw new IOException("시트에 cell 또는 repeat가 필요합니다.");
                 }
-                sheets.add(new SheetMapping(name, mappings));
+                float rowHeight = sheet.hasAttribute("defaultRowHeight")
+                        ? Float.parseFloat(required(sheet, "defaultRowHeight")) : 24;
+                if (!Float.isFinite(rowHeight) || rowHeight <= 0 || rowHeight > 409) throw new IOException("잘못된 기본 행 높이");
+                sheets.add(new SheetMapping(name, mappings, rowHeight));
             }
+            
             if (sheets.isEmpty()) throw new IOException("엑셀 XML에 sheet가 필요합니다.");
             return new Definition(path, sheets);
+            
         } catch (IllegalArgumentException exception) {
             throw new IOException("엑셀 XML 매핑이 올바르지 않습니다: " + resource, exception);
         }
@@ -109,13 +129,15 @@ public class ExcelTemplate {
         if (!"header".equals(style) && !"body".equals(style)) throw new IOException("지원하지 않는 셀 스타일: " + style);
         HorizontalAlignment alignment = element.hasAttribute("align")
                 ? HorizontalAlignment.valueOf(required(element, "align").toUpperCase(Locale.ROOT)) : null;
+        VerticalAlignment vertical = element.hasAttribute("vertical")
+                ? VerticalAlignment.valueOf(required(element, "vertical").toUpperCase(Locale.ROOT)) : null;
         Float height = null;
         if (element.hasAttribute("height")) {
             height = Float.valueOf(required(element, "height"));
             if (!Float.isFinite(height) || height <= 0 || height > 409) throw new IOException("잘못된 행 높이");
         }
         return new CellMapping(reference, hasProperty ? property(element, "property") : null,
-                hasProperty ? null : element.getAttribute("text"), style, element.getAttribute("format"), alignment, height);
+                hasProperty ? null : element.getAttribute("text"), style, element.getAttribute("format"), alignment, vertical, height);
     }
 
     private String property(Element element, String attribute) throws IOException {
@@ -164,11 +186,13 @@ public class ExcelTemplate {
         }
         return result;
     }
+    
     private String required(Element element, String attribute) throws IOException {
         String value = element.getAttribute(attribute).trim();
         if (value.isEmpty()) throw new IOException(element.getTagName() + "의 " + attribute + "가 필요합니다.");
         return value;
     }
+    
     private void requireTag(Element element, String tag) throws IOException {
         if (!tag.equals(element.getTagName())) throw new IOException("잘못된 XML 요소: " + element.getTagName());
     }
@@ -186,11 +210,14 @@ public class ExcelTemplate {
     public static final class SheetMapping {
         private final String name;
         private final List<Mapping> mappings;
-        private SheetMapping(String name, List<Mapping> mappings) {
+        private final float defaultRowHeight;
+        private SheetMapping(String name, List<Mapping> mappings, float defaultRowHeight) {
+            this.defaultRowHeight = defaultRowHeight;
             this.name = name; this.mappings = Collections.unmodifiableList(new ArrayList<>(mappings));
         }
         public String getName() { return name; }
         public List<Mapping> getMappings() { return mappings; }
+        public float getDefaultRowHeight() { return defaultRowHeight; }
     }
     public static final class ColumnMapping implements Mapping {
         private final int index;
@@ -211,11 +238,12 @@ public class ExcelTemplate {
     public static final class CellMapping implements Mapping {
         private final String reference, property, text, style, format;
         private final HorizontalAlignment alignment;
+        private final VerticalAlignment vertical;
         private final Float height;
         private CellMapping(String reference, String property, String text, String style, String format,
-                HorizontalAlignment alignment, Float height) {
+                HorizontalAlignment alignment, VerticalAlignment vertical, Float height) {
             this.reference = reference; this.property = property; this.text = text;
-            this.style = style; this.format = format; this.alignment = alignment; this.height = height;
+            this.style = style; this.format = format; this.alignment = alignment; this.vertical = vertical; this.height = height;
         }
         public String getReference() { return reference; }
         public String getProperty() { return property; }
@@ -223,6 +251,7 @@ public class ExcelTemplate {
         public String getStyle() { return style; }
         public String getFormat() { return format; }
         public HorizontalAlignment getAlignment() { return alignment; }
+        public VerticalAlignment getVertical() { return vertical; }
         public Float getHeight() { return height; }
         public CellRangeAddress range(int offset) {
             CellRangeAddress range = CellRangeAddress.valueOf(reference);

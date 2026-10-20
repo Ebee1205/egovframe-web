@@ -304,12 +304,36 @@
 	            if (typeof ExcelJS === 'undefined') throw new Error('엑셀 라이브러리를 불러오지 못했습니다.');
 	            const d = btn.dataset;
 	
-	            // 1. 저장된 첨부파일 수집 (data-original="true"만)
+		            // 서버가 공통 XML 양식으로 만든 파일을 유지하고 이미지 표시만 추가한다.
+            const sourceLink = document.getElementById('btnExcelDom');
+            const workbookResponse = await fetch(sourceLink.href, { credentials: 'same-origin' });
+            if (!workbookResponse.ok) throw new Error('양식 다운로드 실패 (HTTP ' + workbookResponse.status + ')');
+            const wb = new ExcelJS.Workbook();
+            await wb.xlsx.load(await workbookResponse.arrayBuffer());
+            // POI의 기본 파일에는 테마가 없을 수 있다. ExcelJS가 빈 테마 참조를 쓰지 않도록 기본 테마를 사용한다.
+            if (!Object.keys(wb.model.themes || {}).length) wb.clearThemes();
+            const ws = wb.worksheets[0];
+            if (!ws) throw new Error('다운로드한 엑셀에 시트가 없습니다.');
+
+            // 행 번호를 별도로 정의하지 않고 XML 양식에 출력된 첨부파일 행을 찾는다.
+            let attachmentHeaderRow = 0;
+            const rowsByFileName = new Map();
+            ws.eachRow(function (row) {
+                const cell = row.getCell(1);
+                if (!attachmentHeaderRow && cell.value === '첨부파일' && cell.isMerged) {
+                    attachmentHeaderRow = row.number;
+                } else if (attachmentHeaderRow && row.number > attachmentHeaderRow && cell.isMerged) {
+                    const fileName = String(cell.value || '');
+                    if (!rowsByFileName.has(fileName)) rowsByFileName.set(fileName, []);
+                    rowsByFileName.get(fileName).push(row.number);
+                }
+            });
+            // 1. 저장된 첨부파일 수집 (data-original="true"만)
 	            const files = Array.from(
 	                document.querySelectorAll('#eventAttachment [data-role="file"][data-original="true"]')
 	            ).map(function (el) {
 	                return { name: el.dataset.fileName, url: el.dataset.downloadUrl };
-	            });
+	            }).filter(function (file) { return rowsByFileName.has(file.name); });
 	
 	            // 2. 이미지 파일 가져오기 → 정규화
 	            const attachments = files.map(function (file) {
@@ -329,91 +353,24 @@
 	                }
 	            }
 	
-	            // 3. 워크북 / 시트 / 열 너비
-	            const wb = new ExcelJS.Workbook();
-	            const ws = wb.addWorksheet('이벤트 상세');
-	            ws.columns = [{ width: 12 }, { width: 14 }, { width: 20 }, { width: 14 }, { width: 20 }];
-	
-	            // 4. 스타일
-	            const thin = { style: 'thin', color: { argb: 'FF000000' } };
-	            const border = { top: thin, bottom: thin, left: thin, right: thin };
-	            const font = { name: '맑은 고딕', size: 10 };
-	            const labelStyle = {
-	                font: Object.assign({ bold: true }, font),
-	                fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } },
-	                alignment: { horizontal: 'center', vertical: 'middle' },
-	                border: border
-	            };
-	            const centerStyle = { font: font, alignment: { horizontal: 'center', vertical: 'middle' }, border: border };
-	            const longStyle = { font: font, alignment: { horizontal: 'left', vertical: 'top', wrapText: true }, border: border };
-	
-	            // 셀 입력 + 병합 영역 전체에 테두리 적용
-	            function put(range, value, style) {
-	                const parts = range.split(':');
-	                if (parts.length > 1) ws.mergeCells(range);
-	                const cell = ws.getCell(parts[0]);
-	                cell.value = value;
-	                Object.assign(cell, style);   // font, fill, alignment, border
-	                if (parts.length > 1) {
-	                    const first = ws.getCell(parts[0]);
-	                    const last = ws.getCell(parts[1]);
-	                    for (let r = first.row; r <= last.row; r++) {
-	                        for (let c = first.col; c <= last.col; c++) {
-	                            ws.getCell(r, c).border = border;
-	                        }
-	                    }
-	                }
-	            }
-	
-	            // 5. 1~7행: 양식 레이아웃
-	            put('A1', '이벤트 제목', labelStyle);   put('B1:E1', d.title, centerStyle);
-	            put('A2', '작성일자', labelStyle);
-	            put('B2', '최초 작성일', labelStyle);   put('C2', d.cDate, centerStyle);
-	            put('D2', '최종 작성일', labelStyle);   put('E2', d.uDate, centerStyle);
-	            put('A3', '작성자', labelStyle);        put('B3:E3', d.writer, centerStyle);
-	            put('A4', '이벤트 주소', labelStyle);   put('B4:E4', d.address, centerStyle);
-	            put('A5', '이벤트 기간', labelStyle);
-	            put('B5', '시작일', labelStyle);        put('C5', d.sDate, centerStyle);
-	            put('D5', '종료일', labelStyle);        put('E5', d.eDate, centerStyle);
-	            put('A6:E6', '이벤트 내용', labelStyle);
-	            put('A7:E7', d.dsc, longStyle);
-	            const descriptionLines = String(d.dsc || '').split(/\r?\n/).reduce(function (total, line) {
-	                return total + Math.max(1, Math.ceil(line.length / 80));
-	            }, 0);
-	            ws.getRow(7).height = Math.min(409, Math.max(120, descriptionLines * 15 + 10));
-	            if (attachments.length > 0) {
-	                put('A8:E8', '첨부파일', labelStyle);
-	            }
-
-	            // 7. 9행~: 첨부파일 (한 파일당 한 행, A~E 병합)
-	            for (let i = 0; i < attachments.length; i++) {
-	                const attachment = attachments[i];
-	                const rowNo = 9 + i;                                        // 엑셀 행 번호(1-base)
-
-	                put('A' + rowNo + ':E' + rowNo, attachment.name, attachment.image ? centerStyle : longStyle);
-	                if (attachment.image) {
-	                    const img = attachment.image;
-	                    const fit = Math.min(1, IMG_MAX_W / img.width, IMG_MAX_H / img.height);
-	                    const dw = Math.round(img.width * fit);
-	                    const dh = Math.round(img.height * fit);
-	                    ws.getRow(rowNo).height = dh * 0.75 + 8;                // px → pt + 여백
-
-	                    const imageId = wb.addImage({ buffer: img.buffer, extension: img.extension });
-	                    ws.addImage(imageId, {
-	                        tl: { col: 0.05, row: rowNo - 1 + 0.03 },           // 0-base 위치 + 약간의 여백
-	                        ext: { width: dw, height: dh },
-	                        editAs: 'oneCell'
-	                    });
-	                } else {
-	                    ws.getRow(rowNo).height = 24;
-	                }
-	            }
-
-	            const statusRow = attachments.length > 0 ? 9 + attachments.length : 8;
-	            put('A' + statusRow, '이벤트 상태', labelStyle);
-	            put('B' + statusRow + ':E' + statusRow, d.status, centerStyle);
-
-	            // 8. 다운로드
+            for (const attachment of attachments) {
+                const matchingRows = rowsByFileName.get(attachment.name);
+                if (!matchingRows || !matchingRows.length) continue;
+                const rowNo = matchingRows.shift();
+                if (!attachment.image) continue;
+                const img = attachment.image;
+                const fit = Math.min(1, IMG_MAX_W / img.width, IMG_MAX_H / img.height);
+                const dw = Math.round(img.width * fit);
+                const dh = Math.round(img.height * fit);
+                ws.getRow(rowNo).height = dh * 0.75 + 8;
+                const imageId = wb.addImage({ buffer: img.buffer, extension: img.extension });
+                ws.addImage(imageId, {
+                    tl: { col: 0.05, row: rowNo - 1 + 0.03 },
+                    ext: { width: dw, height: dh },
+                    editAs: 'oneCell'
+                });
+            }
+            // 8. 다운로드
 	            const buffer = await wb.xlsx.writeBuffer();
 	            const blob = new Blob([buffer], {
 	                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

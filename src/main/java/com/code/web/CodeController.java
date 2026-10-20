@@ -81,6 +81,7 @@ public class CodeController {
 		if (codeVO.getName() != null) {
 			codeVO.setName(codeVO.getName().trim());
 		}
+		
 		beanValidator.validate(codeVO, bindingResult);
 
 		if (bindingResult.hasErrors()) {

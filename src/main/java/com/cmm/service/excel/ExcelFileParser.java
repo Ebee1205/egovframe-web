@@ -10,4 +10,6 @@ public interface ExcelFileParser {
 
     Map<String, Object> parseXml(MultipartFile file, String classpathXml) throws IOException;
 
+    // 여기서 check validation?
+    //beanValidator.validate(codeVO, bindingResult);
 }

@@ -32,6 +32,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 /** 업로드 스트림을 파싱하며 파일 저장소 및 파일 DB를 사용하지 않는다. */
 @Component
 public class ExcelFileParserUtil implements ExcelFileParser {
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExcelFileParserUtil.class);
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
     private final FileMngUtil fileMngUtil;
     private final ExcelTemplate excelTemplate;
@@ -120,7 +121,8 @@ public class ExcelFileParserUtil implements ExcelFileParser {
                 result.add(data);
                 
             } catch (IOException | RuntimeException exception) {
-                throw FileMngUtil.bad("EXCEL_PARSE_FAILED", "files");
+                LOGGER.warn("Excel upload parsing failed: file={}", file.getOrignlFileNm(), exception);
+                throw new FileMngUtil.FileException(400, "EXCEL_PARSE_FAILED", "files", exception);
             }
         }
         return result;

@@ -236,7 +236,8 @@ public class FileMngUtil {
         }
         String messageKey = exception instanceof MaxUploadSizeExceededException
                 ? "file.error.UPLOAD_TOO_LARGE" : "file.error." + code;
-        String message = messageSource.getMessage(messageKey, null, Locale.KOREAN);
+        String message = messageSource.getMessage(messageKey, null,
+                "파일 처리 중 오류가 발생했습니다.", Locale.KOREAN);
         if (status >= 500) { LOGGER.error("File request failed", exception); }
         ComResponseVO<Void> body = field == null ? ComResponseVO.fail(code, message)
                 : ComResponseVO.fieldFailure(code, message, field, code, message);
@@ -249,7 +250,10 @@ public class FileMngUtil {
         private final String code;
         private final String field;
         public FileException(int status, String code, String field) {
-            super(code); this.status = status; this.code = code; this.field = field;
+            this(status, code, field, null);
+        }
+        public FileException(int status, String code, String field, Throwable cause) {
+            super(code, cause); this.status = status; this.code = code; this.field = field;
         }
     }
 }

@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
 		eventDAO.insertEvent(eventVO);
 		insertEventFiles(eventVO);
 	}
-
+ 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateEvent(EventVO eventVO) throws Exception {

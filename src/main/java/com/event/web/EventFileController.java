@@ -141,8 +141,18 @@ public class EventFileController {
         
         data.put("event", event);
         data.put("statusName", statusName);
+        String categoryName = event.getCtg();
+        CodeFilterVO categoryFilter = new CodeFilterVO();
+        categoryFilter.setParentCode("EVENT_CTG_ROOT");
+        for (CodeFilterVO code : codeService.selectCmmCodeDetail(categoryFilter)) {
+            if (java.util.Objects.equals(code.getCode(), event.getCtg())) {
+                categoryName = code.getName();
+                break;
+            }
+        }
+        data.put("categoryName", categoryName);
         
-        excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data, "classpath:excel/EventDetail_Excel.xml", null);
+        excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data, "classpath:excel/EventDetail_Excel.xml", new com.event.service.impl.EventExcelStyle());
     }
 
 	@RequestMapping(value = "/event/file/detail/sax.do", method = RequestMethod.GET)
@@ -167,7 +177,12 @@ public class EventFileController {
 
 	@RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)
 	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException {
-        excelFileWriter.downloadXml(response, "이벤트_등록_양식.xlsx", null,
-                "classpath:excel/EventDetail_Excel.xml", null);
+        java.nio.file.Path template = java.nio.file.Paths.get("D:/document/files/template/event_detail_template.xlsx");
+        if (!java.nio.file.Files.isRegularFile(template)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "이벤트 등록 양식 파일을 찾을 수 없습니다.");
+        }
+        byte[] content = java.nio.file.Files.readAllBytes(template);
+        FileMngUtil.download(response, "이벤트_등록_양식.xlsx", FileMngUtil.contentType("xlsx"), content);
     }
 }
