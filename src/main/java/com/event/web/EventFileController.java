@@ -118,12 +118,53 @@ public class EventFileController {
 		return FileMngUtil.errorResponse(exception, messageSource);
 	}
 
+	/** 엑셀 상세 다운로드 - DOM */	
+    @RequestMapping(value = "/event/file/detail/dom.do", method = RequestMethod.GET)
+    public void eventFileDetailDom(@RequestParam("eid") Long eid, HttpServletResponse response) throws Exception {
+        if (eid == null || eid <= 0) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "이벤트 ID가 올바르지 않습니다.");
+        }
+        
+        EventVO query = new EventVO();
+        query.setEid(eid);
+        EventVO event = eventService.selectEvent(query);
+        
+        if (event == null) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다.");
+        }
+        
+        String statusName = event.getStatus();
+        
+        CodeFilterVO filter = new CodeFilterVO();
+        filter.setParentCode("EVENT_STAT_ROOT");
+        for (CodeFilterVO code : codeService.selectCmmCodeDetail(filter)) {
+            if (java.util.Objects.equals(code.getCode(), event.getStatus())) {
+                statusName = code.getName();
+                break;
+            }
+        }
+        
+        Map<String, Object> data = new HashMap<>();
+        
+        data.put("event", event);
+        data.put("statusName", statusName);
+        
+        excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data, "classpath:excel/EventDetail_Excel.xml", null);
+    }
+
+	@RequestMapping(value = "/event/file/detail/sax.do", method = RequestMethod.GET)
+	public void eventFileTemaplteSax(HttpServletResponse response) throws IOException {
+
+	}
+	
 	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
 	@RequestMapping(value = "/event/file/template/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
 			@RequestParam(value = "fileCn", required = false) String description) {
 		try {
 			List<Map<String, Object>> data = excelFileParser.parse(files, description);
+			// XML-parsed data 맵핑 + validation check
+			// FileMngService.write로 다운로드 할 수 있게 제공
 			return ResponseEntity.ok(ComResponseVO.success(data,
 					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
 		} catch (Exception exception) {
@@ -151,38 +192,5 @@ public class EventFileController {
 			StreamUtils.copy(input, response.getOutputStream());
 			response.flushBuffer();
 		}
-	}
-
-    /** 상세 화면의 DOM 다운로드. 브라우저 입력 대신 저장된 이벤트 정보를 사용한다. */
-    @RequestMapping(value = "/event/file/detail/dom.do", method = RequestMethod.GET)
-    public void eventFileDetailDom(@RequestParam("eid") Long eid, HttpServletResponse response) throws Exception {
-        if (eid == null || eid <= 0) {
-            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "이벤트 ID가 올바르지 않습니다.");
-        }
-        EventVO query = new EventVO();
-        query.setEid(eid);
-        EventVO event = eventService.selectEvent(query);
-        if (event == null) {
-            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다.");
-        }
-        String statusName = event.getStatus();
-        CodeFilterVO filter = new CodeFilterVO();
-        filter.setParentCode("EVENT_STAT_ROOT");
-        for (CodeFilterVO code : codeService.selectCmmCodeDetail(filter)) {
-            if (java.util.Objects.equals(code.getCode(), event.getStatus())) {
-                statusName = code.getName();
-                break;
-            }
-        }
-        Map<String, Object> data = new HashMap<>();
-        data.put("event", event);
-        data.put("statusName", statusName);
-        excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data,
-                "classpath:excel/event_detail_excel.xml", null);
-    }
-
-	@RequestMapping(value = "/event/file/detail/sax.do", method = RequestMethod.GET)
-	public void eventFileTemaplteSax(HttpServletResponse response) throws IOException {
-
 	}
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EventDetail.jsp의 다운로드 레이아웃. repeat 이후 셀은 첨부파일 수만큼 아래로 이동한다. -->
+<excel version="1">
+    <sheet name="이벤트 상세">
+        <column index="1" width="14"/>
+        <column index="2" width="14"/>
+        <column index="3" width="20"/>
+        <column index="4" width="14"/>
+        <column index="5" width="20"/>
+        <cell range="A1" text="이벤트 제목"/>
+        <cell range="B1:E1" property="event.title" align="center"/>
+        <cell range="A2" text="이벤트 카테고리"/>
+        <cell range="B2:E2" property="event.ctg" align="center"/>
+        <cell range="A3" text="작성일자"/>
+        <cell range="B3" text="최초 작성일"/>
+        <cell range="C3" property="event.CDate" format="yyyy-mm-dd hh:mm" align="center"/>
+        <cell range="D3" text="최종 작성일"/>
+        <cell range="E3" property="event.UDate" format="yyyy-mm-dd hh:mm" align="center"/>
+        <cell range="A4" text="작성자"/>
+        <cell range="B4:E4" property="event.createdByNickname" align="center"/>
+        <cell range="A5" text="이벤트 주소"/>
+        <cell range="B5:E5" property="event.address"/>
+        <cell range="A6" text="이벤트 기간"/>
+        <cell range="B6" text="시작일"/>
+        <cell range="C6" property="event.SDate" format="yyyy-mm-dd hh:mm" align="center"/>
+        <cell range="D6" text="종료일"/>
+        <cell range="E6" property="event.EDate" format="yyyy-mm-dd hh:mm" align="center"/>
+        <cell range="A7:E7" text="이벤트 내용"/>
+        <cell range="A8:E8" property="event.dsc" height="120"/>
+        <cell range="A9:E9" text="첨부파일"/>
+        <repeat items="event.attachedFiles">
+            <cell range="A10:E10" property="orignlFileNm" height="24"/>
+        </repeat>
+        <cell range="A10" text="이벤트 상태"/>
+        <cell range="B10:E10" property="statusName" align="center"/>
+    </sheet>
+</excel>
