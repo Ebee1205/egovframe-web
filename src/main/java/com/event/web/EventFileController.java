@@ -163,8 +163,10 @@ public class EventFileController {
 			@RequestParam(value = "fileCn", required = false) String description) {
 		try {
 			List<Map<String, Object>> data = excelFileParser.parse(files, description);
-			// XML-parsed data 맵핑 + validation check
+			// excel XML로 parsing?(처음부터 parser에 XML참조하도록) vs validation XMl-parsed data(이미 parsing된 json을 가공해서 XML이랑 비교) 맵핑
+			
 			// FileMngService.write로 다운로드 할 수 있게 제공
+			
 			return ResponseEntity.ok(ComResponseVO.success(data,
 					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
 		} catch (Exception exception) {

@@ -35,6 +35,7 @@ public class ExcelFileParserUtil {
         this.fileMngUtil = fileMngUtil;
     }
 
+    // 엑셀 파일 범용 parser
     public List<Map<String, Object>> parse(List<MultipartFile> files, String description) {
     	
         fileMngUtil.validateCount(files == null ? 0 : files.size());
@@ -103,4 +104,7 @@ public class ExcelFileParserUtil {
         }
         return result;
     }
+    
+    //
+    
 }
