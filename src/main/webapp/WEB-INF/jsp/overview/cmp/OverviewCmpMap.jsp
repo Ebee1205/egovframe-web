@@ -201,13 +201,19 @@
             }
         }
     });
-    eventCards.forEach(function (card) {
+    var boundEventCards = new WeakSet();
+    function bindEventCards() {
+      eventCards.forEach(function (card) {
+        card.classList.remove('is-map-selected');
+        card.setAttribute('aria-pressed', 'false');
         var hasLocation = eventMarkers.has(card.dataset.overviewEvent);
         card.classList.toggle('is-map-interactive', hasLocation);
         card.setAttribute('aria-disabled', String(!hasLocation));
         card.tabIndex = hasLocation ? 0 : -1;
         card.title = hasLocation ? '지도에서 위치 보기' : '위치 정보 없음';
         card.setAttribute('aria-label', card.querySelector('.event-title').textContent.trim() + '. ' + card.title);
+        if (boundEventCards.has(card)) return;
+        boundEventCards.add(card);
         card.addEventListener('click', function () {
             if (hasLocation) eventMarkers.select(card.dataset.overviewEvent);
         });
@@ -221,8 +227,24 @@
                 eventMarkers.select(card.dataset.overviewEvent);
             }
         });
+      });
+    }
+    bindEventCards();
+    document.addEventListener('overview:events-changed', function () {
+        eventCards = Array.from(document.querySelectorAll('[data-overview-event]')).filter(function (card) {
+            return !card.closest('[hidden]');
+        });
+        eventMarkers.setItems(eventCards.map(function (card) {
+            return {
+                id: card.dataset.overviewEvent,
+                lat: card.dataset.lat,
+                lon: card.dataset.lon,
+                title: card.querySelector('.event-title').textContent.trim(),
+                card: card
+            };
+        }));
+        bindEventCards();
     });
-
 
     // =========================
     // Zoom
