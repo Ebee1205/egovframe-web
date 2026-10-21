@@ -6,6 +6,8 @@
  * Appearance may be supplied per item or shared in options. icon accepts a URL
  * or ol.style.Icon options (src, anchor, width, height, scale, etc.). Images keep
  * their original colors unless icon.color explicitly supplies an OpenLayers tint.
+ * Default markers are pins with their bottom tip anchored to the coordinate.
+ * Custom icons also default to bottom-center; supply anchor to override.
  * Returns { setItems(items), has(id), select(id), hover(id|null), fitAll(), destroy() }.
  * UI bindings and application-specific data belong to the caller.
  */
@@ -35,14 +37,25 @@ export function createMapMarker(map, options = {}) {
         let image;
         if (icon) {
             const config = typeof icon === 'string' ? {src: icon} : {...icon};
-            image = new ol.style.Icon({...config, opacity: (config.opacity ?? 1) * opacity});
+            image = new ol.style.Icon({anchor: [0.5, 1], ...config,
+                opacity: (config.opacity ?? 1) * opacity});
         } else {
-            image = new ol.style.Circle({
-                radius: active ? 18 : 15,
-                fill: new ol.style.Fill({color}),
-                stroke: new ol.style.Stroke({color: '#fff', width: 3})
+            const fill = String(color).replace(/[&<>"']/g, function (character) {
+                return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'}[character];
             });
-            image.setOpacity(opacity);
+            // The path ends exactly at (16, 44), the bottom-center of the image.
+            // Scaling around this anchor keeps the tip fixed on selection/hover.
+            const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44">'
+                + '<path fill="' + fill + '" d="M16 0C7.16 0 0 7.16 0 16C0 28 16 44 16 44S32 28 32 16C32 7.16 24.84 0 16 0Z"/>'
+                + '<circle cx="16" cy="16" r="6" fill="#fff"/></svg>';
+            image = new ol.style.Icon({
+                src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg),
+                anchor: [0.5, 1],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction',
+                width: active ? 38 : 32,
+                opacity
+            });
         }
         return new ol.style.Style({
             image,
