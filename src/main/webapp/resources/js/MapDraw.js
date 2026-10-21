@@ -1,6 +1,6 @@
 /** Drawing/measurement layer for an existing OpenLayers map (window.ol).
  * Results stay in memory. No server requests or persistence.
- * Returns {setMode, clear, destroy, source, layer}.
+ * Returns {setMode, toggleMode, clear, destroy, source, layer}.
  */
 export function createMapDraw(map, options = {}) {
     const ol = window.ol;
@@ -149,9 +149,15 @@ export function createMapDraw(map, options = {}) {
             map.addInteraction(draw);
         }
         buttons.forEach(function (button) {
-            button.setAttribute('aria-pressed', String(button.dataset.drawMode === mode));
+            const active = button.dataset.drawMode === mode;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', String(active));
         });
         announce(tools[mode].msg);
+    }
+    function toggleMode(nextMode) {
+        if (!Object.prototype.hasOwnProperty.call(tools, nextMode)) return;
+        setMode(nextMode === mode ? 'None' : nextMode);
     }
     function clear() {
         if (disposed) return;
@@ -161,7 +167,8 @@ export function createMapDraw(map, options = {}) {
     }
     function handleToolbar(event) {
         const button = event.target.closest('[data-draw-mode]');
-        if (button && toolbar.contains(button)) setMode(button.dataset.drawMode);
+        if (!button || !toolbar.contains(button)) return;
+        toggleMode(button.dataset.drawMode);
     }
     function refreshSegments() {
         layer.changed();
@@ -191,7 +198,7 @@ export function createMapDraw(map, options = {}) {
     container.addEventListener('keydown', handleKey);
     setMode('None');
     return {
-        setMode, clear, source, layer,
+        setMode, toggleMode, clear, source, layer,
         destroy: function () {
             if (disposed) return;
             setMode('None');

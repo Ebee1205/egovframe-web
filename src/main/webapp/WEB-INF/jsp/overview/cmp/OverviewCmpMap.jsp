@@ -6,31 +6,43 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.11.0/ol.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/ol@10.11.0/dist/ol.js"></script>
-<link href="<c:url value='/resources/css/map.css?v=20261012-2'/>" rel="stylesheet" type="text/css">
 
 <div class="map-body | p-0">
 
     <div id="map" tabindex="0" aria-label="이벤트 지도"></div>
-    
+	
     <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpSideBar.jsp">
-    <jsp:param name="contentPage"
-               value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
-	</jsp:include>
+        <jsp:param name="contentPage"
+                   value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
+    </jsp:include>
+
+    <!-- 그리기 도구: 우측 상단 / 세로 정렬 -->
+    <div class="map-top-right">
+        <div id="map-draw-tools" class="map-draw-tools" role="group" aria-label="지도 그리기 도구">
+
+            <div class="btn-group-vertical shadow-sm map-draw-buttons" role="group" aria-label="그리기 모드">
+                <button type="button" class="btn btn-light" data-draw-mode="None" aria-pressed="true" aria-label="이동" title="이동"><i class="mdi | mdi-hand-back-right-outline" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-light" data-draw-mode="LineString" aria-pressed="false" aria-label="거리" title="거리"><i class="mdi | mdi-ruler" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-light" data-draw-mode="Polygon" aria-pressed="false" aria-label="면적" title="면적"><i class="mdi | mdi-vector-square" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-light" data-draw-mode="Circle" aria-pressed="false" aria-label="반경" title="반경"><i class="mdi | mdi-radius-outline" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-light" data-draw-mode="Modify" aria-pressed="false" aria-label="수정" title="수정"><i class="mdi | mdi-pencil-outline" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-light text-danger" data-draw-clear aria-label="전체 삭제" title="전체 삭제"><i class="mdi | mdi-trash-can-outline" aria-hidden="true"></i></button>
+            </div>
+
+            <div class="card shadow-sm map-draw-options">
+                <div class="card-body p-2">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="map-draw-segments" data-draw-segments checked>
+                        <label class="form-check-label" for="map-draw-segments">구간 거리</label>
+                    </div>
+                    <p id="map-draw-status" class="mb-0 | mt-2 | text-body-secondary" role="status" aria-live="polite"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <div class="map-bottom-right">
-
-        <div id="map-draw-tools" class="map-draw-tools" role="group" aria-label="지도 그리기 도구">
-            <div class="map-draw-buttons">
-                <button type="button" data-draw-mode="None" aria-pressed="true" aria-label="이동" title="이동"><i class="mdi mdi-hand-back-right-outline" aria-hidden="true"></i></button>
-                <button type="button" data-draw-mode="LineString" aria-pressed="false" aria-label="거리" title="거리"><i class="mdi mdi-ruler" aria-hidden="true"></i></button>
-                <button type="button" data-draw-mode="Polygon" aria-pressed="false" aria-label="면적" title="면적"><i class="mdi mdi-vector-square" aria-hidden="true"></i></button>
-                <button type="button" data-draw-mode="Circle" aria-pressed="false" aria-label="반경" title="반경"><i class="mdi mdi-radius-outline" aria-hidden="true"></i></button>
-                <button type="button" data-draw-mode="Modify" aria-pressed="false" aria-label="수정" title="수정"><i class="mdi mdi-pencil-outline" aria-hidden="true"></i></button>
-                <button type="button" data-draw-clear aria-label="전체 삭제" title="전체 삭제"><i class="mdi mdi-trash-can-outline" aria-hidden="true"></i></button>
-            </div>
-            <label><input type="checkbox" data-draw-segments checked> 구간 거리 표시</label>
-            <p id="map-draw-status" role="status" aria-live="polite"></p>
-        </div>
 
         <!-- Zoom Control -->
         <div class="zoom-box">
@@ -55,30 +67,6 @@
     </div>
 
 </div>
-
-<style>
-    .map-draw-tools {
-        width: 290px;
-        max-width: 100%;
-        padding: 10px;
-        background: #fff;
-        border: 1px solid #dcdfe4;
-        border-radius: 6px;
-        color: #4b5565;
-        font-size: 12px;
-    }
-    .map-draw-buttons { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
-    .map-draw-buttons button {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 40px; height: 40px; padding: 0; font-size: 22px;
-        border: 1px solid #dcdfe4;
-        border-radius: 4px; background: #fff; color: #4b5565; cursor: pointer;
-    }
-    .map-draw-buttons button[aria-pressed="true"] { background: #254b86; color: #fff; }
-    .map-draw-buttons button:focus-visible { outline: 2px solid #3170d7; outline-offset: 2px; }
-    #map-draw-status { margin: 6px 0 0; line-height: 1.5; }
-</style>
-
 <script type="module">
 	import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js"/>';
     import { createMapMarker } from '<c:url value="/resources/js/MapMarker.js"/>';
