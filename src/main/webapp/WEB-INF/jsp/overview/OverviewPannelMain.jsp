@@ -7,9 +7,13 @@
                placeholder="이벤트 제목 검색" autocomplete="off" enterkeyhint="search"
                aria-controls="overviewSearchEvents">
     </form>
+    
+    
     <div id="overviewRecentEvents">
         <jsp:include page="/WEB-INF/jsp/overview/event/OverviewEventList.jsp"/>
     </div>
+    
+    
     <div id="overviewSearchEvents" hidden></div>
     <p id="overviewSearchStatus" class="p-2 | text-body-secondary | small" role="status" aria-live="polite" hidden></p>
     <button id="overviewSearchRetry" type="button" class="btn btn-outline-secondary | m-2" hidden>다시 불러오기</button>

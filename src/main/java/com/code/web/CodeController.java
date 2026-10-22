@@ -71,8 +71,7 @@ public class CodeController {
 		return "forward:/WEB-INF/jsp/code/CodeList.jsp";
 	}
 
-	@RequestMapping(value = "/code/insert.do", method = RequestMethod.POST,
-			produces = "application/json;charset=UTF-8")
+	@RequestMapping(value = "/code/insert.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> insertCode(
 			@ModelAttribute("codeCreateVO") CodeDetailVO codeVO, BindingResult bindingResult) throws Exception {
 		if (codeVO.getCode() != null) {
@@ -104,11 +103,14 @@ public class CodeController {
 				.body(ComResponseVO.success(null,
 						messageSource.getMessage("success.code.insert", null, Locale.KOREAN)).toJson());
 	}
+	
 	@RequestMapping(value = "/code/detail.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> detailCode(@RequestParam("cid") Long cid) throws Exception {
 		CodeDetailVO query = new CodeDetailVO(); query.setCid(validCodeId(cid));
 		CodeDetailVO code = codeService.selectCode(query);
-		if (code == null) { throw new CodeService.CodeException(404, "CODE_NOT_FOUND", "코드를 찾을 수 없습니다.", null); }
+		if (code == null) { 
+			throw new CodeService.CodeException(404, "CODE_NOT_FOUND", "코드를 찾을 수 없습니다.", null); 
+		}
 		Map<String, Object> data = new LinkedHashMap<>();
 		data.put("cid", code.getCid()); data.put("parentCid", code.getParentCid());
 		data.put("parentCode", code.getParentCode()); data.put("parentName", code.getParentName());
@@ -120,9 +122,15 @@ public class CodeController {
 	@RequestMapping(value = "/code/update.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> updateCode(@ModelAttribute("codeUpdateVO") CodeDetailVO code,
 			BindingResult errors) throws Exception {
-		if (code.getName() != null) { code.setName(code.getName().trim()); }
-		if (code.getCode() != null) { code.setCode(code.getCode().trim()); }
+		if (code.getName() != null) { 
+			code.setName(code.getName().trim()); 
+		}
+		if (code.getCode() != null) { 
+			code.setCode(code.getCode().trim()); 
+		}
+		
 		beanValidator.validate(code, errors);
+		
 		if (!errors.hasFieldErrors("cid") && (code.getCid() == null || code.getCid() <= 0)) {
 			errors.rejectValue("cid", "errors.code.id", "코드 ID를 확인해주세요.");
 		}
@@ -136,7 +144,11 @@ public class CodeController {
 			return ResponseEntity.badRequest().body(ComResponseVO.validationFailure(errors, messageSource,
 					Locale.KOREAN, "VALIDATION_FAILED", "입력값을 확인해주세요.").toJson());
 		}
-		try { codeService.updateCode(code); }
+		
+		try { 
+			codeService.updateCode(code); 
+		}
+		
 		catch (DataIntegrityViolationException exception) {
 			errors.rejectValue("code", "errors.code.duplicate");
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(ComResponseVO.validationFailure(errors,

@@ -72,6 +72,7 @@ public class ExcelDomFileWriter {
         CellRangeAddress range = mapping.range(offset);
         Object value = mapping.getProperty() == null ? mapping.getText() : property(data, mapping.getProperty());
         String format = mapping.getFormat();
+        
         if (format.isEmpty() && (value instanceof Date || value instanceof LocalDateTime)) format = "yyyy-mm-dd hh:mm";
         else if (format.isEmpty() && value instanceof LocalDate) format = "yyyy-mm-dd";
         String key = mapping.getStyle() + "|" + format + "|" + mapping.getAlignment() + "|" + mapping.getVertical();
@@ -103,7 +104,7 @@ public class ExcelDomFileWriter {
         else if (value != null) cell.setCellValue(String.valueOf(value));
         if (range.getNumberOfCells() > 1) sheet.addMergedRegion(range);
     }
-
+    
     private Object property(Object data, String path) throws IOException {
         Object value = data;
         for (String part : path.split("\\.")) {
@@ -120,6 +121,7 @@ public class ExcelDomFileWriter {
         }
         return value;
     }
+    
     /** XML에 지정된 셀에 숨김 목록과 이름 정의를 연결한다. */
     private void applyDropdowns(Workbook workbook, Definition template, Map<String, List<String>> options) throws IOException {
         Sheet lookup = null;
@@ -147,14 +149,17 @@ public class ExcelDomFileWriter {
                         if (value == null || value.trim().isEmpty()) throw new IOException("빈 코드는 드롭다운에 사용할 수 없습니다: " + key);
                         unique.add(value);
                     }
+                    
                     if (unique.size() > workbook.getSpreadsheetVersion().getMaxRows()) throw new IOException("드롭다운 항목 수가 너무 많습니다.");
                     int column = names.size(), index = 0;
                     if (column >= workbook.getSpreadsheetVersion().getMaxColumns()) throw new IOException("드롭다운 목록 수가 너무 많습니다.");
+                    
                     for (String value : unique) {
                         Row row = lookup.getRow(index);
                         if (row == null) row = lookup.createRow(index);
                         row.createCell(column).setCellValue(value); index++;
                     }
+                    
                     int number = names.size() + 1;
                     do { name = "_excelChoice" + number++; } while (workbook.getName(name) != null);
                     Name defined = workbook.createName(); defined.setNameName(name);
