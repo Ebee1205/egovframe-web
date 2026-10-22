@@ -79,7 +79,7 @@ public class EventController {
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 		if ("eventCreateVO".equals(binder.getObjectName())) {
-			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "lat", "lon", "createdBy", "fileIds");
+			binder.setAllowedFields("title", "ctg", "status", "SDate", "EDate", "dsc", "address", "reg_id", "lat", "lon", "createdBy", "fileIds");
 		}
 	}
 
@@ -193,14 +193,24 @@ public class EventController {
 		model.addAttribute("fileAccept", fileExtensions.replaceAll("\\.(?=[^.]+)", ",.").replaceFirst("^,", ""));
 		model.addAttribute("fileMaxSize", fileMaxSize);
 
-		return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
+		model.addAttribute("eventCreateMode", true);
+        model.addAttribute("event", formEvent);
+        return "forward:/WEB-INF/jsp/event/EventDetail.jsp";
 	}
 
 	@RequestMapping(value = "/event/insert.do", method = RequestMethod.POST)
 	public String eventInsert(@ModelAttribute("eventCreateVO") EventVO eventVO,
 			BindingResult bindingResult, Model model) throws Exception {
-		eventVO.setReg_id(1L);
-		validatorFactory.getValidator("eventCreateVO", eventVO, bindingResult).validate();
+		if (eventVO.getReg_id() == null) eventVO.setReg_id(1L);
+        boolean validRegion = false;
+        java.util.Set<Long> rootIds = new java.util.HashSet<>();
+        for (com.reg.service.RegFilterVO region : regService.selectRegRoot()) rootIds.add(region.getReg_id());
+        for (com.reg.service.RegFilterVO region : regService.selectRegParents()) {
+            if (java.util.Objects.equals(region.getReg_id(), eventVO.getReg_id())
+                    && (rootIds.contains(region.getReg_id()) || rootIds.contains(region.getParentRegId()))) validRegion = true;
+        }
+        if (!validRegion) bindingResult.rejectValue("reg_id", "errors.reg.id");
+        validatorFactory.getValidator("eventCreateVO", eventVO, bindingResult).validate();
 		if (bindingResult.hasErrors()) {
 			return eventCreate(model);
 		}

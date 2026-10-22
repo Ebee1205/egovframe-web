@@ -10,7 +10,7 @@
             </div>
             
             <div class="modal-body">
-                <p>엑셀 파일을 선택해 이벤트를 등록합니다.</p>
+                <p>엑셀 파일의 내용을 신규 등록 폼에 불러옵니다. 저장은 폼 하단의 등록 버튼으로 진행합니다.</p>
                 <a href="<c:url value='/event/file/template/download.do'/>" class="mt-2 | btn | btn-sm | btn-outline">
                     이벤트 등록 엑셀 양식 다운로드
                 </a>
@@ -32,95 +32,53 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">닫기</button>
-                <button type="button" id="btnApplyEventExcel" class="btn btn-outline-secondary">
-				    업로드
-				</button>
+                <button type="button" id="btnApplyEventExcel" class="btn | btn-outline-secondary">폼에 반영</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-document.getElementById('btnApplyEventExcel').addEventListener('click', function () {
-    const component = document.getElementById('eventExcelAttachment');
-    if (component.getAttribute('aria-busy') === 'true') {
-        alert('파일 처리가 완료될 때까지 기다려주세요.');
-        return;
-    }
-
-    const content = component.getFileContent();
-    if (!content) {
-        alert('이벤트 엑셀 파일을 선택하고 오류가 있다면 다시 선택해주세요.');
-        return;
-    }
-
-    const sheet = Array.isArray(content.sheets)
-        ? content.sheets.find(sheet => sheet && sheet.sheetName === '이벤트 상세')
-        : null;
-    const rows = sheet && sheet.rows;
-    if (!Array.isArray(rows) || rows.some(row => !row || !Array.isArray(row.cells))) {
-        alert('템플릿을 확인해주세요.');
-        return;
-    }
-    function cell(rowNumber, columnIndex) {
-        const row = rows.find(row => row.rowNumber === rowNumber);
-        return String(row?.cells?.[columnIndex] ?? '');
-    }
-
-    const headers = [
-        [1, 0, '이벤트 제목'],
-        [2, 0, '이벤트 지역'],
-        [3, 0, '이벤트 주소'],
-        [4, 0, '이벤트 기간'],
-        [4, 1, '시작일'],
-        [4, 3, '종료일'],
-        [5, 0, '이벤트 내용'],
-        [7, 0, '이벤트 상태']
-    ];
-    if (headers.some(([row, column, label]) => cell(row, column).trim() !== label)) {
-        alert('템플릿을 확인해주세요.');
-        return;
-    }
-
-    const values = {
-        title: cell(1, 1),
-        address: cell(3, 1),
-        sDate: cell(4, 2),
-        eDate: cell(4, 4),
-        dsc: cell(6, 0)
-    };
-    const region = document.getElementById('parentRegId');
-    const regionValue = cell(2, 1).trim();
-    const status = document.getElementById('status');
-    const statusValue = cell(7, 1).trim();
-    function findOption(select, value) {
-        return Array.from(select.options).find(option => option.value &&
-            (option.value === value || option.textContent.trim() === value));
-    }
-    const regionOption = findOption(region, regionValue);
-    const statusOption = findOption(status, statusValue);
-    if (regionValue && !regionOption) {
-        alert('엑셀의 이벤트 지역을 확인해주세요.');
-        return;
-    }
-    if (statusValue && !statusOption) {
-        alert('엑셀의 이벤트 상태를 확인해주세요.');
-        return;
-    }
-
-    Object.entries(values).forEach(([id, value]) => {
-        const field = document.getElementById(id);
-        field.value = value;
-        field.dispatchEvent(new Event('input', {bubbles: true}));
-        field.dispatchEvent(new Event('change', {bubbles: true}));
+(function () {
+    'use strict';
+    var button = document.getElementById('btnApplyEventExcel');
+    button.addEventListener('click', function () {
+        var form = document.getElementById('eventCreateForm');
+        if (!form || form.querySelector('[name="eid"]')) return;
+        var component = document.getElementById('eventExcelAttachment');
+        if (component.getAttribute('aria-busy') === 'true') {
+            alert('파일 처리가 완료될 때까지 기다려주세요.'); return;
+        }
+        var content = component.getFileContent();
+        var event = content && content.event;
+        if (!event) { alert('이벤트 엑셀 파일을 선택하고 오류가 있다면 다시 선택해주세요.'); return; }
+        function field(id) { return form.querySelector('#' + id); }
+        function hasOption(select, value) {
+            return Array.from(select.options).some(function (option) { return option.value && option.value === String(value); });
+        }
+        var parent = field('parentRegId');
+        var child = field('reg_id');
+        var isRoot = String(event.reg_id) === String(event.parentRegId);
+        var validChild = isRoot || Array.from(child.options).some(function (option) {
+            return option.value === String(event.reg_id) && option.dataset.parentId === String(event.parentRegId);
+        });
+        if (!hasOption(field('ctg'), event.ctg) || !hasOption(field('status'), event.status)
+                || !hasOption(parent, event.parentRegId) || !validChild) {
+            alert('카테고리, 상태 또는 지역이 변경되었습니다. 파일을 다시 선택해주세요.'); return;
+        }
+        // 서버 응답 전체를 바인딩하지 않고 신규 등록 입력 필드만 복사한다.
+        ['title', 'ctg', 'status', 'sDate', 'eDate', 'dsc', 'address'].forEach(function (id) {
+            var input = field(id);
+            input.value = event[id] == null ? '' : String(event[id]);
+            input.dispatchEvent(new Event('input', {bubbles: true}));
+            input.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+        parent.value = String(event.parentRegId);
+        parent.dispatchEvent(new Event('change', {bubbles: true}));
+        child.value = isRoot ? '' : String(event.reg_id);
+        child.dispatchEvent(new Event('change', {bubbles: true}));
+        field('eventRegionValue').value = String(event.reg_id);
+        coreui.Modal.getOrCreateInstance(document.getElementById('eventCreateXlsModal')).hide();
     });
-    region.value = regionOption ? regionOption.value : '';
-    region.dispatchEvent(new Event('change', {bubbles: true}));
-    status.value = statusOption ? statusOption.value : '';
-    status.dispatchEvent(new Event('change', {bubbles: true}));
-
-    // 닫힐 때 컴포넌트가 초기화되므로 폼에 값을 먼저 복사한다.
-    coreui.Modal.getOrCreateInstance(document.getElementById('eventCreateXlsModal')).hide();
-});
-
+})();
 </script>

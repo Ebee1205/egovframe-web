@@ -27,7 +27,9 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 import com.cmm.service.ComResponseVO;
-import com.cmm.service.excel.impl.ExcelFileParserUtil;
+import com.cmm.service.excel.impl.ExcelDomFileParser;
+import com.cmm.service.excel.impl.ExcelSaxFileParser;
+import com.cmm.service.excel.ExcelFileParser;
 import com.cmm.service.file.FileMngService;
 import com.cmm.service.file.impl.FileMngUtil;
 
@@ -56,7 +58,11 @@ public class EventFileController {
 
 	private final EventService eventService;
 	@Autowired
-	private ExcelFileParserUtil excelFileParser;
+	private ExcelDomFileParser excelFileParser;
+	@Autowired
+	private com.event.service.EventExcelPreview eventExcelPreview;
+	@Autowired
+	private ExcelSaxFileParser excelSaxFileParser;
 	@Autowired
 	private com.cmm.service.excel.ExcelFileWriter excelFileWriter;
 	private final EventCmtService eventCmtService;
@@ -109,7 +115,7 @@ public class EventFileController {
 	@ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
 	public ResponseEntity<String> eventFileUploadError(org.springframework.web.multipart.MultipartException exception) {
 		return FileMngUtil.errorResponse(exception, messageSource);
-	}
+	} 
 
 	/** 엑셀 상세 다운로드 - DOM */	
     @RequestMapping(value = "/event/file/detail/dom.do", method = RequestMethod.GET)
@@ -139,8 +145,6 @@ public class EventFileController {
         
         Map<String, Object> data = new HashMap<>();
         
-        data.put("event", event);
-        data.put("statusName", statusName);
         String categoryName = event.getCtg();
         CodeFilterVO categoryFilter = new CodeFilterVO();
         categoryFilter.setParentCode("EVENT_CTG_ROOT");
@@ -150,32 +154,56 @@ public class EventFileController {
                 break;
             }
         }
-        data.put("categoryName", categoryName);
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("title", event.getTitle());
+        eventData.put("regName", event.getRegName());
+        eventData.put("address", event.getAddress());
+        eventData.put("SDate", event.getSDate());
+        eventData.put("EDate", event.getEDate());
+        eventData.put("dsc", event.getDsc());
+        eventData.put("categoryName", categoryName);
+        eventData.put("statusName", statusName);
+        data.put("event", eventData);
         
         excelFileWriter.downloadXml(response, "이벤트_상세.xlsx", data, "classpath:excel/EventDetail_Excel.xml", new com.event.service.impl.EventExcelStyle());
     }
-
-	@RequestMapping(value = "/event/file/detail/sax.do", method = RequestMethod.GET)
-	public void eventFileTemaplteSax(HttpServletResponse response) throws IOException {
-
-	}
 	
 	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
 	@RequestMapping(value = "/event/file/template/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files,
+	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files, @RequestParam(value = "fileCn", required = false) String description) {
+
+		return parseEventExcel(files, description, excelFileParser);
+    }
+
+	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
+	@RequestMapping(value = "/event/file/template/insert.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	public ResponseEntity<String> eventFileTemplateInsert(@RequestParam(value = "files", required = false) List<MultipartFile> files,
 			@RequestParam(value = "fileCn", required = false) String description) {
-		try {
-			List<Map<String, Object>> data = excelFileParser.parseXml(files, description, "classpath:excel/EventDetail_Excel.xml");
-			
-			
-			return ResponseEntity.ok(ComResponseVO.success(data,
-					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
-		} catch (Exception exception) {
-			return FileMngUtil.errorResponse(exception, messageSource);
-		}
+		return parseEventExcel(files, description, excelFileParser);
 	}
 
-	@RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)
+    private ResponseEntity<String> parseEventExcel(List<MultipartFile> files, String description, ExcelFileParser parser) {
+		try {
+			if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
+            List<Map<String, Object>> data = parser.parseXml(files, description, "classpath:excel/EventDetail_Excel.xml");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> content = (Map<String, Object>) data.get(0).get("fileContent");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> mapped = (Map<String, Object>) content.get("data");
+            content.put("event", eventExcelPreview.convert(mapped));
+			
+			// 미리보기만 반환한다. 이벤트/첨부 저장 서비스는 호출하지 않는다.
+			return ResponseEntity.ok(ComResponseVO.success(data,
+					messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
+		} catch (com.event.service.EventExcelPreview.InvalidPreview exception) {
+            return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EVENT_EXCEL_INVALID",
+                    exception.getMessage(), exception.getField(), "EVENT_EXCEL_INVALID", exception.getMessage()).toJson());
+        } catch (Exception exception) {
+            return FileMngUtil.errorResponse(exception, messageSource);
+        }
+    }
+
+    @RequestMapping(value = "/event/file/template/download.do", method = RequestMethod.GET)
 	public void eventFileTemapltedownload(HttpServletResponse response) throws IOException {
         java.nio.file.Path template = java.nio.file.Paths.get("D:/document/files/template/event_detail_template.xlsx");
         if (!java.nio.file.Files.isRegularFile(template)) {

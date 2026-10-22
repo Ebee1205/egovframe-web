@@ -10,7 +10,7 @@
         <cell range="A1" text="이벤트 제목"/>
         <cell range="B1:E1" property="event.title" align="center"/>
         <cell range="A2" text="이벤트 카테고리"/>
-        <cell range="B2:E2" property="categoryName" align="center"/>
+        <cell range="B2:E2" property="event.categoryName" align="center"/>
         <cell range="A3" text="이벤트 지역"/>
         <cell range="B3:E3" property="event.regName" align="center"/>
         <cell range="A4" text="이벤트 주소"/>
@@ -23,6 +23,6 @@
         <cell range="A6:E6" text="이벤트 내용"/>
         <cell range="A7:E7" property="event.dsc" align="left" vertical="top" height="120"/>
         <cell range="A8" text="이벤트 상태"/>
-        <cell range="B8:E8" property="statusName" align="center"/>
+        <cell range="B8:E8" property="event.statusName" align="center"/>
     </sheet>
 </excel>

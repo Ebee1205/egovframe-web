@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator"%>
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -74,21 +75,6 @@
                         <input type="text" class="form-control" id="eDate" name="EDate" required maxlength="16" placeholder="yyyy-MM-dd HH:mm" value="<fmt:formatDate value='${event.EDate}' pattern='yyyy-MM-dd HH:mm'/>">
                     </div>
                 </div>
-
-                <!-- <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">이벤트 지역</label>
-                    <select 
-                        class="form-select | input-box" 
-                        placeholder="지역 선택"
-                        id="region" name="region">
-                        <option value="">전체</option>
-                        <c:forEach var="eventRegion" items="${eventRegions}">
-                            <option value="${eventRegion.code}" ${eventRegion.code == filterVO.region ? 'selected' : ''}>
-                                <c:out value="${eventRegion.name}"/>
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div> -->
                 
                 <c:set var="eventParentRegId" value=""/>
                 <c:forEach var="reg" items="${childRegs}">

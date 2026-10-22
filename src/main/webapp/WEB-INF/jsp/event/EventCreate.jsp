@@ -39,7 +39,7 @@
             <c:url var="insertUrl" value="/event/insert.do"/>
             <form:form id="eventCreateForm" modelAttribute="eventCreateVO" action="${insertUrl}"
                        method="post" cssClass="form-container" accept-charset="UTF-8" novalidate="novalidate">
-                <input type="hidden" name="reg_id" value="1">
+                <form:hidden path="reg_id" id="eventRegionValue"/>
                 <input type="hidden" name="lat" value="">
                 <input type="hidden" name="lon" value="">
                 <div>
@@ -86,7 +86,7 @@
 		                            </option>
 		                        </c:forEach>
 		                    </select>
-		                    <select class="form-select | input-box" id="reg_id" name="reg_id" aria-label="시군구 선택"
+		                    <select class="form-select | input-box" id="reg_id" aria-label="시군구 선택"
 		                        ${empty eventParentRegId ? 'disabled' : ''}>
 		                        <option value="">전체 시(구)</option>
 		                        <c:forEach var="reg" items="${childRegs}">
@@ -102,6 +102,7 @@
 	                </div>
 	                <div class="w-100">
 	                    <label for="address" class="form-label | fw-semibold">이벤트 주소</label>
+	                    <form:errors path="reg_id" cssClass="text-danger" element="div" htmlEscape="true"/>
 	                    <input type="text" class="form-control" id="address" name="address" maxlength="500" value="<c:out value='${event.address}'/>">
 	                </div>
         		</div>
@@ -182,15 +183,8 @@
             });
         })();
 
+        /* XML 파싱 결과 적용은 신규 등록 모달에서만 처리한다. */
         const component = document.getElementById('eventExcelAttachment');
-        const fileContent = component.getFileContent();
-
-        component.addEventListener('file-input-box:change', function (event) {
-            const fileContent = event.detail.fileContent;
-            if (fileContent) {
-                console.log(fileContent.sheets);
-            }
-        });
         
 	    const parentRegion = document.getElementById('parentRegId');
 	    const childRegion = document.getElementById('reg_id');
@@ -207,9 +201,11 @@
 	        if (childRegion.selectedOptions.length && childRegion.selectedOptions[0].hidden) {
 	            childRegion.value = '';
 	        }
-	    }
-	
-	    parentRegion.addEventListener('change', function () {
+            document.getElementById('eventRegionValue').value = childRegion.value || parentId || '1';
+        }
+        childRegion.addEventListener('change', function () { updateChildRegions(false); });
+
+        parentRegion.addEventListener('change', function () {
 	        updateChildRegions(true);
 	    });
 
