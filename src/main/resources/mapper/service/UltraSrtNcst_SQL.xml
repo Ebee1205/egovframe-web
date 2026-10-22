@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ultraSrtNcstDAO">
+    <insert id="upsertUltraSrtNcstList">
+        INSERT INTO public.tb_ultra_srt_ncst
+            (base_date, base_time, nx, ny, category, obsr_value)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.baseDate}, #{item.baseTime}, #{item.nx}, #{item.ny},
+             #{item.category}, #{item.obsrValue})
+        </foreach>
+        ON CONFLICT (nx, ny, base_date, base_time, category)
+        DO UPDATE SET obsr_value = EXCLUDED.obsr_value
+    </insert>
+
+    <select id="selectUltraSrtNcst" resultType="com.overview.service.UltraSrtNcstVO">
+        SELECT base_date, base_time, nx, ny, category, obsr_value
+        FROM public.tb_ultra_srt_ncst
+        WHERE nx = #{nx} AND ny = #{ny}
+          AND base_date = #{baseDate} AND base_time = #{baseTime}
+          AND category = #{category}
+    </select>
+
+    <select id="selectUltraSrtNcstList" resultType="com.overview.service.UltraSrtNcstVO">
+        SELECT base_date, base_time, nx, ny, category, obsr_value
+        FROM public.tb_ultra_srt_ncst
+        WHERE nx = #{nx} AND ny = #{ny}
+          AND (base_date, base_time) = (
+              SELECT base_date, base_time FROM public.tb_ultra_srt_ncst
+              WHERE nx = #{nx} AND ny = #{ny}
+              ORDER BY base_date DESC, base_time DESC LIMIT 1
+          )
+        ORDER BY category
+    </select>
+</mapper>

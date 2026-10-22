@@ -28,6 +28,7 @@
     </typeAliases>
 
 	<mappers>
+        <mapper resource="mapper/service/UltraSrtNcst_SQL.xml" />
 	    <mapper resource="mapper/cmm/File_SQL.xml" />
 		<mapper resource="mapper/service/User_SQL.xml" />
 		<mapper resource="mapper/service/Me_SQL.xml" />
