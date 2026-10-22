@@ -78,6 +78,7 @@ public class ExcelTemplate {
                             requireTag(child, "cell");
                             CellMapping mapping = cell(child);
                             CellRangeAddress range = mapping.range(0);
+                            if (!mapping.getDropdown().isEmpty()) throw new IOException("반복 셀에는 dropdown을 지정할 수 없습니다.");
                             if (range.getFirstRow() != range.getLastRow()
                                     || (row >= 0 && row != range.getFirstRow())) {
                                 throw new IOException("repeat의 셀은 같은 한 행에 있어야 합니다.");
@@ -136,8 +137,11 @@ public class ExcelTemplate {
             height = Float.valueOf(required(element, "height"));
             if (!Float.isFinite(height) || height <= 0 || height > 409) throw new IOException("잘못된 행 높이");
         }
+        String dropdown = element.getAttribute("dropdown").trim();
+        if (!dropdown.isEmpty() && (!hasProperty || !dropdown.matches("[A-Za-z_][A-Za-z0-9_]*")))
+            throw new IOException("dropdown은 속성 셀의 코드 목록 키여야 합니다.");
         return new CellMapping(reference, hasProperty ? property(element, "property") : null,
-                hasProperty ? null : element.getAttribute("text"), style, element.getAttribute("format"), alignment, vertical, height);
+                hasProperty ? null : element.getAttribute("text"), style, element.getAttribute("format"), alignment, vertical, height, dropdown);
     }
 
     private String property(Element element, String attribute) throws IOException {
@@ -236,15 +240,17 @@ public class ExcelTemplate {
         public List<CellMapping> getCells() { return cells; }
     }
     public static final class CellMapping implements Mapping {
-        private final String reference, property, text, style, format;
+        private final String reference, property, text, style, format, dropdown;
         private final HorizontalAlignment alignment;
         private final VerticalAlignment vertical;
         private final Float height;
         private CellMapping(String reference, String property, String text, String style, String format,
-                HorizontalAlignment alignment, VerticalAlignment vertical, Float height) {
+                HorizontalAlignment alignment, VerticalAlignment vertical, Float height, String dropdown) {
+            this.dropdown = dropdown;
             this.reference = reference; this.property = property; this.text = text;
             this.style = style; this.format = format; this.alignment = alignment; this.vertical = vertical; this.height = height;
         }
+        public String getDropdown() { return dropdown; }
         public String getReference() { return reference; }
         public String getProperty() { return property; }
         public String getText() { return text; }

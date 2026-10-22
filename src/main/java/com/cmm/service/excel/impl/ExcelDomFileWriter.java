@@ -4,11 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -28,6 +27,10 @@ public class ExcelDomFileWriter {
         return write(data, new ExcelTemplate().load(resource), style);
     }
     public byte[] write(Object data, Definition template, ExcelStyle style) throws IOException {
+        return write(data, template, style, null);
+    }
+    public byte[] write(Object data, Definition template, ExcelStyle style,
+            Map<String, java.util.List<String>> dropdowns) throws IOException {
         if (template == null) throw new IllegalArgumentException("엑셀 매핑 양식이 필요합니다.");
         ExcelStyle selected = style == null ? new DefaultExcelStyle() : style;
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
@@ -56,6 +59,7 @@ public class ExcelDomFileWriter {
                     }
                 }
             }
+            if (dropdowns != null) applyDropdowns(workbook, template, dropdowns);
             workbook.write(output);
             return output.toByteArray();
         } catch (IllegalArgumentException e) {
@@ -115,5 +119,63 @@ public class ExcelDomFileWriter {
             }
         }
         return value;
+    }
+    /** XML에 지정된 셀에 숨김 목록과 이름 정의를 연결한다. */
+    private void applyDropdowns(Workbook workbook, Definition template, Map<String, List<String>> options) throws IOException {
+        Sheet lookup = null;
+        Map<String, String> names = new LinkedHashMap<>();
+        for (SheetMapping definition : template.getSheets()) {
+            Sheet target = workbook.getSheet(definition.getName());
+            for (Mapping item : definition.getMappings()) {
+                if (!(item instanceof CellMapping)) continue;
+                CellMapping cell = (CellMapping) item;
+                String key = cell.getDropdown();
+                if (key.isEmpty()) continue;
+                List<String> values = options.get(key);
+                if (values == null || values.isEmpty()) throw new IOException("드롭다운 코드 목록이 없습니다: " + key);
+                String name = names.get(key);
+                if (name == null) {
+                    if (lookup == null) {
+                        String sheetName = "_excel_codes";
+                        int suffix = 1;
+                        while (workbook.getSheet(sheetName) != null) sheetName = "_excel_codes_" + suffix++;
+                        lookup = workbook.createSheet(sheetName);
+                        workbook.setSheetVisibility(workbook.getSheetIndex(lookup), SheetVisibility.VERY_HIDDEN);
+                    }
+                    LinkedHashSet<String> unique = new LinkedHashSet<>();
+                    for (String value : values) {
+                        if (value == null || value.trim().isEmpty()) throw new IOException("빈 코드는 드롭다운에 사용할 수 없습니다: " + key);
+                        unique.add(value);
+                    }
+                    if (unique.size() > workbook.getSpreadsheetVersion().getMaxRows()) throw new IOException("드롭다운 항목 수가 너무 많습니다.");
+                    int column = names.size(), index = 0;
+                    if (column >= workbook.getSpreadsheetVersion().getMaxColumns()) throw new IOException("드롭다운 목록 수가 너무 많습니다.");
+                    for (String value : unique) {
+                        Row row = lookup.getRow(index);
+                        if (row == null) row = lookup.createRow(index);
+                        row.createCell(column).setCellValue(value); index++;
+                    }
+                    int number = names.size() + 1;
+                    do { name = "_excelChoice" + number++; } while (workbook.getName(name) != null);
+                    Name defined = workbook.createName(); defined.setNameName(name);
+                    String col = org.apache.poi.ss.util.CellReference.convertNumToColString(column);
+                    defined.setRefersToFormula("'" + lookup.getSheetName().replace("'", "''") + "'!$" + col + "$1:$" + col + "$" + unique.size());
+                    names.put(key, name);
+                }
+                CellRangeAddress range = cell.range(0);
+                DataValidationHelper helper = target.getDataValidationHelper();
+                // 병합된 셀은 왼쪽 위 셀에 값을 보관하므로 해당 셀에만 검증을 연결한다.
+                DataValidation validation = helper.createValidation(helper.createFormulaListConstraint(name),
+                        new CellRangeAddressList(range.getFirstRow(), range.getFirstRow(), range.getFirstColumn(), range.getFirstColumn()));
+                validation.setEmptyCellAllowed(true);
+                validation.setSuppressDropDownArrow(true);
+                validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+                validation.setShowErrorBox(true);
+                validation.createErrorBox("코드 입력 확인", "목록에 있는 항목을 선택해주세요.");
+                validation.setShowPromptBox(true);
+                validation.createPromptBox("항목 선택", "한국어 이름을 선택해주세요. 등록 시 코드로 변환됩니다.");
+                target.addValidationData(validation);
+            }
+        }
     }
 }

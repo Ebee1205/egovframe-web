@@ -45,4 +45,15 @@ public class ExcelFileWriter {
         FileMngUtil.download(response, fileName, FileMngUtil.contentType("xlsx"), content);
     }
 
+    /** XML dropdown 키에 해당하는 코드 목록을 포함하여 생성한다. */
+    public byte[] writeXml(Object data, String resource, ExcelStyle style,
+            java.util.Map<String, java.util.List<String>> dropdowns) throws IOException {
+        return new ExcelDomFileWriter().write(data, excelTemplate.load(resource), style, dropdowns);
+    }
+
+    public void downloadXml(HttpServletResponse response, String fileName, Object data,
+            String resource, ExcelStyle style, java.util.Map<String, java.util.List<String>> dropdowns) throws IOException {
+        FileMngUtil.download(response, fileName, FileMngUtil.contentType("xlsx"), writeXml(data, resource, style, dropdowns));
+    }
+
 }
