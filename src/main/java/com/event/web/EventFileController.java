@@ -149,19 +149,26 @@ public class EventFileController {
 	
 	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
 	@RequestMapping(value = "/event/file/template/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files, @RequestParam(value = "fileCn", required = false) String description) {
+	public ResponseEntity<String> eventFileTemplateUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files, 
+			@RequestParam(value = "fileCn", required = false) String description) {
 
 		return parseEventExcel(files, description, excelFileParser);
     }
 
-	/** 엑셀 양식 파일을 저장하지 않고 파싱한 결과만 반환한다. */
-	@RequestMapping(value = "/event/file/template/insert.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	public ResponseEntity<String> eventFileTemplateInsert(@RequestParam(value = "files", required = false) List<MultipartFile> files,
-			@RequestParam(value = "fileCn", required = false) String description) {
-		return parseEventExcel(files, description, excelFileParser);
-	}
+    /** 엑셀은 저장하지 않고, 검증한 이벤트만 기존 등록 서비스로 저장한다. */
+    @RequestMapping(value = {"/event/file/template/insert.do", "/event/template/insert.do"}, method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    public ResponseEntity<String> eventFileTemplateInsert(@RequestParam(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "fileCn", required = false) String description,
+            @RequestParam(value = "createdBy", required = false) String createdBy) {
+        return parseEventExcel(files, description, excelFileParser, true, createdBy);
+    }
 
     private ResponseEntity<String> parseEventExcel(List<MultipartFile> files, String description, ExcelFileParser parser) {
+        return parseEventExcel(files, description, parser, false, null);
+    }
+
+    private ResponseEntity<String> parseEventExcel(List<MultipartFile> files, String description,
+            ExcelFileParser parser, boolean insert, String createdBy) {
 		try {
 			if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
             List<Map<String, Object>> data = parser.parseXml(files, description, "classpath:excel/EventDetail_Excel.xml");
@@ -169,7 +176,25 @@ public class EventFileController {
             Map<String, Object> content = (Map<String, Object>) data.get(0).get("fileContent");
             @SuppressWarnings("unchecked")
             Map<String, Object> mapped = (Map<String, Object>) content.get("data");
-            content.put("event", parseExcelEvent(mapped));
+            Map<String, Object> preview = new LinkedHashMap<>();
+            EventVO eventVO = parseExcelEvent(mapped, preview);
+            content.put("event", preview);
+            if (insert) {
+                // 등록자 정보는 엑셀에서 읽지 않고 기존 신규 등록 폼과 동일한 별도 입력을 사용한다.
+                if (createdBy == null || !createdBy.matches("[1-9][0-9]{0,18}"))
+                    throw invalid("createdBy", "등록할 사용자를 선택해주세요.");
+                try { eventVO.setCreatedBy(Long.valueOf(createdBy)); }
+                catch (NumberFormatException exception) { throw invalid("createdBy", "등록자 ID를 확인해주세요."); }
+                BindingResult errors = new org.springframework.validation.BeanPropertyBindingResult(eventVO, "eventCreateVO");
+                validatorFactory.getValidator("eventCreateVO", eventVO, errors).validate();
+                if (errors.hasErrors()) {
+                    return ResponseEntity.badRequest().body(ComResponseVO.validationFailure(errors, messageSource,
+                            Locale.KOREAN, "EVENT_EXCEL_INVALID", "등록할 이벤트 정보를 확인해주세요.").toJson());
+                }
+                eventService.insertEvent(eventVO);
+                return ResponseEntity.status(201).body(ComResponseVO.success(
+                        Collections.singletonMap("eid", eventVO.getEid()), "이벤트가 등록되었습니다.").toJson());
+            }
 			
 			// 미리보기만 반환한다. 이벤트/첨부 저장 서비스는 호출하지 않는다.
 			return ResponseEntity.ok(ComResponseVO.success(data,
@@ -273,8 +298,8 @@ public class EventFileController {
         return result;
     }
 
-    // 신규 등록 미리보기: 허용 필드 변환 및 검증
-    private Map<String, Object> parseExcelEvent(Map<String, Object> mapped) throws Exception {
+    // 일단 validation check 여기서...
+    private EventVO parseExcelEvent(Map<String, Object> mapped, Map<String, Object> preview) throws Exception {
         Object nested = mapped.get("event");
         if (!(nested instanceof Map)) throw invalid("files", "이벤트 엑셀 양식을 확인해주세요.");
         Map<?, ?> source = (Map<?, ?>) nested;
@@ -314,7 +339,8 @@ public class EventFileController {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ROOT);
         result.put("sDate", format.format(event.getSDate()));
         result.put("eDate", format.format(event.getEDate()));
-        return result;
+        preview.putAll(result);
+        return event;
     }
 
     private String excelCode(Object raw, String parent, String field) throws Exception {

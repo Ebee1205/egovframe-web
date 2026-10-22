@@ -3,7 +3,7 @@
 <%--
   단일 파일 파싱 컴포넌트: 선택 즉시 업로드하고 data[0].fileContent를 반환한다.
   props: id, label, description, accept, maxSize, uploadUrl
-  API: await element.uploadFile(file), element.getFileContent(), element.reset()
+  API: await element.uploadFile(file), element.getFileContent(), element.getFile(), element.setProcessing(busy), element.reset()
   이벤트: file-input-box:change -> detail.fileContent (재선택/첨부 취소 시 null로 초기화)
   파일 ID, 다운로드 및 삭제 API는 사용하지 않는다.
 --%>
@@ -192,6 +192,9 @@
         return parsedContent;
     };
     box.getFileContent = function () { return fileContent; };
+    box.getFile = function () { return selectedFile; };
+    // 파싱 완료 후 별도의 등록 요청을 보내는 동안 재선택/드롭을 막는다.
+    box.setProcessing = function (value) { setBusy(!!value); };
 
     box.reset = function () {
         requestVersion++;
