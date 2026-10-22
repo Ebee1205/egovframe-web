@@ -35,12 +35,14 @@
     function notifyListChange() {
         document.dispatchEvent(new Event('overview:events-changed'));
     }
-
+        
     function loadNext() {
         if (!title || !hasNext || loading || composing) return;
+        
         var currentRevision = revision;
         var requestedPage = page;
         var controller = new AbortController();
+        
         request = controller;
         loading = true;
         failed = false;

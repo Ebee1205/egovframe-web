@@ -7,10 +7,18 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/ol@10.11.0/dist/ol.js"></script>
 
+<%-- 3D 컨테이너: 기존 #map 의 CSS(위치/크기)와 동일하게 맞춰야 합니다. --%>
+<style>
+    #map3d { position: absolute; inset: 0; z-index: 0; }
+    #map3d[hidden] { display: none; }
+    .map-top-right[hidden] { display: none; }
+</style>
+
 <div class="map-body | p-0">
 
     <div id="map" tabindex="0" aria-label="이벤트 지도"></div>
-	
+    <div id="map3d" hidden></div>
+
     <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpSideBar.jsp">
         <jsp:param name="contentPage"
                    value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
@@ -18,6 +26,7 @@
 
     <!-- 그리기 도구: 우측 상단 / 세로 정렬 -->
     <div class="map-top-right">
+
         <div id="map-draw-tools" class="map-draw-tools" role="group" aria-label="지도 그리기 도구">
 
             <div class="btn-group-vertical shadow-sm map-draw-buttons" role="group" aria-label="그리기 모드">
@@ -71,6 +80,7 @@
 	import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js"/>';
     import { createMapMarker } from '<c:url value="/resources/js/MapMarker.js"/>';
     import { createMapDraw } from '<c:url value="/resources/js/MapDraw.js"/>';
+    import { createMap3D } from '<c:url value="/resources/js/MapTilt3D.js"/>';
 
     var meta = mapMeta.get();
 
@@ -93,6 +103,9 @@
     var scaleElement = document.getElementById('map-scale');
 
     var mapTypeSelect = document.getElementById('map-type-select');
+
+    var drawToolsEl = document.getElementById('map-draw-tools');
+    var toolboxEl = drawToolsEl.closest('.map-top-right');
 
 
     // =========================
@@ -165,17 +178,18 @@
         },
         keyboardTarget: document.querySelector('.map-body')
     });
+
+
+    // =========================
+    // Event markers (2D / 3D 공용 로직)
+    // =========================
+
     // Event-list UI bindings stay here; the marker component accepts any point data.
     var eventCards = Array.from(document.querySelectorAll('[data-overview-event]'));
     var sidePanel = document.getElementById('mapSidePanel');
-    var eventMarkers = createMapMarker(map, {
-        color: '#5856d6',
-        hoverColor: '#4645ab',
-        opacity: 0.5,
-        selectedOpacity: 1,
-        hoverOpacity: 1,
-        // Supply icon: '/path/to/marker.svg' or {src, width, anchor, ...} as needed.
-        items: eventCards.map(function (card) {
+
+    function toItems() {
+        return eventCards.map(function (card) {
             return {
                 id: card.dataset.overviewEvent,
                 lat: card.dataset.lat,
@@ -183,24 +197,85 @@
                 title: card.querySelector('.event-title').textContent.trim(),
                 card: card
             };
-        }),
-        getPadding: function (size) {
-            var panelWidth = sidePanel && !sidePanel.classList.contains('folded') ? sidePanel.offsetWidth + 24 : 0;
-            return [40, Math.min(64, size[0] * 0.1), Math.min(100, size[1] * 0.2),
-                Math.min(panelWidth + 40, size[0] * 0.6)];
+        });
+    }
+
+    function getPadding(size) {
+        var panelWidth = sidePanel && !sidePanel.classList.contains('folded') ? sidePanel.offsetWidth + 24 : 0;
+        return [40, Math.min(64, size[0] * 0.1), Math.min(100, size[1] * 0.2),
+            Math.min(panelWidth + 40, size[0] * 0.6)];
+    }
+
+    function handleSelect(item, selection) {
+        eventCards.forEach(function (card) {
+            var active = card === item.card;
+            card.classList.toggle('is-map-selected', active);
+            card.setAttribute('aria-pressed', String(active));
+        });
+        if (selection.fromMap) {
+            if (sidePanel && sidePanel.classList.contains('folded')) sidePanel.querySelector('.fold-button').click();
+            item.card.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+        }
+    }
+
+    var eventMarkers = createMapMarker(map, {
+        color: '#5856d6',
+        hoverColor: '#4645ab',
+        opacity: 0.5,
+        selectedOpacity: 1,
+        hoverOpacity: 1,
+        // Supply icon: '/path/to/marker.svg' or {src, width, anchor, ...} as needed.
+        items: toItems(),
+        getPadding: getPadding,
+        onSelect: handleSelect
+    });
+
+
+    // =========================
+    // 3D (MapLibre pitch) - 하이브리드
+    // =========================
+
+    var map3d = createMap3D(map, {
+        container: document.getElementById('map3d'),
+        projection: meta.projection,
+        getTileSource: function () { return meta.tileSources[currentMapType]; },
+        // 건물 3D 등 벡터 스타일을 쓰려면: style: 'https://.../style.json'
+        color: '#5856d6',
+        hoverColor: '#4645ab',
+        opacity: 0.5,
+        selectedOpacity: 1,
+        hoverOpacity: 1,
+        items: toItems(),
+        getPadding: getPadding,
+        onSelect: handleSelect,
+        onZoom: function (z) {
+            zoomSlider.value = z;
         },
-        onSelect: function (item, selection) {
-            eventCards.forEach(function (card) {
-                var active = card === item.card;
-                card.classList.toggle('is-map-selected', active);
-                card.setAttribute('aria-pressed', String(active));
+        onEnter: function () {
+            // 진행 중인 그리기 모드 해제 후 도구 숨김
+            mapDraw.setMode('None');
+            toolboxEl.hidden = true;
+        },
+        onExit: function () {
+            toolboxEl.hidden = false;
+            zoomSlider.value = view.getZoom();
+            // Return to a north-up view smoothly after leaving 3D.
+            console.log('[OverviewCmpMap] 2D 북쪽 정렬 시작 / 도구상자 표시', {
+                time: new Date().toISOString(), rotation: view.getRotation()
             });
-            if (selection.fromMap) {
-                if (sidePanel && sidePanel.classList.contains('folded')) sidePanel.querySelector('.fold-button').click();
-                item.card.scrollIntoView({block: 'nearest', behavior: 'smooth'});
-            }
+            view.animate({rotation: 0, duration: 500}, function (completed) {
+                console.log('[OverviewCmpMap] 2D 북쪽 정렬 ' + (completed ? '완료' : '중단'), {
+                    time: new Date().toISOString(), rotation: view.getRotation()
+                });
+            });
         }
     });
+
+    // 2D / 3D 상태에 맞는 마커 컨트롤러
+    function activeMarkers() {
+        return map3d.isActive() ? map3d : eventMarkers;
+    }
+
     var boundEventCards = new WeakSet();
     function bindEventCards() {
       eventCards.forEach(function (card) {
@@ -215,16 +290,16 @@
         if (boundEventCards.has(card)) return;
         boundEventCards.add(card);
         card.addEventListener('click', function () {
-            if (hasLocation) eventMarkers.select(card.dataset.overviewEvent);
+            if (hasLocation) activeMarkers().select(card.dataset.overviewEvent);
         });
         card.addEventListener('mouseenter', function () {
-            if (hasLocation) eventMarkers.hover(card.dataset.overviewEvent);
+            if (hasLocation) activeMarkers().hover(card.dataset.overviewEvent);
         });
-        card.addEventListener('mouseleave', function () { eventMarkers.hover(null); });
+        card.addEventListener('mouseleave', function () { activeMarkers().hover(null); });
         card.addEventListener('keydown', function (event) {
             if (hasLocation && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault();
-                eventMarkers.select(card.dataset.overviewEvent);
+                activeMarkers().select(card.dataset.overviewEvent);
             }
         });
       });
@@ -234,15 +309,8 @@
         eventCards = Array.from(document.querySelectorAll('[data-overview-event]')).filter(function (card) {
             return !card.closest('[hidden]');
         });
-        eventMarkers.setItems(eventCards.map(function (card) {
-            return {
-                id: card.dataset.overviewEvent,
-                lat: card.dataset.lat,
-                lon: card.dataset.lon,
-                title: card.querySelector('.event-title').textContent.trim(),
-                card: card
-            };
-        }));
+        eventMarkers.setItems(toItems());
+        map3d.setItems(toItems());
         bindEventCards();
     });
 
@@ -256,11 +324,19 @@
 
 
     function setZoom(value) {
-        view.setZoom(Number(value));
+        if (map3d.isActive()) {
+            map3d.setZoom(Number(value));
+        } else {
+            view.setZoom(Number(value));
+        }
     }
 
 
     function zoomBy(delta) {
+        if (map3d.isActive()) {
+            map3d.zoomBy(delta);
+            return;
+        }
         view.animate({
             zoom: view.getZoom() + delta,
             duration: 200
@@ -316,6 +392,9 @@
             currentMapType = this.value;
 
             mapMeta.setMapType(currentMapType);
+
+            // 3D 뷰도 같은 타일로 갱신
+            map3d.refreshSource();
         });
     }
 
@@ -355,6 +434,8 @@
     if (typeof ResizeObserver !== 'undefined') {
         var mapResizeObserver = new ResizeObserver(function () {
             map.updateSize();
+            var map3dInstance = map3d.getMap();
+            if (map3dInstance) map3dInstance.resize();
         });
         mapResizeObserver.observe(document.getElementById('map'));
     }
