@@ -7,7 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import com.cmm.service.excel.impl.DefaultExcelStyle;
 
-/** sample.xlsx의 글꼴, 회색 제목 배경과 검은 테두리를 적용한다. */
+
 public class EventExcelStyle extends DefaultExcelStyle {
     @Override
     public CellStyle createHeaderStyle(Workbook workbook) {
@@ -17,6 +17,7 @@ public class EventExcelStyle extends DefaultExcelStyle {
         font.setFontHeightInPoints((short) 10);
         font.setBold(true);
         style.setFont(font);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         ((XSSFCellStyle) style).setFillForegroundColor(new XSSFColor(
                 new byte[] {(byte) 217, (byte) 217, (byte) 217}, new DefaultIndexedColorMap()));
         return style;
@@ -29,6 +30,7 @@ public class EventExcelStyle extends DefaultExcelStyle {
         font.setFontName("맑은 고딕");
         font.setFontHeightInPoints((short) 10);
         style.setFont(font);
+        style.setFillPattern(FillPatternType.NO_FILL);
         style.setAlignment(HorizontalAlignment.CENTER);
         return style;
     }
