@@ -193,9 +193,8 @@ public class EventController {
 		model.addAttribute("fileAccept", fileExtensions.replaceAll("\\.(?=[^.]+)", ",.").replaceFirst("^,", ""));
 		model.addAttribute("fileMaxSize", fileMaxSize);
 
-		model.addAttribute("eventCreateMode", true);
         model.addAttribute("event", formEvent);
-        return "forward:/WEB-INF/jsp/event/EventDetail.jsp";
+        return "forward:/WEB-INF/jsp/event/EventCreate.jsp";
 	}
 
 	@RequestMapping(value = "/event/insert.do", method = RequestMethod.POST)
