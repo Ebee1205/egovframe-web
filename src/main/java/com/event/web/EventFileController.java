@@ -120,31 +120,45 @@ public class EventFileController {
     public void eventFileListDownload(EventFilterVO filterVO, HttpServletResponse response) throws Exception {
         filterVO.setPageIndex(1);
         filterVO.setPageSize(0);
+        
         List<EventVO> events = eventService.selectEventList(filterVO);
         if (events.size() >= org.apache.poi.ss.SpreadsheetVersion.EXCEL2007.getMaxRows()) {
             throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "검색 범위를 줄여주세요. 엑셀 최대 행 수를 초과했습니다.");
         }
+        
         Map<String, String> categories = new HashMap<>();
         Map<String, String> statuses = new HashMap<>();
         CodeFilterVO codeFilter = new CodeFilterVO();
+        
         codeFilter.setParentCode("EVENT_CTG_ROOT");
         for (CodeFilterVO code : codeService.selectCmmCodeDetail(codeFilter)) categories.put(code.getCode(), code.getName());
+        
         codeFilter.setParentCode("EVENT_STAT_ROOT");
+        
         for (CodeFilterVO code : codeService.selectCmmCodeDetail(codeFilter)) statuses.put(code.getCode(), code.getName());
+        
         String fileName = "이벤트목록_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".xlsx";
         response.setContentType(FileMngUtil.contentType("xlsx"));
         response.setHeader("Content-Disposition", org.springframework.http.ContentDisposition.attachment()
                 .filename(fileName, java.nio.charset.StandardCharsets.UTF_8).build().toString());
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Cache-Control", "private, no-store");
+        
         final int[] number = {0};
+        
         new com.cmm.service.excel.impl.ExcelSXSSFWriter().writeList(response.getOutputStream(), "이벤트 목록",
                 new String[] {"NO", "지역", "제목", "분류", "시작일", "종료일", "주소", "등록일", "수정일", "상태"},
                 new int[] {8, 20, 50, 16, 22, 22, 50, 22, 22, 16}, events,
-                event -> new Object[] {++number[0], event.getRegName(), event.getTitle(),
-                    categories.getOrDefault(event.getCtg(), event.getCtg()), event.getSDate(), event.getEDate(),
-                    event.getAddress(), event.getCDate(), event.getUDate(),
-                    statuses.getOrDefault(event.getStatus(), event.getStatus())},
+                event -> new Object[] {
+	                		++number[0], 
+	                		event.getRegName(), 
+	                		event.getTitle(),
+	                		categories.getOrDefault(event.getCtg(), event.getCtg()), 
+	                		event.getSDate(), event.getEDate(),
+	                		event.getAddress(), 
+	                		event.getCDate(), event.getUDate(),
+	                		statuses.getOrDefault(event.getStatus(), event.getStatus())
+                		},
                 new com.event.service.impl.EventExcelStyle());
         response.flushBuffer();
     }
@@ -168,6 +182,7 @@ public class EventFileController {
         Map<String, List<String>> options = loadExcelOptions(template);
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> eventData = new HashMap<>();
+        
         eventData.put("title", event.getTitle());
         eventData.put("regName", excelRegionLabel(event.getReg_id()));
         eventData.put("address", event.getAddress());
