@@ -47,9 +47,9 @@
 .map-side-panel .fold-button svg { transition: transform .3s ease; }
 .map-side-panel.folded .fold-button svg { transform: rotate(180deg); }
 
-.overview-events .event-card { 
-    overflow: hidden; 
-    border: 0px; 
+.overview-events .event-card {
+    overflow: hidden;
+    border: 0px;
     padding: 8px;
     transition: background-color .15s ease, box-shadow .15s ease;
 }
@@ -73,50 +73,50 @@
     .overview-events .event-card { transition: none; }
 }
 
-.overview-events .event-summary { 
-    list-style: none; 
-    cursor: pointer; 
-    padding: 1rem; 
+.overview-events .event-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1rem;
 }
-.overview-events .event-summary::-webkit-details-marker { 
-    display: none; 
+.overview-events .event-summary::-webkit-details-marker {
+    display: none;
 }
-.overview-events .event-summary:focus-visible { 
-    outline: 3px solid var(--cui-primary); 
-    outline-offset: -3px; 
+.overview-events .event-summary:focus-visible {
+    outline: 3px solid var(--cui-primary);
+    outline-offset: -3px;
 }
-.overview-events .event-title { 
-    overflow-wrap: anywhere; 
-    line-height: 1.5; 
+.overview-events .event-title {
+    overflow-wrap: anywhere;
+    line-height: 1.5;
 }
-.overview-events .event-meta { 
-    font-size: .8125rem; 
-    line-height: 1.6; 
-    overflow-wrap: anywhere; 
+.overview-events .event-meta {
+    font-size: .8125rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
 }
-.overview-events .event-chevron { 
-    flex-shrink: 0; 
-    transition: transform .15s ease; 
+.overview-events .event-chevron {
+    flex-shrink: 0;
+    transition: transform .15s ease;
 }
 .overview-events details[open] .event-chevron { transform: rotate(180deg); }
-.overview-events .event-description { 
-    white-space: pre-wrap; 
-    overflow-wrap: anywhere; 
-    line-height: 1.75; 
+.overview-events .event-description {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.75;
 }
-.overview-events .event-details { 
-    padding: 1rem; 
-    border-top: 1px solid var(--cui-border-color); 
+.overview-events .event-details {
+    padding: 1rem;
+    border-top: 1px solid var(--cui-border-color);
 }
-.overview-events .event-details dt { 
-    color: var(--cui-secondary-color); 
-    font-size: .8125rem; 
-    font-weight: 400; 
+.overview-events .event-details dt {
+    color: var(--cui-secondary-color);
+    font-size: .8125rem;
+    font-weight: 400;
 }
-.overview-events .event-details dd { 
-    overflow-wrap: anywhere; 
-    margin-bottom: .75rem; 
-    font-size: .875rem; 
+.overview-events .event-details dd {
+    overflow-wrap: anywhere;
+    margin-bottom: .75rem;
+    font-size: .875rem;
 }
 @media (prefers-reduced-motion: reduce) { .overview-events .event-chevron { transition: none; } }
 /* 카드의 일정, 위치, 작성자, 등록일은 event-meta의 같은 작은 글꼴을 사용합니다. */
@@ -140,4 +140,14 @@
     font-size: inherit;
     line-height: inherit;
     overflow-wrap: anywhere;
+}
+.overview-weather-hud {
+    position: absolute;
+    right: 80px;
+    top: 16px;
+    z-index: 10;
+    width: 260px;
+    max-width: calc(100% - 96px);
+    max-height: calc(100% - 160px);
+    overflow-y: auto;
 }
