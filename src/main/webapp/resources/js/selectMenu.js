@@ -43,18 +43,12 @@ const pageList = [
         path: '/event/list.do',
         icon: 'cil-layers',
       },
-      // {
-      //   page: 'StoreList',
-      //   name: '사업장',
-      //   path: '/store/list.do',
-      //   icon: 'cil-speedometer',
-      // },
-/*      {
-        page: 'MapView',
-        name: '지도 보기',
-        path: '/content/map.do',
+      {
+        page: 'ExcelUpload',
+        name: '일괄등록',
+        path: '/event/list.do',
         icon: 'cil-speedometer',
-      },*/
+      },
     ],
   },
 ];
