@@ -1,0 +1,29 @@
+<svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#clip0_59_29)">
+<g filter="url(#filter0_f_59_29)">
+<ellipse cx="12" cy="29" rx="4" ry="2" fill="black" fill-opacity="0.12"/>
+</g>
+<use xlink:href="#stroke0_59_29" fill="#5856D6"/>
+<mask id="stroke1_59_29" maskUnits="userSpaceOnUse" x="1" y="1" width="22" height="28" fill="black">
+<rect fill="white" x="1" y="1" width="22" height="28"/>
+<use xlink:href="#stroke0_59_29"/>
+</mask>
+<path d="M12 2C17.5228 2 22 6.47715 22 12C22 15.2858 20.4146 18.2005 17.9678 20.0234C16.083 21.4394 13.387 23.685 12.7715 27.3193C12.7069 27.7008 12.3869 27.9971 12 27.9971C11.6131 27.9971 11.2931 27.7008 11.2285 27.3193C10.6129 23.6846 7.91604 21.4394 6.03125 20.0234C3.58477 18.2005 2 15.2855 2 12C2 6.47715 6.47715 2 12 2Z" stroke-width="2" stroke="url(#paint0_linear_59_29)" mask="url(#stroke1_59_29)"/>
+</g>
+<circle cx="12" cy="12" r="4" fill="black" fill-opacity="0.4"/>
+<defs>
+<filter id="filter0_f_59_29" x="6" y="25" width="12" height="8" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_59_29"/>
+</filter>
+<linearGradient id="paint0_linear_59_29" x1="12" y1="2" x2="12" y2="27.9969" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0.35"/>
+</linearGradient>
+<clipPath id="clip0_59_29">
+<rect width="24" height="32" fill="white"/>
+</clipPath>
+<path id="stroke0_59_29" d="M12 2C17.5228 2 22 6.47715 22 12C22 15.2858 20.4146 18.2005 17.9678 20.0234C16.083 21.4394 13.387 23.685 12.7715 27.3193C12.7069 27.7008 12.3869 27.9971 12 27.9971C11.6131 27.9971 11.2931 27.7008 11.2285 27.3193C10.6129 23.6846 7.91604 21.4394 6.03125 20.0234C3.58477 18.2005 2 15.2855 2 12C2 6.47715 6.47715 2 12 2Z"/>
+</defs>
+</svg>
