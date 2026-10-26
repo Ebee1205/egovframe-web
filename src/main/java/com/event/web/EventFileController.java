@@ -33,9 +33,9 @@ public class EventFileController {
 
     private final EventService eventService;
     private final MessageSource messageSource;
-    private final com.cmm.service.excel.impl.ExcelFileServiceImpl excelFileService;
+    private final com.event.service.impl.EventlFileServiceImpl excelFileService;
     public EventFileController(EventService eventService, MessageSource messageSource,
-            com.cmm.service.excel.impl.ExcelFileServiceImpl excelFileService) {
+            com.event.service.impl.EventlFileServiceImpl excelFileService) {
         this.eventService=eventService; this.messageSource=messageSource; this.excelFileService=excelFileService;
     }
 
@@ -107,14 +107,18 @@ public class EventFileController {
         try {
             if (insert) return ResponseEntity.status(201).body(ComResponseVO.success(
                     excelFileService.insertEventExcel(files, description, createdBy), "이벤트가 등록되었습니다.").toJson());
+            
             return ResponseEntity.ok(ComResponseVO.success(excelFileService.parseEventExcel(files, description),
                     messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
+            
         } catch (BindException exception) {
             return ResponseEntity.badRequest().body(ComResponseVO.validationFailure(exception.getBindingResult(), messageSource,
                     Locale.KOREAN, "EVENT_EXCEL_INVALID", "등록할 이벤트 정보를 확인해주세요.").toJson());
-        } catch (com.cmm.service.excel.impl.ExcelFileServiceImpl.InvalidEventExcelException exception) {
+            
+        } catch (com.event.service.impl.EventlFileServiceImpl.InvalidEventExcelException exception) {
             return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EVENT_EXCEL_INVALID", exception.getMessage(),
                     exception.getField(), "EVENT_EXCEL_INVALID", exception.getMessage()).toJson());
+            
         } catch (Exception exception) {
             return FileMngUtil.errorResponse(exception, messageSource);
         }

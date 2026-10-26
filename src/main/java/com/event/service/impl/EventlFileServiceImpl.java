@@ -1,4 +1,4 @@
-package com.cmm.service.excel.impl;
+package com.event.service.impl;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -7,6 +7,7 @@ import com.code.service.*;
 import com.reg.service.*;
 import com.cmm.service.excel.*;
 import com.cmm.service.excel.ExcelTemplate.*;
+import com.cmm.service.excel.impl.ExcelDomFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +17,19 @@ import org.springmodules.validation.commons.DefaultValidatorFactory;
 
 /** 이벤트 엑셀의 조회, 매핑, 검증과 등록을 조합한다. HTTP 응답은 Controller에서 처리한다. */
 @Service
-public class ExcelFileServiceImpl {
+public class EventlFileServiceImpl {
+	
     private final EventService eventService;
     private final CodeService codeService;
     private final RegService regService;
     @Autowired private ExcelDomFileParser excelFileParser;
     @Autowired private ExcelFileWriter excelFileWriter;
     @Autowired private DefaultValidatorFactory validatorFactory;
-    public ExcelFileServiceImpl(EventService eventService, CodeService codeService, RegService regService) {
+    
+    public EventlFileServiceImpl(EventService eventService, CodeService codeService, RegService regService) {
         this.eventService=eventService; this.codeService=codeService; this.regService=regService;
     }
+    
     public void writeEventList(EventFilterVO filterVO, OutputStream output) throws Exception {
         filterVO.setPageIndex(1);
         filterVO.setPageSize(0);
@@ -117,7 +121,7 @@ public class ExcelFileServiceImpl {
             Map<String, Object> mapped = (Map<String, Object>) content.get("data");
             Map<String, Object> preview = new LinkedHashMap<>();
             
-            EventVO eventVO = parseExcelEvent(mapped, preview);
+            EventVO eventVO = validateEventExcel(mapped, preview);
             content.put("event", preview);
             
             if (parsed != null) parsed.accept(eventVO);
@@ -127,7 +131,8 @@ public class ExcelFileServiceImpl {
     public Map<String, Long> insertEventExcel(List<MultipartFile> files, String description, String createdBy) throws Exception {
         final EventVO[] parsed = new EventVO[1];
         
-        parseEventExcel(files, description, event -> parsed[0] = event);
+        parseEventExcel(files, description, event -> parsed[0] = event); // 파싱해서 가져오기
+        
         EventVO eventVO = parsed[0];
         
         // 등록자 정보는 엑셀에서 읽지 않고 기존 신규 등록 폼과 동일한 별도 입력을 사용한다.
@@ -142,6 +147,7 @@ public class ExcelFileServiceImpl {
         	throw invalid("createdBy", "등록자 ID를 확인해주세요."); 
     	}
         
+        // 주입받은 ValidatorFactory로 validation check
         BindingResult errors = new org.springframework.validation.BeanPropertyBindingResult(eventVO, "eventCreateVO");
         validatorFactory.getValidator("eventCreateVO", eventVO, errors).validate();
    
@@ -236,7 +242,7 @@ public class ExcelFileServiceImpl {
     }
 
     // 일단 validation check 여기서...
-    private EventVO parseExcelEvent(Map<String, Object> mapped, Map<String, Object> preview) throws Exception {
+    private EventVO validateEventExcel(Map<String, Object> mapped, Map<String, Object> preview) throws Exception {
         Object nested = mapped.get("event");
         if (!(nested instanceof Map)) throw invalid("files", "이벤트 엑셀 양식을 확인해주세요.");
         Map<?, ?> source = (Map<?, ?>) nested;

@@ -69,8 +69,8 @@ public class FileMngServiceImpl implements FileMngService {
     
     private void write(MultipartFile upload, FileVO file) throws IOException {
         // Register before put: a provider can fail after having persisted the object.
-        rollbackCleanup(file.getStreFileNm());
-        try (InputStream input = upload.getInputStream()) {
+        rollbackCleanup(file.getStreFileNm()); // 삭제 콜백 등록
+        try (InputStream input = upload.getInputStream()) { // 실제 파일 저장
             storage.put(file.getStreFileNm(), input, file.getFileSize(), FileMngUtil.contentType(file.getFileExtsn()));
         }
     }

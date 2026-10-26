@@ -29,8 +29,7 @@ public class ExcelDomFileWriter {
     public byte[] write(Object data, Definition template, ExcelStyle style) throws IOException {
         return write(data, template, style, null);
     }
-    public byte[] write(Object data, Definition template, ExcelStyle style,
-            Map<String, java.util.List<String>> dropdowns) throws IOException {
+    public byte[] write(Object data, Definition template, ExcelStyle style, Map<String, java.util.List<String>> dropdowns) throws IOException {
         if (template == null) throw new IllegalArgumentException("엑셀 매핑 양식이 필요합니다.");
         ExcelStyle selected = style == null ? new DefaultExcelStyle() : style;
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
