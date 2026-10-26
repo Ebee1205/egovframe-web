@@ -44,9 +44,9 @@ const pageList = [
         icon: 'cil-layers',
       },
       {
-        page: 'ExcelUpload',
+        page: 'ExtraUpload',
         name: '일괄등록',
-        path: '/event/list.do',
+        path: '/extra/list.do',
         icon: 'cil-speedometer',
       },
     ],

@@ -10,6 +10,6 @@
     <import resource="classpath:spring/context-common.xml"/>
     <import resource="classpath:spring/context-datasource.xml"/>
     <import resource="classpath:spring/context-validation.xml"/>
-    <context:component-scan base-package="com.basic,com.overview,com.user,com.code,com.reg,com.event,com.map,com.cmm,com.file"/>
+    <context:component-scan base-package="com.basic,com.overview,com.user,com.code,com.reg,com.event,com.map,com.cmm,com.file,com.extra"/>
     <mvc:annotation-driven/>
 </beans>
