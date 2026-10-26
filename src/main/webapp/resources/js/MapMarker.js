@@ -56,6 +56,7 @@ export function createMapMarker(map, options = {}) {
       anchorXUnits: 'fraction',
       anchorYUnits: 'fraction',
       ...config,
+      color: over ? item.hoverColor ?? options.hoverColor ?? '#b3b3b3' : config.color,
       opacity: (config.opacity ?? 1) * opacity,
     });
     return new ol.style.Style({
@@ -68,7 +69,7 @@ export function createMapMarker(map, options = {}) {
     if (active) return item.selectedOpacity ?? options.selectedOpacity ?? 1;
     if (over) return item.hoverOpacity ?? options.hoverOpacity ?? 1;
 
-    return item.opacity ?? options.opacity ?? 0.5;
+    return item.opacity ?? options.opacity ?? 1;
   }
 
   function isValidLocation(data) {

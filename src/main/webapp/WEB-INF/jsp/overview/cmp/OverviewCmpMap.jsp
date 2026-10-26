@@ -143,9 +143,9 @@ const eventMarkers = createMapMarker(map, {
     src: '<c:url value="/resources/place-mark-spot.svg"/>',
     anchor: [0.5, 39 / 43],
   },
-  opacity: 0.5,
   selectedOpacity: 1,
   hoverOpacity: 1,
+  hoverColor: '#b3b3b3',
   items: eventCards.map(createEventMarkerItem),
   onSelect: handleEventSelect,
 });
