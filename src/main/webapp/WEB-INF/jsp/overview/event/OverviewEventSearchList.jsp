@@ -4,10 +4,10 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <section class="p-2 | overview-events" aria-labelledby="overviewSearchHeading"
-         data-search-page="${searchPage}" data-has-next="${searchHasNext}">
+         data-search-events>
     <header class="d-flex | p-2 | align-items-start | justify-content-between | gap-2 | mb-4">
         <div>
-            <h2 id="overviewSearchHeading" class="h5 | fw-semibold | mb-1">이벤트 검색 결과</h2>
+            <h2 id="overviewSearchHeading" class="h5 | fw-semibold | mb-1">전체 이벤트 검색 결과</h2>
             <p class="text-body-secondary | small | mb-0">“<c:out value="${searchTitle}"/>” 검색 결과 <c:out value="${searchTotal}"/>개</p>
         </div>
     </header>

@@ -3,11 +3,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<section class="p-2 | overview-events" aria-labelledby="serviceEventHeading">
+<section class="p-2 | overview-events" aria-labelledby="serviceEventHeading" data-viewport-events>
     <header class="d-flex | p-2 | align-items-start | justify-content-between | gap-2 | mb-4">
         <div>
-            <h2 id="serviceEventHeading" class="h5 | fw-semibold | mb-1">새로 올라온 이벤트</h2>
-            <p class="text-body-secondary | small | mb-0">최신 10개</p>
+            <h2 id="serviceEventHeading" class="h5 | fw-semibold | mb-1">주변</h2>
+            <p class="text-body-secondary | small | mb-0">최신순</p>
         </div>
     </header>
 
@@ -16,8 +16,8 @@
         <c:when test="${empty events}">
             <div class="card | border-0 | bg-transparent | text-center">
                 <div class="card-body | py-5">
-                    <p class="fw-semibold | mb-2">아직 등록된 이벤트가 없어요</p>
-                    <p class="text-body-secondary | small | mb-0">새로운 이벤트가 등록되면 여기에 표시됩니다.</p>
+                    <p class="fw-semibold | mb-2">${viewportLoaded ? '현재 지도 영역에 이벤트가 없어요' : '지도 영역을 확인하고 있습니다.'}</p>
+                    <p class="text-body-secondary | small | mb-0">지도를 이동하거나 전체 제목 검색을 이용해 주세요.</p>
                 </div>
             </div>
         </c:when>
@@ -25,7 +25,7 @@
         <c:otherwise>
             <div class="d-flex | flex-column | gap-2">
             
-                <c:forEach var="event" items="${events}" begin="0" end="9">
+                <c:forEach var="event" items="${events}">
                    <c:set var="serviceEventCtg" value="${event.ctg}"/>
                    <c:forEach var="eventCtg" items="${eventCtgs}">
                        <c:if test="${event.ctg eq eventCtg.code}">

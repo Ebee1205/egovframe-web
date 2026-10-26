@@ -2,7 +2,6 @@ package com.overview.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import com.event.service.EventFilterVO;
 import com.event.service.EventService;
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
@@ -34,10 +33,7 @@ public class OverviewController {
 
     @RequestMapping("/overview.do")
     public String mapService(Model model) throws Exception {
-        EventFilterVO filter = new EventFilterVO();
-        filter.setPageIndex(1);
-        filter.setPageSize(10);
-        model.addAttribute("events", eventService.selectEventList(filter));
+        // The browser supplies its stored map bounds after the map initializes.
 
         CodeFilterVO categoryFilter = new CodeFilterVO();
         categoryFilter.setParentCode("EVENT_CTG_ROOT");

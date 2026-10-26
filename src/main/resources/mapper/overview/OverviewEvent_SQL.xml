@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="overviewEventDAO">
+
+    <sql id="overviewEventListWhere">
+        <where>
+            <if test="title != null and title != ''">
+                AND e.title LIKE '%' || #{title} || '%'
+            </if>
+            <if test="minLat != null and minLon != null and maxLat != null and maxLon != null">
+                AND EXISTS (
+                    SELECT 1 FROM tb_geo bounds_geo
+                    WHERE bounds_geo.geo_id = e.gid
+                        AND bounds_geo.lat BETWEEN #{minLat} AND #{maxLat}
+                        AND bounds_geo.lon BETWEEN #{minLon} AND #{maxLon}
+                )
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectEventList" parameterType="OverviewEventFilterVO" resultMap="eventDAO.eventResultMap">
+        SELECT <include refid="eventDAO.eventColumns"/>
+        FROM tb_event e
+        LEFT JOIN tb_users u ON u.uid = e.created_by
+        LEFT JOIN tb_reg r ON r.reg_id = e.reg_id
+        LEFT JOIN tb_geo g ON g.geo_id = e.gid
+        <include refid="overviewEventListWhere"/>
+        ORDER BY e.c_date DESC NULLS LAST, e.eid DESC
+    </select>
+
+    <select id="selectEventListCnt" parameterType="OverviewEventFilterVO" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_event e
+        <include refid="overviewEventListWhere"/>
+    </select>
+
+</mapper>

@@ -84,29 +84,37 @@ const zoomOutButton = document.getElementById('zoom-out');
 const attributionElement = document.getElementById('map-attribution');
 const scaleElement = document.getElementById('map-scale');
 const mapTypeSelect = document.getElementById('map-type-select');
+const sidePanel = document.getElementById('mapSidePanel');
+const boundEventCards = new WeakSet();
+
+let lastPublishedBounds = '';
 
 // ----- 배경지도 레이어 생성 ----- //
 const baseTileLayer = new ol.layer.Tile({
-  source: createTileSource(tileSource)
+  source: createTileSource(tileSource),
 });
 
 // ----- 지도 생성 및 배경 레이어 등록 ----- //
 const map = new ol.Map({
   target: 'map',
   layers: [baseTileLayer],
-  controls: [new ol.control.Rotate(), new ol.control.Attribution({
-    target: attributionElement,
-    collapsible: false
-  }), new ol.control.ScaleLine({
-    target: scaleElement
-  })],
+  controls: [
+    new ol.control.Rotate(),
+    new ol.control.Attribution({
+      target: attributionElement,
+      collapsible: false,
+    }),
+    new ol.control.ScaleLine({
+      target: scaleElement,
+    }),
+  ],
   view: new ol.View({
     center: ol.proj.fromLonLat([meta.view.cenLon, meta.view.cenLat], meta.projection),
     zoom: meta.view.zoom,
     minZoom: meta.view.minZoom,
     maxZoom: meta.view.maxZoom,
-    projection: meta.projection
-  })
+    projection: meta.projection,
+  }),
 });
 const view = map.getView();
 
@@ -117,109 +125,82 @@ const mapDraw = createMapDraw(map, {
   cursors: {
     LineString: '<c:url value="/resources/distance.cur.ico"/>',
     Polygon: '<c:url value="/resources/area.cur.ico"/>',
-    Circle: '<c:url value="/resources/point_radius.cur.ico"/>'
+    Circle: '<c:url value="/resources/point_radius.cur.ico"/>',
   },
-  keyboardTarget: document.querySelector('.map-body')
+  keyboardTarget: document.querySelector('.map-body'),
 });
 
 // ----- 이벤트 목록 상태 ----- //
 let eventCards = Array.from(document.querySelectorAll('[data-overview-event]'));
-const sidePanel = document.getElementById('mapSidePanel');
 
 // ----- 이벤트 마커 레이어 추가 ----- //
 const eventMarkers = createMapMarker(map, {
-  color: '#5856d6',
-  hoverColor: '#4645ab',
+  icon: {
+    src: '<c:url value="/resources/place-mark.svg"/>',
+    anchor: [0.5, 28 / 32],
+  },
+  selectedIcon: {
+    src: '<c:url value="/resources/place-mark-spot.svg"/>',
+    anchor: [0.5, 39 / 43],
+  },
   opacity: 0.5,
   selectedOpacity: 1,
   hoverOpacity: 1,
-  items: eventCards.map(function (card) {
-    return {
-      id: card.dataset.overviewEvent,
-      lat: card.dataset.lat,
-      lon: card.dataset.lon,
-      title: card.querySelector('.event-title').textContent.trim(),
-      card: card
-    };
-  }),
-  getPadding: function (size) {
-    var panelWidth = sidePanel && !sidePanel.classList.contains('folded') ? sidePanel.offsetWidth + 24 : 0;
-    return [40, Math.min(64, size[0] * 0.1), Math.min(100, size[1] * 0.2), Math.min(panelWidth + 40, size[0] * 0.6)];
-  },
-  onSelect: function (item, selection) {
-    eventCards.forEach(function (card) {
-      var active = card === item.card;
-      card.classList.toggle('is-map-selected', active);
-      card.setAttribute('aria-pressed', String(active));
-    });
-    if (selection.fromMap) {
-      if (sidePanel && sidePanel.classList.contains('folded')) {
-        sidePanel.querySelector('.fold-button').click();
-      }
-      item.card.scrollIntoView({
-        block: 'nearest',
-        behavior: 'smooth'
-      });
-    }
-  }
+  items: eventCards.map(createEventMarkerItem),
+  onSelect: handleEventSelect,
 });
 
 // ----- 이벤트 연결 및 초기화 ----- //
-const boundEventCards = new WeakSet();
 bindEventCards();
-document.addEventListener('overview:events-changed', function () {
-  eventCards = Array.from(document.querySelectorAll('[data-overview-event]')).filter(function (card) {
-    return !card.closest('[hidden]');
-  });
-  eventMarkers.setItems(eventCards.map(function (card) {
-    return {
-      id: card.dataset.overviewEvent,
-      lat: card.dataset.lat,
-      lon: card.dataset.lon,
-      title: card.querySelector('.event-title').textContent.trim(),
-      card: card
-    };
-  }));
-  bindEventCards();
-});
+document.addEventListener('overview:events-changed', refreshEventMarkers);
 zoomSlider.min = view.getMinZoom();
 zoomSlider.max = view.getMaxZoom();
 zoomSlider.value = view.getZoom();
-zoomSlider.addEventListener('input', function () {
-  setZoom(this.value);
-});
-zoomInButton.addEventListener('click', function () {
-  zoomBy(1);
-});
-zoomOutButton.addEventListener('click', function () {
-  zoomBy(-1);
-});
-view.on('change:resolution', function () {
+zoomSlider.addEventListener('input', (event) => setZoom(event.target.value));
+zoomInButton.addEventListener('click', () => zoomBy(1));
+zoomOutButton.addEventListener('click', () => zoomBy(-1));
+view.on('change:resolution', () => {
   zoomSlider.value = view.getZoom();
 });
+
 if (mapTypeSelect) {
   mapTypeSelect.value = currentMapType;
-  mapTypeSelect.addEventListener('change', function () {
-    var nextSource = meta.tileSources[this.value];
-    if (!nextSource) {
-      this.value = currentMapType;
-      return;
-    }
-    baseTileLayer.setSource(createTileSource(nextSource));
-    currentMapType = this.value;
-    mapMeta.setMapType(currentMapType);
-  });
+  mapTypeSelect.addEventListener('change', handleMapTypeChange);
 }
-map.on('moveend', function () {
-  var center = view.getCenter();
-  var size = map.getSize();
+
+map.on('moveend', saveMapBounds);
+requestAnimationFrame(refreshMapSize);
+if (typeof ResizeObserver !== 'undefined') {
+  const mapResizeObserver = new ResizeObserver(refreshMapSize);
+  mapResizeObserver.observe(document.getElementById('map'));
+}
+
+// ----- 함수 정의 ----- //
+function refreshMapSize() {
+  map.updateSize();
+  saveMapBounds();
+}
+
+function saveMapBounds() {
+  const center = view.getCenter();
+  const size = map.getSize();
+
   if (!center || !size || size[0] <= 0 || size[1] <= 0) {
     return;
   }
-  var extent = view.calculateExtent(size);
-  var bottomLeft = ol.proj.toLonLat([extent[0], extent[1]], view.getProjection());
-  var topRight = ol.proj.toLonLat([extent[2], extent[3]], view.getProjection());
-  var centerLonLat = ol.proj.toLonLat(center, view.getProjection());
+
+  const extent = view.calculateExtent(size);
+  const bottomLeft = ol.proj.toLonLat([extent[0], extent[1]], view.getProjection());
+  const topRight = ol.proj.toLonLat([extent[2], extent[3]], view.getProjection());
+  const centerLonLat = ol.proj.toLonLat(center, view.getProjection());
+  const boundsKey = [
+    centerLonLat[0], centerLonLat[1], view.getZoom(),
+    bottomLeft[0], bottomLeft[1], topRight[0], topRight[1],
+  ].map((value) => Number(value).toFixed(7)).join(',');
+
+  if (boundsKey === lastPublishedBounds) return;
+
+  lastPublishedBounds = boundsKey;
   mapMeta.updateView({
     cenLat: centerLonLat[1],
     cenLon: centerLonLat[0],
@@ -227,58 +208,102 @@ map.on('moveend', function () {
     minLat: bottomLeft[1],
     minLon: bottomLeft[0],
     maxLat: topRight[1],
-    maxLon: topRight[0]
+    maxLon: topRight[0],
   });
-});
-requestAnimationFrame(function () {
-  map.updateSize();
-});
-if (typeof ResizeObserver !== 'undefined') {
-  var mapResizeObserver = new ResizeObserver(function () {
-    map.updateSize();
-  });
-  mapResizeObserver.observe(document.getElementById('map'));
+  document.dispatchEvent(new Event('overview:bounds-changed'));
 }
 
-// ----- 함수 정의 ----- //
+function createEventMarkerItem(card) {
+  return {
+    id: card.dataset.overviewEvent,
+    lat: card.dataset.lat,
+    lon: card.dataset.lon,
+    title: card.querySelector('.event-title').textContent.trim(),
+    card,
+  };
+}
+
+function refreshEventMarkers() {
+  eventCards = Array.from(document.querySelectorAll('[data-overview-event]'))
+    .filter((card) => !card.closest('[hidden]'));
+
+  eventMarkers.setItems(eventCards.map(createEventMarkerItem));
+  bindEventCards();
+}
+
+function handleEventSelect(item, selection) {
+  eventCards.forEach((card) => {
+    const isActive = card === item.card;
+
+    card.classList.toggle('is-map-selected', isActive);
+    card.setAttribute('aria-pressed', String(isActive));
+  });
+
+  if (!selection.fromMap) return;
+
+  if (sidePanel && sidePanel.classList.contains('folded')) {
+    sidePanel.querySelector('.fold-button').click();
+  }
+
+  item.card.scrollIntoView({
+    block: 'nearest',
+    behavior: 'smooth',
+  });
+}
+
+function handleMapTypeChange(event) {
+  const nextMapType = event.target.value;
+  const nextSource = meta.tileSources[nextMapType];
+
+  if (!nextSource) {
+    event.target.value = currentMapType;
+    return;
+  }
+
+  baseTileLayer.setSource(createTileSource(nextSource));
+  currentMapType = nextMapType;
+  mapMeta.setMapType(currentMapType);
+}
 
 function createTileSource(source) {
   return new ol.source.XYZ({
     url: source.url,
     minZoom: source.minZoom,
     maxZoom: source.maxZoom,
-    attributions: source.attributions
+    attributions: source.attributions,
   });
 }
 
 function bindEventCards() {
-  eventCards.forEach(function (card) {
-    card.classList.remove('is-map-selected');
-    card.setAttribute('aria-pressed', 'false');
-    var hasLocation = eventMarkers.has(card.dataset.overviewEvent);
+  eventCards.forEach((card) => {
+    const isActive = eventMarkers.isSelected(card.dataset.overviewEvent);
+    const hasLocation = eventMarkers.has(card.dataset.overviewEvent);
+
+    card.classList.toggle('is-map-selected', isActive);
+    card.setAttribute('aria-pressed', String(isActive));
     card.classList.toggle('is-map-interactive', hasLocation);
     card.setAttribute('aria-disabled', String(!hasLocation));
     card.tabIndex = hasLocation ? 0 : -1;
     card.title = hasLocation ? '지도에서 위치 보기' : '위치 정보 없음';
     card.setAttribute('aria-label', card.querySelector('.event-title').textContent.trim() + '. ' + card.title);
-    if (boundEventCards.has(card)) {
-      return;
-    }
+
+    if (boundEventCards.has(card)) return;
+
     boundEventCards.add(card);
-    card.addEventListener('click', function () {
+    card.addEventListener('click', () => {
       if (hasLocation) {
         eventMarkers.select(card.dataset.overviewEvent);
       }
     });
-    card.addEventListener('mouseenter', function () {
+    card.addEventListener('mouseenter', () => {
       if (hasLocation) {
         eventMarkers.hover(card.dataset.overviewEvent);
       }
     });
-    card.addEventListener('mouseleave', function () {
+    card.addEventListener('mouseleave', () => {
       eventMarkers.hover(null);
     });
-    card.addEventListener('keydown', function (event) {
+    card.addEventListener('keydown', (event) => {
       if (hasLocation && (event.key === 'Enter' || event.key === ' ')) {
         event.preventDefault();
         eventMarkers.select(card.dataset.overviewEvent);
@@ -294,7 +319,7 @@ function setZoom(value) {
 function zoomBy(delta) {
   view.animate({
     zoom: view.getZoom() + delta,
-    duration: 200
+    duration: 200,
   });
 }
 </script>

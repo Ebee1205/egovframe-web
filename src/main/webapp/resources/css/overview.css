@@ -1,3 +1,6 @@
+/* Replacing a result list must not let scroll anchoring move the panel. */
+#overviewEventPanel { overflow-anchor: none; }
+
 /* 사이드 패널 */
 .sidebar.app-sidebar ~ .overview-map-layout {
     width: calc(100% - var(--cui-sidebar-narrow-width, 4rem));

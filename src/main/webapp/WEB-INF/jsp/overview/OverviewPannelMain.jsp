@@ -20,115 +20,215 @@
 </div>
 
 <script>
-(function () {
-    var panel = document.getElementById('overviewEventPanel');
-    var form = document.getElementById('overviewEventSearchForm');
-    var input = document.getElementById('overviewEventTitle');
-    var recent = document.getElementById('overviewRecentEvents');
-    var results = document.getElementById('overviewSearchEvents');
-    var status = document.getElementById('overviewSearchStatus');
-    var retry = document.getElementById('overviewSearchRetry');
-    
-    var title = '', page = 1, hasNext = false, loading = false, failed = false;
-    var revision = 0, request = null, composing = false;
+(() => {
+  // ----- 선언부 ----- //
+  const panel = document.getElementById('overviewEventPanel');
+  const searchForm = document.getElementById('overviewEventSearchForm');
+  const searchInput = document.getElementById('overviewEventTitle');
+  const recentEvents = document.getElementById('overviewRecentEvents');
+  const searchEvents = document.getElementById('overviewSearchEvents');
+  const searchStatus = document.getElementById('overviewSearchStatus');
+  const retryButton = document.getElementById('overviewSearchRetry');
+  const mapMetaKey = '__openlayers_tile_meta_data';
+  const boundsKeys = ['minLat', 'minLon', 'maxLat', 'maxLon'];
+  const boundsRefreshDelay = 150;
 
-    function notifyListChange() {
-        document.dispatchEvent(new Event('overview:events-changed'));
+  let searchTitle = '';
+  let requestRevision = 0;
+  let requestController = null;
+  let isComposing = false;
+  let loadedBounds = '';
+  let requestedBounds = '';
+  let boundsTimer = null;
+
+  // ----- 이벤트 등록 및 초기화 ----- //
+  searchInput.addEventListener('input', clearSearchIfEmpty);
+  searchInput.addEventListener('search', clearSearchIfEmpty);
+  searchInput.addEventListener('compositionstart', handleCompositionStart);
+  searchInput.addEventListener('compositionend', handleCompositionEnd);
+  searchInput.addEventListener('keydown', handleSearchKeydown);
+  searchForm.addEventListener('submit', handleSearchSubmit);
+  retryButton.addEventListener('click', handleRetryClick);
+  document.addEventListener('overview:bounds-changed', refreshBounds);
+
+  // 지도가 실제 초기 영역을 전달한 뒤 조회한다.
+  showStatus('지도 영역을 확인하고 있습니다.');
+
+  // ----- 함수 정의 ----- //
+  function notifyListChange() {
+    document.dispatchEvent(new Event('overview:events-changed'));
+  }
+
+  function showStatus(message) {
+    searchStatus.hidden = false;
+    searchStatus.textContent = message;
+  }
+
+  function readBounds() {
+    try {
+      const savedMeta = JSON.parse(localStorage.getItem(mapMetaKey));
+      const savedView = savedMeta?.view;
+
+      if (!savedView || !boundsKeys.every((key) => isValidCoordinate(savedView[key]))) return null;
+
+      const bounds = {};
+      boundsKeys.forEach((key) => {
+        bounds[key] = Number(savedView[key]);
+      });
+
+      if (bounds.minLat < -90 || bounds.maxLat > 90
+          || bounds.minLon < -180 || bounds.maxLon > 180
+          || bounds.minLat > bounds.maxLat || bounds.minLon > bounds.maxLon) {
+        return null;
+      }
+
+      return new URLSearchParams(bounds).toString();
+    } catch (error) {
+      return null;
     }
-        
-    function loadNext() {
-        if (!title || !hasNext || loading || composing) return;
-        
-        var currentRevision = revision;
-        var requestedPage = page;
-        var controller = new AbortController();
-        
-        request = controller;
-        loading = true;
-        failed = false;
-        retry.hidden = true;
-        results.setAttribute('aria-busy', 'true');
-        status.hidden = false;
-        status.textContent = '검색 결과를 불러오는 중입니다.';
-        var query = new URLSearchParams({title: title, pageIndex: requestedPage});
-        fetch('<c:url value="/overview/event/list.do"/>?' + query.toString(), {
-            signal: controller.signal, credentials: 'same-origin', headers: {'Accept': 'text/html'}
-        }).then(function (response) {
-            if (!response.ok) throw new Error('검색 요청 실패');
-            return response.text();
-        }).then(function (html) {
-            if (currentRevision !== revision) return;
-            var parsed = new DOMParser().parseFromString(html, 'text/html');
-            var section = parsed.querySelector('[data-search-page]');
-            if (!section || Number(section.dataset.searchPage) !== requestedPage) throw new Error('검색 응답 오류');
-            if (requestedPage === 1) {
-                results.replaceChildren(section);
-            } else {
-                var items = results.querySelector('[data-search-items]');
-                var cards = section.querySelectorAll('[data-overview-event]');
-                if (!items && cards.length) throw new Error('검색 목록 오류');
-                cards.forEach(function (card) { items.appendChild(card); });
-            }
-            hasNext = section.dataset.hasNext === 'true';
-            page = requestedPage + 1;
-            status.textContent = hasNext ? '아래로 스크롤하면 더 불러옵니다.' : '';
-            notifyListChange();
-        }).catch(function (error) {
-            if (currentRevision !== revision || error.name === 'AbortError') return;
-            failed = true;
-            status.textContent = '검색 결과를 불러오지 못했습니다. 다시 시도해 주세요.';
-            retry.hidden = false;
-        }).finally(function () {
-            if (currentRevision !== revision) return;
-            loading = false;
-            request = null;
-            results.setAttribute('aria-busy', 'false');
-            if (!failed) requestAnimationFrame(loadIfNearBottom);
-        });
+  }
+
+  function isValidCoordinate(value) {
+    return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+  }
+
+  function isCurrentBounds(bounds) {
+    return bounds && (bounds === loadedBounds || (requestController && bounds === requestedBounds));
+  }
+
+  function cancelRequest() {
+    if (requestController) requestController.abort();
+
+    requestController = null;
+    requestedBounds = '';
+  }
+
+  async function loadEvents(force = false) {
+    const bounds = searchTitle ? '' : readBounds();
+
+    if (!searchTitle && !force && isCurrentBounds(bounds)) return;
+
+    loadedBounds = '';
+    requestRevision++;
+    const currentRevision = requestRevision;
+    cancelRequest();
+
+    const target = searchTitle ? searchEvents : recentEvents;
+
+    // 응답이 준비될 때까지 기존 목록과 마커를 유지한다.
+    target.setAttribute('aria-busy', 'false');
+    retryButton.hidden = true;
+
+    if (!searchTitle && !bounds) {
+      showStatus('지도 영역을 확인하고 있습니다.');
+      return;
     }
 
-    function loadIfNearBottom() {
-        if (!failed && panel.scrollHeight - panel.scrollTop - panel.clientHeight < 200) loadNext();
+    const controller = new AbortController();
+    const url = searchTitle
+      ? '<c:url value="/overview/event/list.do"/>?' + new URLSearchParams({ title: searchTitle }).toString()
+      : '<c:url value="/overview/event/list/recent.do"/>?' + bounds;
+    const selector = searchTitle ? '[data-search-events]' : '[data-viewport-events]';
+
+    requestController = controller;
+    requestedBounds = bounds;
+    target.setAttribute('aria-busy', 'true');
+    showStatus('이벤트를 불러오는 중입니다.');
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        credentials: 'same-origin',
+        headers: { Accept: 'text/html' },
+      });
+
+      if (!response.ok) throw new Error('조회 요청 실패');
+
+      const html = await response.text();
+
+      if (currentRevision !== requestRevision) return;
+
+      const parsedHtml = new DOMParser().parseFromString(html, 'text/html');
+      const section = parsedHtml.querySelector(selector);
+
+      if (!section) throw new Error('조회 응답 오류');
+
+      target.replaceChildren(section);
+      if (!searchTitle) loadedBounds = bounds;
+
+      searchStatus.hidden = true;
+      notifyListChange();
+    } catch (error) {
+      if (currentRevision !== requestRevision || error.name === 'AbortError') return;
+
+      showStatus('이벤트를 불러오지 못했습니다. 다시 시도해 주세요.');
+      retryButton.hidden = false;
+    } finally {
+      if (currentRevision === requestRevision) {
+        requestController = null;
+        target.setAttribute('aria-busy', 'false');
+      }
+    }
+  }
+
+  function search(force = false) {
+    const nextTitle = searchInput.value.trim();
+
+    if (nextTitle === searchTitle && !force) return;
+
+    searchTitle = nextTitle;
+    recentEvents.hidden = !!searchTitle;
+    searchEvents.hidden = !searchTitle;
+    notifyListChange();
+    panel.scrollTop = 0;
+    loadEvents(true);
+  }
+
+  function refreshBounds() {
+    if (searchTitle) return;
+
+    const bounds = readBounds();
+
+    if (isCurrentBounds(bounds)) return;
+
+    // 대기 시간 중 이전 응답이 도착해도 목록을 덮어쓰지 못하게 한다.
+    if (requestController) {
+      requestRevision++;
+      cancelRequest();
     }
 
-    function search(force) {
-        var nextTitle = input.value.trim();
-        if (nextTitle === title && !force) return;
-        revision++;
-        if (request) request.abort();
-        request = null;
-        title = nextTitle;
-        page = 1;
-        hasNext = !!title;
-        loading = false;
-        failed = false;
-        results.replaceChildren();
-        results.setAttribute('aria-busy', 'false');
-        recent.hidden = !!title;
-        results.hidden = !title;
-        retry.hidden = true;
-        status.hidden = !title;
-        status.textContent = '';
-        panel.scrollTop = 0;
-        notifyListChange();
-        loadNext();
-    }
+    clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(() => {
+      if (!searchTitle) loadEvents();
+    }, boundsRefreshDelay);
+  }
 
-    // The native search-input clear icon emits input/search events with an empty value.
-    function clearSearchIfEmpty() {
-        if (!composing && !input.value.trim()) search();
+  function clearSearchIfEmpty() {
+    if (!isComposing && !searchInput.value.trim()) search();
+  }
+
+  function handleCompositionStart() {
+    isComposing = true;
+  }
+
+  function handleCompositionEnd() {
+    isComposing = false;
+    clearSearchIfEmpty();
+  }
+
+  function handleSearchKeydown(event) {
+    if (event.key === 'Enter' && (isComposing || event.isComposing || event.keyCode === 229)) {
+      event.preventDefault();
     }
-    input.addEventListener('input', clearSearchIfEmpty);
-    input.addEventListener('search', clearSearchIfEmpty);
-    input.addEventListener('compositionstart', function () { composing = true; });
-    input.addEventListener('compositionend', function () { composing = false; clearSearchIfEmpty(); });
-    input.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' && (composing || event.isComposing || event.keyCode === 229)) event.preventDefault();
-    });
-    form.addEventListener('submit', function (event) { event.preventDefault(); if (!composing) search(true); });
-    retry.addEventListener('click', loadNext);
-    panel.addEventListener('scroll', loadIfNearBottom, {passive: true});
-    window.addEventListener('resize', loadIfNearBottom);
+  }
+
+  function handleSearchSubmit(event) {
+    event.preventDefault();
+    if (!isComposing) search(true);
+  }
+
+  function handleRetryClick() {
+    loadEvents(true);
+  }
 })();
 </script>
-
