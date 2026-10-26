@@ -74,6 +74,7 @@ export function createMapDraw(map, options = {}) {
   window.addEventListener('pointerup', handleDragEnd);
   window.addEventListener('pointercancel', handleDragEnd);
   window.addEventListener('blur', handleDragEnd);
+
   if (toolbar) {
     toolbar.addEventListener('click', handleToolbar);
   }
@@ -83,11 +84,11 @@ export function createMapDraw(map, options = {}) {
   if (segmentInput) {
     segmentInput.addEventListener('change', refreshSegments);
   }
+
   const container = options.keyboardTarget || map.getTargetElement();
   container.addEventListener('keydown', handleKey);
   setMode('None');
 
-  // ----- 외부에서 사용하는 기능 ----- //
   return {
     setMode,
     toggleMode,

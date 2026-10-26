@@ -101,7 +101,7 @@ const map = new ol.Map({
     target: scaleElement
   })],
   view: new ol.View({
-    center: ol.proj.fromLonLat(meta.view.center, meta.projection),
+    center: ol.proj.fromLonLat([meta.view.cenLon, meta.view.cenLat], meta.projection),
     zoom: meta.view.zoom,
     minZoom: meta.view.minZoom,
     maxZoom: meta.view.maxZoom,
@@ -212,12 +212,22 @@ if (mapTypeSelect) {
 }
 map.on('moveend', function () {
   var center = view.getCenter();
-  if (!center) {
+  var size = map.getSize();
+  if (!center || !size || size[0] <= 0 || size[1] <= 0) {
     return;
   }
+  var extent = view.calculateExtent(size);
+  var bottomLeft = ol.proj.toLonLat([extent[0], extent[1]], view.getProjection());
+  var topRight = ol.proj.toLonLat([extent[2], extent[3]], view.getProjection());
+  var centerLonLat = ol.proj.toLonLat(center, view.getProjection());
   mapMeta.updateView({
-    center: ol.proj.toLonLat(center, meta.projection),
-    zoom: view.getZoom()
+    cenLat: centerLonLat[1],
+    cenLon: centerLonLat[0],
+    zoom: view.getZoom(),
+    minLat: bottomLeft[1],
+    minLon: bottomLeft[0],
+    maxLat: topRight[1],
+    maxLon: topRight[0]
   });
 });
 requestAnimationFrame(function () {

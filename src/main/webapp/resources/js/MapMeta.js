@@ -36,10 +36,15 @@ const DEFAULT_MAP_META = {
   },
 
   view: {
-    center: [126.9780, 37.5665],
+    cenLat: 37.5665,
+    cenLon: 126.9780,
     zoom: 12,
     minZoom: 0,
     maxZoom: 19,
+    minLat: null,
+    minLon: null,
+    maxLat: null,
+    maxLon: null,
   },
 
   projection: 'EPSG:3857',
@@ -57,6 +62,7 @@ class MapMeta {
 
     try {
       const saved = JSON.parse(data);
+      const { center: legacyCenter, ...savedView } = saved.view ?? {};
       const savedTileSources = saved.tileSources ?? {};
       const tileSources = {
         ...DEFAULT_MAP_META.tileSources,
@@ -87,7 +93,9 @@ class MapMeta {
 
         view: {
           ...DEFAULT_MAP_META.view,
-          ...saved.view,
+          ...savedView,
+          cenLat: savedView.cenLat ?? legacyCenter?.[1] ?? DEFAULT_MAP_META.view.cenLat,
+          cenLon: savedView.cenLon ?? legacyCenter?.[0] ?? DEFAULT_MAP_META.view.cenLon,
         },
       };
     } catch (error) {
@@ -136,8 +144,13 @@ class MapMeta {
   }
 
   updateView({
-    center,
+    cenLat,
+    cenLon,
     zoom,
+    minLat,
+    minLon,
+    maxLat,
+    maxLon,
   }) {
     const current = this.get();
 
@@ -145,20 +158,25 @@ class MapMeta {
       view: {
         ...current.view,
 
-        ...(center && {
-          center,
-        }),
+        ...(cenLat !== undefined && { cenLat }),
+        ...(cenLon !== undefined && { cenLon }),
 
         ...(zoom !== undefined && {
           zoom,
         }),
+
+        ...(minLat !== undefined && { minLat }),
+        ...(minLon !== undefined && { minLon }),
+        ...(maxLat !== undefined && { maxLat }),
+        ...(maxLon !== undefined && { maxLon }),
       },
     });
   }
 
-  setCenter(center) {
+  setCenter(cenLat, cenLon) {
     return this.updateView({
-      center,
+      cenLat,
+      cenLon,
     });
   }
 
