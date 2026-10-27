@@ -6,6 +6,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="vworld-api-key" content="<c:out value='${vworldApiKey}'/>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>지도</title>
@@ -25,7 +26,9 @@
         <!-- Header -->
         <jsp:include page="/WEB-INF/jsp/main/cmp/MainCmpHeader.jsp" />
         <!--// Header -->
-        <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpMap.jsp" />
+        <div class="overview-map-stage">
+            <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpMap.jsp" />
+        </div>
     </div>
 </body>
 </html>

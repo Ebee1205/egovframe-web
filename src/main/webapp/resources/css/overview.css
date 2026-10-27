@@ -155,10 +155,29 @@
 .overview-weather-hud {
     position: absolute;
     left: 16px;
-    top: 16px;
+    bottom: 16px;
+    top: auto;
     z-index: 10;
-    width: 260px;
-    max-width: calc(100% - 96px);
-    max-height: calc(100% - 160px);
+    width: 520px;
+    max-width: calc(100% - 32px);
+    max-height: min(320px, calc(100% - 32px));
     overflow-y: auto;
+    font-size: .8rem;
+    background: #fff;
+    color: #161616;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
 }
+.overview-weather-hud [hidden] { display: none !important; }
+.overview-weather-hud .weather-summary-date { font-size: 11px; }
+.overview-weather-hud .weather-main-temperature { font-size: 56px; letter-spacing: -.05em; }
+.overview-weather-hud .weather-main-unit { font-size: 22px; letter-spacing: 0; }
+.overview-weather-hud .weather-metrics-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.overview-weather-hud .weather-metrics-row { min-width: 480px; }
+.overview-weather-hud .weather-detail-cell { min-width: 0; border-right: 1px solid var(--cui-border-color, #ececec); }
+.overview-weather-hud .weather-detail-cell:last-child { border-right: 0; }
+.overview-weather-hud .weather-detail-label { font-size: 10px; }
+.overview-weather-hud .weather-detail-value { font-size: 21px; letter-spacing: -.04em; }
+.overview-weather-hud .weather-detail-unit { font-size: 10px; letter-spacing: 0; color: var(--cui-secondary-color, #777); }
+.overview-weather-hud .card-footer { font-size: 10px; }

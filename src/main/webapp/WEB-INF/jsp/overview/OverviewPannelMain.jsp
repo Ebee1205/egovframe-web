@@ -29,7 +29,9 @@
   const searchEvents = document.getElementById('overviewSearchEvents');
   const searchStatus = document.getElementById('overviewSearchStatus');
   const retryButton = document.getElementById('overviewSearchRetry');
+  
   const mapMetaKey = '__openlayers_tile_meta_data';
+  
   const boundsKeys = ['minLat', 'minLon', 'maxLat', 'maxLon'];
   const boundsRefreshDelay = 150;
 
