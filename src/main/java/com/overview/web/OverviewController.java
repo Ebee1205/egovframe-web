@@ -16,6 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class OverviewController {
@@ -52,14 +53,17 @@ public class OverviewController {
     }
 
     @RequestMapping(value = "/overview/weather.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
-    public ResponseEntity<String> mapWeatherService() {
+    public ResponseEntity<String> mapWeatherService(@RequestParam("nx") int nx, @RequestParam("ny") int ny) {
+        if (nx < 1 || nx > 149 || ny < 1 || ny > 253) {
+            return ResponseEntity.status(400).body(ComResponseVO.fail("INVALID_GRID", "기상청 격자 영역 밖입니다.").toJson());
+        }
         try {
-            ComResponseVO<List<UltraSrtNcstVO>> fetched = ultraSrtNcstService.fetchUltraSrtNcstRes();
+            ComResponseVO<List<UltraSrtNcstVO>> fetched = ultraSrtNcstService.fetchUltraSrtNcstRes(nx, ny);
             if (!"SUCCESS".equals(fetched.getCode().getResultCode())) {
                 return ResponseEntity.status(502).body(fetched.toJson());
             }
             ultraSrtNcstService.insertUltraSrtNcst(fetched.getData());
-            ComResponseVO<Map<String, Object>> result = ultraSrtNcstService.selectUltraSrtNcst();
+            ComResponseVO<Map<String, Object>> result = ultraSrtNcstService.selectUltraSrtNcst(nx, ny);
             
             int status = "SUCCESS".equals(result.getCode().getResultCode()) ? 200 : 502;
            
