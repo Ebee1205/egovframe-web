@@ -2,7 +2,6 @@ package com.cmm.service.excel.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Locale;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,7 +31,6 @@ import com.cmm.service.excel.ExcelFileParser.ReadResult.*;
 /** XLSX의 시트 XML을 SAX로 읽는다. 전체 XSSFWorkbook 객체를 생성하지 않는다. */
 @Component
 public class ExcelSaxFileParser extends ExcelFileParser {
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
     public ExcelSaxFileParser(FileMngUtil fileMngUtil) { this(fileMngUtil, new ExcelTemplate()); }
     @Autowired
     public ExcelSaxFileParser(FileMngUtil fileMngUtil, ExcelTemplate template) { super(fileMngUtil, template); }
@@ -185,8 +183,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             String format = cellStyle == null ? "General" : cellStyle.getDataFormatString();
             boolean date = DateUtil.isValidExcelDate(number) && DateUtil.isADateFormat(formatIndex, format);
             Object value = date ? DateUtil.getJavaDate(number, date1904) : number;
-            String formatted = date ? DateUtil.getLocalDateTime(number, date1904).format(DATE_FORMAT)
-                    : formatter.formatRawCellContents(number, formatIndex, format, date1904);
+            String formatted = formatter.formatRawCellContents(number, formatIndex, format, date1904);
             return new CellData(value, formatted, false);
         }
     }

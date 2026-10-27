@@ -31,7 +31,7 @@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn | btn-outline-success" disabled>엑셀 다운로드</button>
                         <button type="button" class="btn | btn-outline-secondary"
-                                data-coreui-toggle="modal" data-coreui-target="#extraXlsModal">일괄 업로드</button>
+                                data-coreui-toggle="modal" data-coreui-target="#extraXlsModal">일괄 등록</button>
                     </div>
                 </div>
                 <jsp:include page="/WEB-INF/jsp/extra/ExtraMockTable.jsp" />
