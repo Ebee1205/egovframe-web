@@ -11,6 +11,10 @@
     #extraXlsModal .extra-excel-warning {
         color: #fd7e14;
     }
+    #extraExcelTable td.extra-excel-warning-empty {
+        --cui-table-bg: var(--cui-warning-bg-subtle);
+        background-color: var(--cui-warning-bg-subtle);
+    }
     #extraXlsModal .modal-content {
         height: 100%;
     }
@@ -196,6 +200,9 @@
                     if (issue) {
                         var isError = issue.status === 'ERROR';
                         cell.className = isError ? 'extra-excel-error' : 'extra-excel-warning';
+                        if (!isError && cell.textContent.trim() === '') {
+                            cell.classList.add('extra-excel-warning-empty');
+                        }
                         cell.title = issue.message;
                         cell.setAttribute('aria-label', (cell.textContent || '빈 값') + ' / '
                             + (isError ? '오류: ' : '경고: ') + issue.message);
