@@ -1,4 +1,6 @@
 const MAP_META_KEY = '__openlayers_tile_meta_data';
+export const VWORLD_API_KEY =
+  document.querySelector('meta[name="vworld-api-key"]')?.content ?? '';
 
 export const MAP_TYPE = {
   BASIC: 'basic',
@@ -12,18 +14,18 @@ const DEFAULT_MAP_META = {
   tileSources: {
     basic: {
       type: 'XYZ',
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      minZoom: 0,
+      url: `https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_API_KEY}/Base/{z}/{y}/{x}.png`,
+      minZoom: 6,
       maxZoom: 19,
-      attributions: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+      attributions: '© <a href="https://www.vworld.kr/">공간정보 오픈플랫폼 VWorld</a>',
     },
 
     satellite: {
       type: 'XYZ',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      minZoom: 0,
+      url: `https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_API_KEY}/Satellite/{z}/{y}/{x}.jpeg`,
+      minZoom: 6,
       maxZoom: 19,
-      attributions: 'Tiles © <a href="https://www.esri.com/">Esri</a>',
+      attributions: '© <a href="https://www.vworld.kr/">공간정보 오픈플랫폼 VWorld</a>',
     },
 
     terrain: {
@@ -31,7 +33,7 @@ const DEFAULT_MAP_META = {
       url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
       minZoom: 0,
       maxZoom: 17,
-      attributions: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, SRTM | Map style: <a href="https://opentopomap.org/">OpenTopoMap</a> (CC-BY-SA)',
+      attributions: '© <a href="https://www.vworld.kr/">공간정보 오픈플랫폼 VWorld</a>',
     },
   },
 
@@ -41,10 +43,6 @@ const DEFAULT_MAP_META = {
     zoom: 12,
     minZoom: 0,
     maxZoom: 19,
-    minLat: null,
-    minLon: null,
-    maxLat: null,
-    maxLon: null,
   },
 
   projection: 'EPSG:3857',
@@ -73,15 +71,18 @@ class MapMeta {
         const savedSource = savedTileSources[mapType] ?? {};
         const isLegacyTerrainUrl = mapType === MAP_TYPE.TERRAIN
           && savedSource.url?.includes('/World_Topo_Map/MapServer/tile/');
+        // VWorld URL은 현재 페이지에서 전달받은 키로 생성한다.
+        const usesVworld = defaultSource.url.includes('https://api.vworld.kr/');
 
         tileSources[mapType] = {
           ...defaultSource,
           ...savedSource,
-          url: !savedSource.url || isLegacyTerrainUrl
+          url: usesVworld || !savedSource.url || isLegacyTerrainUrl
             ? defaultSource.url
             : savedSource.url,
+          minZoom: usesVworld ? defaultSource.minZoom : (savedSource.minZoom ?? defaultSource.minZoom),
           maxZoom: Math.min(savedSource.maxZoom ?? defaultSource.maxZoom, defaultSource.maxZoom),
-          attributions: savedSource.attributions ?? defaultSource.attributions,
+          attributions: usesVworld ? defaultSource.attributions : (savedSource.attributions ?? defaultSource.attributions),
         };
       }
 

@@ -2,6 +2,7 @@ package com.overview.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.beans.factory.annotation.Value;
 import com.event.service.EventService;
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
@@ -22,6 +23,9 @@ public class OverviewController {
     private final CodeService codeService;
     private final UltraSrtNcstService ultraSrtNcstService;
 
+    @Value("${Globals.vmWorld.apiKey:}")
+    private String vworldApiKey;
+
     public OverviewController(EventService eventService, CodeService codeService,
             UltraSrtNcstService ultraSrtNcstService) {
         this.eventService = eventService;
@@ -31,6 +35,7 @@ public class OverviewController {
 
     @RequestMapping("/overview.do")
     public String mapService(Model model) throws Exception {
+        model.addAttribute("vworldApiKey", vworldApiKey);
         // The browser supplies its stored map bounds after the map initializes.
 
         CodeFilterVO categoryFilter = new CodeFilterVO();
