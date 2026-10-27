@@ -12,37 +12,31 @@
     <div id="map" tabindex="0" aria-label="이벤트 지도"></div>
 	
     <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpSideBar.jsp">
-        <jsp:param name="contentPage"
-                   value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
+        <jsp:param name="contentPage" value="/WEB-INF/jsp/overview/OverviewPannelMain.jsp"/>
     </jsp:include>
 
-    <!-- 그리기 도구: 우측 상단 / 세로 정렬 -->
+    <div class="map-weather-position">
+        <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpRtHud.jsp" />
+    </div>
+    
+
+    <!-- 공통 배치 클래스에서 지도 위 컴포넌트 위치 지정 -->
     <div class="map-top-right">
-        <div id="map-draw-tools" class="map-draw-tools" role="group" aria-label="지도 그리기 도구">
+	    <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpMapType.jsp" />
+	      
+	    <div class="form-check form-switch mb-2">
+	        <input class="form-check-input" type="checkbox" role="switch" id="map-weather-grid">
+	        <label class="form-check-label" for="map-weather-grid">기상청 격자 (5km)</label>
+	    </div>
+	</div>
+	    
+    
+    <div class="map-center-right">
 
-            <div class="btn-group-vertical shadow-sm map-draw-buttons" role="group" aria-label="그리기 모드">
-                <button type="button" class="btn btn-light" data-draw-mode="None" aria-pressed="true" aria-label="이동" title="이동"><i class="mdi | mdi-hand-back-right-outline" aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-light" data-draw-mode="LineString" aria-pressed="false" aria-label="거리" title="거리"><i class="mdi | mdi-ruler" aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-light" data-draw-mode="Polygon" aria-pressed="false" aria-label="면적" title="면적"><i class="mdi | mdi-vector-square" aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-light" data-draw-mode="Circle" aria-pressed="false" aria-label="반경" title="반경"><i class="mdi | mdi-radius-outline" aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-light" data-draw-mode="Modify" aria-pressed="false" aria-label="수정" title="수정"><i class="mdi | mdi-pencil-outline" aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-light text-danger" data-draw-clear aria-label="전체 삭제" title="전체 삭제"><i class="mdi | mdi-trash-can-outline" aria-hidden="true"></i></button>
-            </div>
-
-            <div class="card shadow-sm map-draw-options">
-                <div class="card-body p-2">
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="map-draw-segments" data-draw-segments checked>
-                        <label class="form-check-label" for="map-draw-segments">구간 거리</label>
-                    </div>
-                    <p id="map-draw-status" class="mb-0 | mt-2 | text-body-secondary" role="status" aria-live="polite"></p>
-                </div>
-            </div>
-
-        </div>
+        <jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpToolBox.jsp" />
     </div>
 
-    <div class="map-bottom-right">
+    <div class="map-bottom-right map-zoom-controls">
 
         <!-- Zoom Control -->
         <div class="zoom-box">
@@ -65,17 +59,12 @@
         </div>
 
     </div>
-    
-    
-    <div class="map-bottom-left">
-    	<jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpRtHud.jsp" />
-    </div>
-
 </div>
 <script type="module">
-import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js"/>';
+import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js?v=20261027-grid2"/>';
 import { createMapMarker } from '<c:url value="/resources/js/MapMarker.js"/>';
-import { createMapDraw } from '<c:url value="/resources/js/MapDraw.js"/>';
+import { createMapDraw } from '<c:url value="/resources/js/MapDraw.js?v=20261027-toolbox1"/>';
+import { createMapWeatherGrid } from '<c:url value="/resources/js/MapWeatherGrid.js?v=20261027-grid2"/>';
 
 // ----- 지도 설정 ----- //
 const meta = mapMeta.get();
@@ -88,7 +77,8 @@ const zoomInButton = document.getElementById('zoom-in');
 const zoomOutButton = document.getElementById('zoom-out');
 const attributionElement = document.getElementById('map-attribution');
 const scaleElement = document.getElementById('map-scale');
-const mapTypeSelect = document.getElementById('map-type-select');
+const mapTypeControl = document.getElementById('map-type-control');
+const mapTypeButtons = Array.from(mapTypeControl.querySelectorAll('[data-map-type]'));
 const sidePanel = document.getElementById('mapSidePanel');
 const boundEventCards = new WeakSet();
 
@@ -122,6 +112,14 @@ const map = new ol.Map({
   }),
 });
 const view = map.getView();
+const weatherGridVisible = meta.weatherGrid?.visible === true;
+const weatherGrid = createMapWeatherGrid(map, { visible: weatherGridVisible });
+const weatherGridToggle = document.getElementById('map-weather-grid');
+weatherGridToggle.checked = weatherGridVisible;
+weatherGridToggle.addEventListener('change', () => {
+  weatherGrid.setVisible(weatherGridToggle.checked);
+  mapMeta.setWeatherGridVisible(weatherGridToggle.checked);
+});
 
 // ----- 측정 레이어 추가 ----- //
 const mapDraw = createMapDraw(map, {
@@ -169,10 +167,8 @@ view.on('change:resolution', () => {
   zoomSlider.value = view.getZoom();
 });
 
-if (mapTypeSelect) {
-  mapTypeSelect.value = currentMapType;
-  mapTypeSelect.addEventListener('change', handleMapTypeChange);
-}
+refreshMapTypeButtons();
+mapTypeControl.addEventListener('click', handleMapTypeChange);
 
 map.on('moveend', saveMapBounds);
 requestAnimationFrame(refreshMapSize);
@@ -206,8 +202,7 @@ function saveMapBounds() {
 
   if (boundsKey === lastPublishedBounds) return;
 
-  lastPublishedBounds = boundsKey;
-  mapMeta.updateView({
+  const updatedMeta = mapMeta.updateView({
     cenLat: centerLonLat[1],
     cenLon: centerLonLat[0],
     zoom: view.getZoom(),
@@ -216,7 +211,16 @@ function saveMapBounds() {
     maxLat: topRight[1],
     maxLon: topRight[0],
   });
+  lastPublishedBounds = boundsKey;
   document.dispatchEvent(new Event('overview:bounds-changed'));
+
+  const gridCenterElement = document.getElementById('map-weather-grid-center');
+  const grid = updatedMeta.weatherGrid;
+  if (gridCenterElement && grid) {
+    gridCenterElement.textContent = grid.inRange
+      ? '중심 격자: ' + grid.nx + ', ' + grid.ny
+      : '기상청 격자 영역 밖';
+  }
 }
 
 function createEventMarkerItem(card) {
@@ -258,17 +262,26 @@ function handleEventSelect(item, selection) {
 }
 
 function handleMapTypeChange(event) {
-  const nextMapType = event.target.value;
+  const button = event.target.closest('[data-map-type]');
+  if (!button || !mapTypeControl.contains(button)) return;
+  const nextMapType = button.dataset.mapType;
+  if (!Object.values(MAP_TYPE).includes(nextMapType) || nextMapType === currentMapType) return;
   const nextSource = meta.tileSources[nextMapType];
 
-  if (!nextSource) {
-    event.target.value = currentMapType;
-    return;
-  }
+  if (!nextSource) return;
 
   baseTileLayer.setSource(createTileSource(nextSource));
   currentMapType = nextMapType;
   mapMeta.setMapType(currentMapType);
+  refreshMapTypeButtons();
+}
+
+function refreshMapTypeButtons() {
+  mapTypeButtons.forEach((button) => {
+    const active = button.dataset.mapType === currentMapType;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
 }
 
 function createTileSource(source) {

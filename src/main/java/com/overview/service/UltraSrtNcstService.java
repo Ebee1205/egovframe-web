@@ -11,9 +11,11 @@ public interface UltraSrtNcstService {
 
     // API 응답 검증 후 저장할 실황 목록 반환 (저장은 호출부에서 수행)
     ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes() throws Exception;
+    ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes(int nx, int ny) throws Exception;
 
     // 기본 격자의 최신 DB 자료를 공통코드와 매핑해 화면용 응답으로 반환
     ComResponseVO<Map<String, Object>> selectUltraSrtNcst() throws Exception;
+    ComResponseVO<Map<String, Object>> selectUltraSrtNcst(int nx, int ny) throws Exception;
 
     // API 오류 응답도 변형 없이 반환한다.
     String fetchUltraSrtNcstJson() throws Exception;

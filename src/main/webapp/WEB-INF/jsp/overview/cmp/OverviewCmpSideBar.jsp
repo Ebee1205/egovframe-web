@@ -22,6 +22,7 @@
             <path d="M10 3 5 8l5 5"/>
         </svg>
     </button>
+
 </div>
 
 <script>
@@ -29,12 +30,25 @@
         var panel = document.getElementById('<c:out value="${mspId}"/>');
         var btn = panel.querySelector('.fold-button');
         var content = panel.querySelector('.panel-content');
+        var mapBody = panel.closest('.map-body');
+
+        function syncPanelOffset() {
+            if (!mapBody) return;
+            var width = panel.classList.contains('folded') ? 0 : panel.offsetWidth;
+            mapBody.style.setProperty('--map-panel-offset', width + 'px');
+        }
+
+        syncPanelOffset();
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(syncPanelOffset).observe(panel);
+        }
 
         btn.addEventListener('click', function () {
             var isFolded = panel.classList.toggle('folded');
             btn.setAttribute('aria-expanded', String(!isFolded));
             btn.setAttribute('aria-label', isFolded ? '패널 펼치기' : '패널 접기');
             content.inert = isFolded;   // 접힌 동안 내부 요소로 Tab 포커스가 가지 않도록
+            syncPanelOffset();
         });
     })();
 </script>

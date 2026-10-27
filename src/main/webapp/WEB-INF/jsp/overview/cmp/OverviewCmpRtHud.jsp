@@ -98,6 +98,23 @@
         content.hidden = footer.hidden = false;
     }
 
+    function readWeatherGrid() {
+        var meta;
+        try {
+            meta = JSON.parse(localStorage.getItem('__openlayers_tile_meta_data'));
+        } catch (e) {
+            throw new Error('지도 격자 정보를 읽을 수 없습니다. 지도를 이동한 뒤 다시 조회해주세요.');
+        }
+        var grid = meta && meta.weatherGrid;
+        if (!grid || !Number.isInteger(grid.nx) || !Number.isInteger(grid.ny)) {
+            throw new Error('지도 격자가 준비되지 않았습니다. 지도를 이동한 뒤 다시 조회해주세요.');
+        }
+        if (grid.inRange === false || grid.nx < 1 || grid.nx > 149 || grid.ny < 1 || grid.ny > 253) {
+            throw new Error('현재 지도 중심은 기상청 격자 영역 밖입니다.');
+        }
+        return grid;
+    }
+
     button.addEventListener('click', async function () {
         button.disabled = true;
         spinner.hidden = false;
@@ -107,7 +124,11 @@
         content.hidden = footer.hidden = true;
 
         try {
-            var response = await fetch(button.dataset.url, {
+            var grid = readWeatherGrid();
+            var url = new URL(button.dataset.url, window.location.href);
+            url.searchParams.set('nx', grid.nx);
+            url.searchParams.set('ny', grid.ny);
+            var response = await fetch(url, {
                 headers: { 'Accept': 'application/json' }, credentials: 'same-origin'
             });
             var result = await response.json();

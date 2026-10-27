@@ -70,10 +70,15 @@ public class UltraSrtNcstServiceImpl implements UltraSrtNcstService {
 
     @Override
     public ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes() throws Exception {
+        return fetchUltraSrtNcstRes(defaultNx, defaultNy);
+    }
+
+    @Override
+    public ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes(int nx, int ny) throws Exception {
         try (Jsonb jsonb = JsonbBuilder.create()) {
 
             // API응답 가져오기
-            Map<?, ?> root = jsonb.fromJson(fetchUltraSrtNcstJson(), Map.class);
+            Map<?, ?> root = jsonb.fromJson(fetchUltraSrtNcstJson(nx, ny), Map.class);
             Map<?, ?> response = (Map<?, ?>) root.get("response");
             Map<?, ?> header = (Map<?, ?>) response.get("header");
             String resultCode = (String) header.get("resultCode");
@@ -97,6 +102,9 @@ public class UltraSrtNcstServiceImpl implements UltraSrtNcstService {
                         || row.getObsrValue() == null) {
                     throw new IllegalStateException("실황 자료의 필수 항목이 누락되었습니다.");
                 }
+                if (row.getNx() != nx || row.getNy() != ny) {
+                    throw new IllegalStateException("실황 자료의 격자가 요청 격자와 일치하지 않습니다.");
+                }
                 new BigDecimal(row.getObsrValue());
                 UltraSrtNcstVO first = rows.get(0);
                 if (!java.util.Objects.equals(first.getBaseDate(), row.getBaseDate())
@@ -112,16 +120,31 @@ public class UltraSrtNcstServiceImpl implements UltraSrtNcstService {
 
     @Override
     public ComResponseVO<Map<String, Object>> selectUltraSrtNcst() throws Exception {
-        List<UltraSrtNcstVO> rows = selectUltraSrtNcstList(null);
+        return selectUltraSrtNcst(defaultNx, defaultNy);
+    }
+
+    @Override
+    public ComResponseVO<Map<String, Object>> selectUltraSrtNcst(int nx, int ny) throws Exception {
+        UltraSrtNcstVO condition = new UltraSrtNcstVO();
+        condition.setNx(nx);
+        condition.setNy(ny);
+        List<UltraSrtNcstVO> rows = selectUltraSrtNcstList(condition);
         return buildWeatherResponse(rows.toArray(new UltraSrtNcstVO[0]), null);
     }
 
     @Override
     public String fetchUltraSrtNcstJson() throws Exception {
+        return fetchUltraSrtNcstJson(defaultNx, defaultNy);
+    }
+
+    private String fetchUltraSrtNcstJson(int nx, int ny) throws Exception {
         if (serviceKey == null || serviceKey.trim().isEmpty()) {
             throw new IllegalStateException("기상청 API 인증키가 설정되지 않았습니다.");
         }
-        return requestJson(withGrid(latestCondition()), 1);
+        UltraSrtNcstVO condition = latestCondition();
+        condition.setNx(nx);
+        condition.setNy(ny);
+        return requestJson(withGrid(condition), 1);
     }
 
     @Override
