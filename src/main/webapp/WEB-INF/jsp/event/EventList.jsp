@@ -156,27 +156,108 @@
                 </div>
                 
                 <!-- 테이블 페이징 -->
-                <c:if test="${filterVO.totalCnt > 0 and filterVO.pageSize > 0}">
-                    <nav aria-label="이벤트 목록 페이징">
-                        <ul class="pagination | justify-content-center">
-                            <c:forEach var="i" begin="1" end="${totalPage}">
-                                <li class="page-item ${i == filterVO.pageIndex ? 'active' : ''}">
-                                    <c:url var="eventPageUrl" value="/event/list.do">
-                                        <c:param name="pageIndex" value="${i}"/>
-                                        <c:param name="title" value="${filterVO.title}"/>
-                                        <c:param name="ctg" value="${filterVO.ctg}"/>
-                                        <c:param name="reg_id" value="${filterVO.reg_id}"/>
-                                        <c:param name="parentRegId" value="${filterVO.parentRegId}"/>
-                                    </c:url>
-                                    <a class="page-link"
-                                        href="<c:out value='${eventPageUrl}'/>">
-                                        <c:out value="${i}"/>
-                                    </a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </nav>
-                </c:if>
+				<c:if test="${totalPage > 0}">
+				    <%-- 표시할 번호 범위 계산 (항상 최대 11칸: 앞쪽 9개 / 중간 7개 / 뒤쪽 9개 + 처음·끝·생략) --%>
+				    <c:set var="pgCur" value="${filterVO.pageIndex}"/>
+				    <c:set var="pgTotal" value="${totalPage}"/>
+				    <c:choose>
+				        <c:when test="${pgTotal <= 11}">
+				            <c:set var="pgFrom" value="1"/>
+				            <c:set var="pgTo" value="${pgTotal}"/>
+				        </c:when>
+				        <c:when test="${pgCur <= 6}">
+				            <c:set var="pgFrom" value="1"/>
+				            <c:set var="pgTo" value="9"/>
+				        </c:when>
+				        <c:when test="${pgCur >= pgTotal - 5}">
+				            <c:set var="pgFrom" value="${pgTotal - 8}"/>
+				            <c:set var="pgTo" value="${pgTotal}"/>
+				        </c:when>
+				        <c:otherwise>
+				            <c:set var="pgFrom" value="${pgCur - 3}"/>
+				            <c:set var="pgTo" value="${pgCur + 3}"/>
+				        </c:otherwise>
+				    </c:choose>
+
+				    <nav aria-label="이벤트 목록 페이징">
+				        <ul class="pagination | justify-content-center | flex-wrap">
+
+				            <%-- « 첫 페이지 --%>
+				            <li class="page-item ${pgCur > 1 ? '' : 'disabled'}">
+				                <c:choose>
+				                    <c:when test="${pgCur > 1}">
+				                        <c:url var="pgUrl" value="/event/list.do">
+				                            <c:param name="pageIndex" value="1"/>
+				                            <c:param name="pageSize" value="${filterVO.pageSize}"/>
+				                            <c:param name="title" value="${filterVO.title}"/>
+				                            <c:param name="ctg" value="${filterVO.ctg}"/>
+				                            <c:param name="reg_id" value="${filterVO.reg_id}"/>
+				                            <c:param name="parentRegId" value="${filterVO.parentRegId}"/>
+				                        </c:url>
+				                        <a class="page-link" href="<c:out value='${pgUrl}'/>" aria-label="첫 페이지로 이동">
+				                            <span aria-hidden="true">&laquo;</span>
+				                        </a>
+				                    </c:when>
+				                    <c:otherwise>
+				                        <span class="page-link" aria-label="첫 페이지" aria-disabled="true"><span aria-hidden="true">&laquo;</span></span>
+				                    </c:otherwise>
+				                </c:choose>
+				            </li>
+
+				            <%-- 페이지 번호: 1, 2, 3 ... 9, …, 46 형태 --%>
+				            <c:forEach var="i" begin="1" end="${pgTotal}">
+				                <c:choose>
+				                    <c:when test="${i == 1 or i == pgTotal or (i >= pgFrom and i <= pgTo)}">
+				                        <li class="page-item ${i == pgCur ? 'active' : ''}">
+				                            <c:choose>
+				                                <c:when test="${i == pgCur}">
+				                                    <span class="page-link" aria-current="page" aria-label="${i}페이지, 현재 페이지"><c:out value="${i}"/></span>
+				                                </c:when>
+				                                <c:otherwise>
+				                                    <c:url var="pgUrl" value="/event/list.do">
+				                                        <c:param name="pageIndex" value="${i}"/>
+				                                        <c:param name="pageSize" value="${filterVO.pageSize}"/>
+				                                        <c:param name="title" value="${filterVO.title}"/>
+				                                        <c:param name="ctg" value="${filterVO.ctg}"/>
+				                                        <c:param name="reg_id" value="${filterVO.reg_id}"/>
+				                                        <c:param name="parentRegId" value="${filterVO.parentRegId}"/>
+				                                    </c:url>
+				                                    <a class="page-link" href="<c:out value='${pgUrl}'/>" aria-label="${i}페이지로 이동"><c:out value="${i}"/></a>
+				                                </c:otherwise>
+				                            </c:choose>
+				                        </li>
+				                    </c:when>
+				                    <%-- 생략(…): 숨겨진 구간의 첫 위치에서 한 번만 출력 --%>
+				                    <c:when test="${(i == 2 and pgFrom > 2) or (i == pgTo + 1 and pgTo + 1 < pgTotal)}">
+				                        <li class="page-item disabled"><span class="page-link" aria-hidden="true">&hellip;</span></li>
+				                    </c:when>
+				                </c:choose>
+				            </c:forEach>
+
+				            <%-- » 마지막 페이지 --%>
+				            <li class="page-item ${pgCur < pgTotal ? '' : 'disabled'}">
+				                <c:choose>
+				                    <c:when test="${pgCur < pgTotal}">
+				                        <c:url var="pgUrl" value="/event/list.do">
+				                            <c:param name="pageIndex" value="${pgTotal}"/>
+				                            <c:param name="pageSize" value="${filterVO.pageSize}"/>
+				                            <c:param name="title" value="${filterVO.title}"/>
+				                            <c:param name="ctg" value="${filterVO.ctg}"/>
+				                            <c:param name="reg_id" value="${filterVO.reg_id}"/>
+				                            <c:param name="parentRegId" value="${filterVO.parentRegId}"/>
+				                        </c:url>
+				                        <a class="page-link" href="<c:out value='${pgUrl}'/>" aria-label="마지막 페이지로 이동">
+				                            <span aria-hidden="true">&raquo;</span>
+				                        </a>
+				                    </c:when>
+				                    <c:otherwise>
+				                        <span class="page-link" aria-label="마지막 페이지" aria-disabled="true"><span aria-hidden="true">&raquo;</span></span>
+				                    </c:otherwise>
+				                </c:choose>
+				            </li>
+				        </ul>
+				    </nav>
+				</c:if>
 
             </div>
 
