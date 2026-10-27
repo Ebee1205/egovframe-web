@@ -12,24 +12,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartException;
-import com.cmm.service.excel.impl.ExcelSaxFileParser;
+import com.extra.service.impl.ExtraFileServiceImpl;
 import com.cmm.service.file.impl.FileMngUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.extra.service.ExtraFilterVO;
+import com.extra.service.ExtraService;
 
 @Controller
 public class ExtraController {
-    private final ExcelSaxFileParser excelFileParser;
+    private final ExtraFileServiceImpl extraFileService;
     private final MessageSource messageSource;
+    private final ExtraService extraService;
 
-    public ExtraController(ExcelSaxFileParser excelFileParser, MessageSource messageSource) {
-        this.excelFileParser = excelFileParser;
+    public ExtraController(ExtraFileServiceImpl extraFileService, MessageSource messageSource, ExtraService extraService) {
+        this.extraFileService = extraFileService;
         this.messageSource = messageSource;
+        this.extraService = extraService;
     }
 
     @RequestMapping("/extra/list.do")
-    public String extraList(Model model) throws Exception {
-    	
-    	
+    public String extraList(ExtraFilterVO filterVO, Model model) throws Exception {
+        model.addAttribute("extras", extraService.selectExtraList(filterVO));
+        model.addAttribute("filterVO", filterVO);
+        model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
+                : (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
     
@@ -41,10 +47,12 @@ public class ExtraController {
             if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
             return ResponseEntity.ok(
             	ComResponseVO.success(
-            		excelFileParser.parse(files, null),
+            		extraFileService.parseExtraExcel(files),
                     messageSource.getMessage("success.request.msg", null, Locale.KOREAN)
                 ).toJson());
             
+        } catch (ExtraFileServiceImpl.InvalidExtraExcelException exception) {
+            return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_PARSE_FAILED", exception.getMessage(), "files", "EXTRA_EXCEL_PARSE_FAILED", exception.getMessage()).toJson());
         } catch (Exception exception) {
             return FileMngUtil.errorResponse(exception, messageSource);
         }
@@ -54,8 +62,7 @@ public class ExtraController {
     public ResponseEntity<String> extraFileUploadError(MultipartException exception) {
         return FileMngUtil.errorResponse(exception, messageSource);
     }
-    
-    
+   
     // 오류 목록 다운로드
     @RequestMapping("/extra/file/err/download.do")
     public String extraFileErrDownload(Model model) throws Exception {

@@ -27,15 +27,21 @@
         min-height: 0;
         min-width: 0;
         overflow: auto;
+        overflow-anchor: none;
     }
     #extraExcelTable {
         width: max-content;
         min-width: 100%;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0;
     }
-    #extraExcelTable thead th {
+    #extraExcelTable thead {
         position: sticky;
         top: 0;
         z-index: 1;
+    }
+    #extraExcelTable thead th {
         background-color: var(--cui-tertiary-bg, #f3f4f7);
     }
 </style>
@@ -62,8 +68,7 @@
 	            </jsp:include>
 
             </div>
-            
-            
+                        
             <div class="table-container">
                 <!-- 테이블 상단 정보 -->
                 <div class="table-info | d-flex | justify-content-between | align-items-center | flex-wrap | gap-2">
@@ -83,12 +88,27 @@
                     <table id="extraExcelTable" class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
-                                <th scope="col">시트</th>
                                 <th scope="col" style="width: 45px;">NO</th>
+                                <th scope="col">자전거번호</th>
+                                <th scope="col">대여일시</th>
+                                <th scope="col">대여 대여소번호</th>
+                                <th scope="col">대여 대여소명</th>
+                                <th scope="col">대여거치대</th>
+                                <th scope="col">반납일시</th>
+                                <th scope="col">반납대여소번호</th>
+                                <th scope="col">반납대여소명</th>
+                                <th scope="col">반납거치대</th>
+                                <th scope="col">이용시간(분)</th>
+                                <th scope="col">이용거리(M)</th>
+                                <th scope="col">생년</th>
+                                <th scope="col">성별</th>
+                                <th scope="col">이용자종류</th>
+                                <th scope="col">대여대여소ID</th>
+                                <th scope="col">반납대여소ID</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td class="text-center | text-body-secondary | py-4" colspan="2">조회된 데이터가 없습니다.</td></tr>
+                            <tr><td class="text-center | text-body-secondary | py-4" colspan="17">조회된 데이터가 없습니다.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -113,37 +133,20 @@
     var count = document.getElementById('extraExcelTotalCount');
     var paging = document.getElementById('extraExcelPaging');
     var rows = [];
-    var columns = 0;
+    var columns = 16;
     var pageIndex = 1;
     var pageSize = 20;
-    function columnName(index) {
-        var name = '';
-        for (index++; index > 0; index = Math.floor((index - 1) / 26)) {
-            name = String.fromCharCode(65 + (index - 1) % 26) + name;
-        }
-        return name;
-    }
     box.addEventListener('file-input-box:change', function (event) {
         var content = event.detail.fileContent;
         var sheets = content ? content.sheets : [];
-        columns = 0;
         rows = [];
         pageIndex = 1;
         sheets.forEach(function (sheet) {
             sheet.rows.forEach(function (row) {
-                columns = Math.max(columns, row.cells.length);
                 rows.push({sheetName: sheet.sheetName, rowNumber: row.rowNumber, cells: row.cells});
             });
         });
         count.textContent = rows.length;
-        var header = table.tHead.rows[0];
-        while (header.cells.length > 2) header.deleteCell(2);
-        for (var column = 0; column < columns; column++) {
-            var th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = columnName(column);
-            header.appendChild(th);
-        }
         renderPage();
     });
     function renderPage() {
@@ -152,9 +155,6 @@
         var start = (pageIndex - 1) * pageSize;
         rows.slice(start, start + pageSize).forEach(function (row) {
                 var tr = document.createElement('tr');
-                var name = document.createElement('td');
-                name.textContent = row.sheetName;
-                tr.appendChild(name);
                 var number = document.createElement('td');
                 number.className = 'text-center';
                 number.textContent = row.rowNumber;
@@ -170,9 +170,10 @@
         if (!rows.length) {
             var empty = body.insertRow().insertCell();
             empty.className = 'text-center | text-body-secondary | py-4';
-            empty.colSpan = columns + 2;
+            empty.colSpan = columns + 1;
             empty.textContent = '조회된 데이터가 없습니다.';
         }
+        table.parentElement.scrollTop = 0;
         var totalPage = Math.ceil(rows.length / pageSize);
         var list = paging.querySelector('ul');
         list.textContent = '';

@@ -63,14 +63,19 @@
         </where>
     </sql>
 
-    <select id="selectExtraList" parameterType="com.extra.service.ExtraVO" resultMap="extraResultMap">
+    <select id="selectExtraList" parameterType="com.extra.service.ExtraFilterVO" resultMap="extraResultMap">
         SELECT <include refid="extraColumns"/>
         FROM public.tb_extra
         <include refid="extraWhere"/>
-        ORDER BY rent_dt DESC NULLS LAST, bike_id, rtn_dt DESC NULLS LAST
+        ORDER BY rent_dt DESC NULLS LAST, bike_id, rtn_dt DESC NULLS LAST,
+            rent_id, rtn_id, rent_station_id, return_station_id, rent_nm, rtn_nm,
+            rent_hold, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, bike_se_cd, c_date
+        <if test="pageSize > 0">
+            LIMIT #{pageSize} OFFSET #{firstIndex}
+        </if>
     </select>
 
-    <select id="selectExtraListCnt" parameterType="com.extra.service.ExtraVO" resultType="long">
+    <select id="selectExtraListCnt" parameterType="com.extra.service.ExtraFilterVO" resultType="long">
         SELECT COUNT(*) FROM public.tb_extra
         <include refid="extraWhere"/>
     </select>

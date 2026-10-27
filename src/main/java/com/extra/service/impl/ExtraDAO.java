@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.extra.service.ExtraVO;
+import com.extra.service.ExtraFilterVO;
 
 @Repository
 public class ExtraDAO extends EgovAbstractMapper {
@@ -33,12 +34,12 @@ public class ExtraDAO extends EgovAbstractMapper {
         return inserted;
     }
 
-    /** 자전거ID, 대여소번호, 반납대여소번호로 조회한다. null 조건은 전체 조회한다. */
-    public List<ExtraVO> selectExtraList(ExtraVO condition) {
-        return selectList("extraDAO.selectExtraList", condition == null ? new ExtraVO() : condition);
+    /** 자전거ID, 대여소번호, 반납대여소번호 및 페이징 조건으로 조회한다. */
+    public List<ExtraVO> selectExtraList(ExtraFilterVO condition) {
+        return selectList("extraDAO.selectExtraList", condition == null ? new ExtraFilterVO() : condition);
     }
 
-    public long selectExtraListCnt(ExtraVO condition) {
-        return selectOne("extraDAO.selectExtraListCnt", condition == null ? new ExtraVO() : condition);
+    public long selectExtraListCnt(ExtraFilterVO condition) {
+        return selectOne("extraDAO.selectExtraListCnt", condition == null ? new ExtraFilterVO() : condition);
     }
 }
