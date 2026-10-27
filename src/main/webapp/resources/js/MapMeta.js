@@ -1,3 +1,5 @@
+import { lonLatToGrid } from './MapWeatherGrid.js?v=20261027-grid2';
+
 const MAP_META_KEY = '__openlayers_tile_meta_data';
 export const VWORLD_API_KEY =
   document.querySelector('meta[name="vworld-api-key"]')?.content ?? '';
@@ -47,6 +49,8 @@ const DEFAULT_MAP_META = {
 
   projection: 'EPSG:3857',
 
+  weatherGrid: { visible: false, ...lonLatToGrid(126.9780, 37.5665) },
+
   updateTime: null,
 };
 
@@ -92,6 +96,13 @@ class MapMeta {
 
         tileSources,
 
+        weatherGrid: {
+          visible: saved.weatherGrid?.visible === true,
+          ...lonLatToGrid(
+            savedView.cenLon ?? legacyCenter?.[0] ?? DEFAULT_MAP_META.view.cenLon,
+            savedView.cenLat ?? legacyCenter?.[1] ?? DEFAULT_MAP_META.view.cenLat),
+        },
+
         view: {
           ...DEFAULT_MAP_META.view,
           ...savedView,
@@ -127,6 +138,10 @@ class MapMeta {
     return this.get().mapType;
   }
 
+  setWeatherGridVisible(visible) {
+    return this.save({ weatherGrid: { ...this.get().weatherGrid, visible: Boolean(visible) } });
+  }
+
   setMapType(mapType) {
     if (!Object.values(MAP_TYPE).includes(mapType)) {
       console.warn(`[MapMeta] invalid map type: ${mapType}`);
@@ -156,6 +171,10 @@ class MapMeta {
     const current = this.get();
 
     return this.save({
+      weatherGrid: {
+        ...current.weatherGrid,
+        ...lonLatToGrid(cenLon ?? current.view.cenLon, cenLat ?? current.view.cenLat),
+      },
       view: {
         ...current.view,
 
@@ -210,6 +229,7 @@ class MapMeta {
 
     return this.save({
       view: structuredClone(DEFAULT_MAP_META.view),
+      weatherGrid: { ...current.weatherGrid, ...lonLatToGrid(DEFAULT_MAP_META.view.cenLon, DEFAULT_MAP_META.view.cenLat) },
     });
   }
 
