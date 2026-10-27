@@ -136,17 +136,35 @@
     var columns = 16;
     var pageIndex = 1;
     var pageSize = 20;
+    var fields = ['bikeId', 'rentDt', 'rentId', 'rentNm', 'rentHold', 'rtnDt', 'rtnId', 'rtnNm',
+        'rtnHold', 'useMin', 'useDst', 'birthYear', 'sexCd', 'usrClsCd', 'rentStationId', 'returnStationId'];
+    function cellText(item, field) {
+        var value = item[field];
+        if (value == null) return '';
+        if (field === 'rentDt' || field === 'rtnDt') {
+            var date = new Date(value);
+            if (!isNaN(date.getTime())) {
+                function pad(number) { return String(number).padStart(2, '0'); }
+                return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate())
+                    + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+            }
+        }
+        return String(value);
+    }
     box.addEventListener('file-input-box:change', function (event) {
         var content = event.detail.fileContent;
-        var sheets = content ? content.sheets : [];
         rows = [];
         pageIndex = 1;
-        sheets.forEach(function (sheet) {
-            sheet.rows.forEach(function (row) {
-                rows.push({sheetName: sheet.sheetName, rowNumber: row.rowNumber, cells: row.cells});
-            });
+        (content ? content.dataList : []).forEach(function (item, index) {
+            rows.push({rowNumber: index + 1, cells: fields.map(function (field) { return cellText(item, field); })});
         });
-        count.textContent = rows.length;
+        var total = content ? content.totalCount : 0;
+        var errors = content ? content.errorCount : 0;
+        var warnings = content ? content.warningCount : 0;
+        count.textContent = total;
+        document.getElementById('extraExcelValidCount').textContent = total - errors - warnings;
+        document.getElementById('extraExcelErrorCount').textContent = errors;
+        document.getElementById('extraExcelWarningCount').textContent = warnings;
         renderPage();
     });
     function renderPage() {

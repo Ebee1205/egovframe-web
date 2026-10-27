@@ -32,10 +32,12 @@ public class ExtraController {
 
     @RequestMapping("/extra/list.do")
     public String extraList(ExtraFilterVO filterVO, Model model) throws Exception {
+    	
         model.addAttribute("extras", extraService.selectExtraList(filterVO));
         model.addAttribute("filterVO", filterVO);
-        model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
-                : (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
+        model.addAttribute("totalPage", 
+        		filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
+        		: (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
     
@@ -45,6 +47,7 @@ public class ExtraController {
     	
         try {
             if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
+            
             return ResponseEntity.ok(
             	ComResponseVO.success(
             		extraFileService.parseExtraExcel(files),

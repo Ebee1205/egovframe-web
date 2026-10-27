@@ -1,18 +1,16 @@
 package com.extra.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,11 +18,10 @@ import com.cmm.service.excel.impl.ExcelSaxFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
 import com.extra.service.ExtraVO;
 
-/** SAX 결과를 저장용 VO로 변환한다. DB 조회, 등록 및 업무 검증은 수행하지 않는다. */
+/** SAX 결과를 VO로 변환하고 빈 셀 경고 및 타입·DB 컬럼 규격 오류를 수집한다. DB는 변경하지 않는다. */
 @Service
 public class ExtraFileServiceImpl {
     private final ExcelSaxFileParser excelFileParser;
-    private static final Map<String, String> HEADER_PROPERTIES = headerProperties();
     private static final String[] DATE_PATTERNS = {
         "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm",
         "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy-MM-dd", "yyyy/MM/dd"
@@ -34,60 +31,88 @@ public class ExtraFileServiceImpl {
         this.excelFileParser = excelFileParser;
     }
 
-    public List<Map<String, Object>> parseExtraExcel(List<MultipartFile> files) {
+    public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
         if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
-        List<Map<String, Object>> parsed = excelFileParser.parse(files, null);
-        for (Map<String, Object> file : parsed) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> content = (Map<String, Object>) file.get("fileContent");
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> sheets = (List<Map<String, Object>>) content.get("sheets");
-            List<ExtraVO> data = new ArrayList<>();
-            for (Map<String, Object> sheet : sheets) parseSheet(sheet, data);
-            // 기존 미리보기 응답은 유지하고, DAO에 전달할 수 있는 VO 목록을 추가한다.
-            content.put("data", data);
-        }
-        return parsed;
+        Map<String, Object> file = excelFileParser.parse(files, null).get(0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> content = (Map<String, Object>) file.get("fileContent");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> sheets = (List<Map<String, Object>>) content.get("sheets");
+        List<ExtraVO> dataList = new ArrayList<>();
+        List<ExtraVO> errorList = new ArrayList<>();
+        List<ExtraVO> warningList = new ArrayList<>();
+        for (Map<String, Object> sheet : sheets) parseSheet(sheet, dataList, errorList, warningList);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("dataList", dataList);
+        result.put("errorList", errorList);
+        result.put("warningList", warningList);
+        result.put("errorCount", errorList.size());
+        result.put("warningCount", warningList.size());
+        result.put("totalCount", dataList.size());
+        result.put("extension", file.get("extension"));
+        result.put("fileSize", file.get("fileSize"));
+        result.put("originalName", file.get("originalName"));
+        return result;
     }
 
-    private void parseSheet(Map<String, Object> sheet, List<ExtraVO> data) {
+    public static class InvalidExtraExcelException extends IllegalArgumentException {
+        private static final long serialVersionUID = 1L;
+        public InvalidExtraExcelException(String message) { super(message); }
+    }
+
+    private void parseSheet(Map<String, Object> sheet, List<ExtraVO> dataList,
+            List<ExtraVO> errorList, List<ExtraVO> warningList) {
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> rows = (List<Map<String, Object>>) sheet.get("rows");
         if (rows.isEmpty()) return;
-        List<String> headers = cells(rows.get(0));
-        Map<Integer, String> properties = new LinkedHashMap<>();
-        for (int column = 0; column < headers.size(); column++) {
-            String property = HEADER_PROPERTIES.get(normalize(headers.get(column)));
-            if (property != null) {
-                if (properties.containsValue(property)) {
-                    throw invalid(sheet, rows.get(0), column, "같은 항목의 헤더가 중복되었습니다.");
-                }
-                properties.put(column, property);
-            }
-        }
-        if (!properties.containsValue("bikeId")) {
-            throw invalid(sheet, rows.get(0), 0, "첫 행에서 자전거번호 또는 BIKE_ID 헤더를 찾을 수 없습니다.");
-        }
-        List<Map<String, Object>> previewRows = new ArrayList<>();
+
         for (int index = 1; index < rows.size(); index++) {
             Map<String, Object> row = rows.get(index);
             List<String> values = cells(row);
             ExtraVO item = new ExtraVO();
-            BeanWrapper bean = new BeanWrapperImpl(item);
-            for (Map.Entry<Integer, String> mapping : properties.entrySet()) {
-                int column = mapping.getKey();
+
+            // 양식의 고정 열 순서로 매핑한다. 첫 행은 헤더로 건너뛴다.
+
+            boolean hasError = false;
+            boolean hasWarning = false;
+            for (int column = 0; column < 17; column++) {
                 String value = column < values.size() ? values.get(column) : "";
+                if (value == null || value.trim().isEmpty()) {
+                    hasWarning = true;
+                    continue;
+                }
                 try {
-                    bean.setPropertyValue(mapping.getValue(), convert(value, bean.getPropertyType(mapping.getValue())));
+                    validateCell(column, value);
+                    switch (column) {
+                        case 0: item.setBikeId((String) convert(value, String.class)); break;
+                        case 1: item.setRentDt((Date) convert(value, Date.class)); break;
+                        case 2: item.setRentId((String) convert(value, String.class)); break;
+                        case 3: item.setRentNm((String) convert(value, String.class)); break;
+                        case 4: item.setRentHold((String) convert(value, String.class)); break;
+                        case 5: item.setRtnDt((Date) convert(value, Date.class)); break;
+                        case 6: item.setRtnId((String) convert(value, String.class)); break;
+                        case 7: item.setRtnNm((String) convert(value, String.class)); break;
+                        case 8: item.setRtnHold((String) convert(value, String.class)); break;
+                        case 9: item.setUseMin((BigDecimal) convert(value, BigDecimal.class)); break;
+                        case 10: item.setUseDst((BigDecimal) convert(value, BigDecimal.class)); break;
+                        case 11: item.setBirthYear((String) convert(value, String.class)); break;
+                        case 12: item.setSexCd((String) convert(value, String.class)); break;
+                        case 13: item.setUsrClsCd((String) convert(value, String.class)); break;
+                        case 14: item.setRentStationId((String) convert(value, String.class)); break;
+                        case 15: item.setReturnStationId((String) convert(value, String.class)); break;
+                        case 16: item.setBikeSeCd((String) convert(value, String.class)); break;
+                        default: break;
+                    }
                 } catch (IllegalArgumentException exception) {
-                    throw invalid(sheet, row, column, headers.get(column) + ": " + exception.getMessage());
+                    hasError = true;
                 }
             }
-            data.add(item);
-            previewRows.add(row);
+            // 전체 행을 유지하고, 오류가 있는 행은 경고 목록에 중복으로 넣지 않는다.
+            dataList.add(item);
+            if (hasError) errorList.add(item);
+            else if (hasWarning) warningList.add(item);
         }
-        // 헤더 행은 데이터 건수 및 미리보기 본문에서 제외한다.
-        sheet.put("rows", previewRows);
     }
 
     @SuppressWarnings("unchecked")
@@ -118,44 +143,34 @@ public class ExtraFileServiceImpl {
         throw new IllegalArgumentException("지원하지 않는 컬럼 타입입니다.");
     }
 
-    private static InvalidExtraExcelException invalid(Map<String, Object> sheet, Map<String, Object> row,
-            int column, String reason) {
-        return new InvalidExtraExcelException(sheet.get("sheetName") + " 시트 / " + row.get("rowNumber")
-                + "행 / " + (column + 1) + "열: " + reason);
+    private static void validateCell(int column, String value) {
+        int maxLength;
+        switch (column) {
+            case 0: case 2: case 6: case 13: case 14: case 15: case 16:
+                maxLength = 50; break;
+            case 3: case 7:
+                maxLength = 200; break;
+            case 4: case 8: case 12:
+                maxLength = 20; break;
+            case 11:
+                maxLength = 4; break;
+            case 9: case 10:
+                BigDecimal number = (BigDecimal) convert(value, BigDecimal.class);
+                try { number = number.setScale(2, RoundingMode.UNNECESSARY); }
+                catch (ArithmeticException exception) {
+                    throw new IllegalArgumentException("소수점 이하 두 자리까지 입력할 수 있습니다.");
+                }
+                int integerDigits = column == 9 ? 10 : 13;
+                if (number.abs().compareTo(BigDecimal.TEN.pow(integerDigits)) >= 0) {
+                    throw new IllegalArgumentException("정수부는 " + integerDigits + "자리까지 입력할 수 있습니다.");
+                }
+                return;
+            default:
+                return; // 일시의 타입 검사는 convert에서 처리한다.
+        }
+        if (value.codePointCount(0, value.length()) > maxLength) {
+            throw new IllegalArgumentException("최대 " + maxLength + "자까지 입력할 수 있습니다.");
+        }
     }
 
-    public static class InvalidExtraExcelException extends IllegalArgumentException {
-        private static final long serialVersionUID = 1L;
-        public InvalidExtraExcelException(String message) { super(message); }
-    }
-
-    private static String normalize(String header) {
-        return header.replace("\uFEFF", "").replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
-    }
-
-    private static Map<String, String> headerProperties() {
-        Map<String, String> headers = new HashMap<>();
-        alias(headers, "bikeId", "BIKE_ID", "자전거ID", "자전거번호");
-        alias(headers, "rentDt", "RENT_DT", "대여일시");
-        alias(headers, "rentId", "RENT_ID", "대여소번호", "대여 대여소번호");
-        alias(headers, "rentNm", "RENT_NM", "대여소명", "대여 대여소명");
-        alias(headers, "rentHold", "RENT_HOLD", "대여거치대");
-        alias(headers, "rtnDt", "RTN_DT", "반납일시");
-        alias(headers, "rtnId", "RTN_ID", "반납대여소번호", "반납대여소대여소번호");
-        alias(headers, "rtnNm", "RTN_NM", "반납대여소명");
-        alias(headers, "rtnHold", "RTN_HOLD", "반납거치대");
-        alias(headers, "useMin", "USE_MIN", "사용(분)", "사용시간(분)", "이용시간(분)");
-        alias(headers, "useDst", "USE_DST", "이용거리(M)");
-        alias(headers, "usrClsCd", "USR_CLS_CD", "사용자종류", "이용자종류");
-        alias(headers, "sexCd", "SEX_CD", "성별");
-        alias(headers, "birthYear", "BIRTH_YEAR", "생년");
-        alias(headers, "rentStationId", "RENT_STATION_ID", "대여대여소ID");
-        alias(headers, "returnStationId", "RETURN_STATION_ID", "반납대여소ID");
-        alias(headers, "bikeSeCd", "BIKE_SE_CD", "자전거구분");
-        return headers;
-    }
-
-    private static void alias(Map<String, String> headers, String property, String... names) {
-        for (String name : names) headers.put(normalize(name), property);
-    }
 }

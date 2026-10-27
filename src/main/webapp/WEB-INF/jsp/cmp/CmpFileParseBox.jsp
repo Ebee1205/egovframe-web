@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%--
-  단일 파일 파싱 컴포넌트: 선택 즉시 업로드하고 data[0].fileContent를 반환한다.
+  단일 파일 파싱 컴포넌트: 선택 즉시 업로드하고 data[0].fileContent 또는 목록형 data 객체를 반환한다.
   props: id, label, description, accept, maxSize, uploadUrl
   API: await element.uploadFile(file), element.getFileContent(), element.getFile(), element.setProcessing(busy), element.reset()
   이벤트: file-input-box:change -> detail.fileContent (재선택/첨부 취소 시 null로 초기화)
@@ -171,11 +171,15 @@
                 throw new Error(errorMessage(result));
             }
             var data = result.data;
-            if (!Array.isArray(data) || data.length !== 1 || !data[0]
-                    || !data[0].fileContent || !Array.isArray(data[0].fileContent.sheets)) {
+            if (data && !Array.isArray(data) && Array.isArray(data.dataList)
+                    && Array.isArray(data.errorList) && Array.isArray(data.warningList)) {
+                fileContent = data;
+            } else if (Array.isArray(data) && data.length === 1 && data[0]
+                    && data[0].fileContent && Array.isArray(data[0].fileContent.sheets)) {
+                fileContent = data[0].fileContent;
+            } else {
                 throw new Error('파일 파싱 결과를 확인할 수 없습니다.');
             }
-            fileContent = data[0].fileContent;
             clearError();
         } catch (error) {
             if (version !== requestVersion) { return null; }
