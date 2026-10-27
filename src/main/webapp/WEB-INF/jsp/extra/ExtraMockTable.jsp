@@ -21,7 +21,6 @@
                 <th scope="col">등록일</th>
                 <th scope="col">수정일</th>
                 <th scope="col">상태</th>
-                <th scope="col">action</th>
             </tr>
         </thead>
         <tbody>
@@ -41,7 +40,6 @@
                     <td>2026-10-20 10:00</td>
                     <td>2026-10-26 10:00</td>
                     <td class="text-center">등록</td>
-                    <td><button type="button" class="btn | btn-sm | btn-outline-primary" disabled>상세</button></td>
                 </tr>
             </c:forEach>
         </tbody>

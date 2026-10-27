@@ -1,46 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ultraSrtNcstDAO">
-    <insert id="insertUltraSrtNcst">
+    <!-- API 항목 목록을 발표일시/격자별 한 행으로 변환한다. -->
+    <sql id="pivotObservations">
+        WITH input(base_date, base_time, nx, ny, category, obsr_value) AS (
+            VALUES
+            <foreach collection="list" item="item" separator=",">
+                (CAST(#{item.baseDate} AS varchar), CAST(#{item.baseTime} AS varchar),
+                 CAST(#{item.nx} AS integer), CAST(#{item.ny} AS integer),
+                 CAST(#{item.category} AS varchar), CAST(#{item.obsrValue} AS numeric))
+            </foreach>
+        )
         INSERT INTO public.tb_ultra_srt_ncst
-            (base_date, base_time, nx, ny, category, obsr_value, c_date)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (#{item.baseDate}, #{item.baseTime}, #{item.nx}, #{item.ny},
-             #{item.category}, #{item.obsrValue}, CURRENT_TIMESTAMP)
-        </foreach>
-        ON CONFLICT (nx, ny, base_date, base_time, category) DO NOTHING
+            (base_date, base_time, nx, ny, pty, reh, rn1, t1h, uuu, vec, vvv, wsd, c_date)
+        SELECT base_date, base_time, nx, ny,
+            MAX(obsr_value) FILTER (WHERE category = 'PTY')::smallint,
+            MAX(obsr_value) FILTER (WHERE category = 'REH'),
+            MAX(obsr_value) FILTER (WHERE category = 'RN1'),
+            MAX(obsr_value) FILTER (WHERE category = 'T1H'),
+            MAX(obsr_value) FILTER (WHERE category = 'UUU'),
+            MAX(obsr_value) FILTER (WHERE category = 'VEC'),
+            MAX(obsr_value) FILTER (WHERE category = 'VVV'),
+            MAX(obsr_value) FILTER (WHERE category = 'WSD'), CURRENT_TIMESTAMP
+        FROM input GROUP BY base_date, base_time, nx, ny
+    </sql>
+
+    <insert id="insertUltraSrtNcst">
+        <include refid="pivotObservations"/>
+        ON CONFLICT (nx, ny, base_date, base_time) DO NOTHING
     </insert>
 
     <insert id="upsertUltraSrtNcstList">
-        INSERT INTO public.tb_ultra_srt_ncst
-            (base_date, base_time, nx, ny, category, obsr_value, c_date)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (#{item.baseDate}, #{item.baseTime}, #{item.nx}, #{item.ny},
-             #{item.category}, #{item.obsrValue}, CURRENT_TIMESTAMP)
-        </foreach>
-        ON CONFLICT (nx, ny, base_date, base_time, category)
-        DO UPDATE SET obsr_value = EXCLUDED.obsr_value
+        <include refid="pivotObservations"/>
+        ON CONFLICT (nx, ny, base_date, base_time)
+        DO UPDATE SET
+            pty = COALESCE(EXCLUDED.pty, tb_ultra_srt_ncst.pty),
+            reh = COALESCE(EXCLUDED.reh, tb_ultra_srt_ncst.reh),
+            rn1 = COALESCE(EXCLUDED.rn1, tb_ultra_srt_ncst.rn1),
+            t1h = COALESCE(EXCLUDED.t1h, tb_ultra_srt_ncst.t1h),
+            uuu = COALESCE(EXCLUDED.uuu, tb_ultra_srt_ncst.uuu),
+            vec = COALESCE(EXCLUDED.vec, tb_ultra_srt_ncst.vec),
+            vvv = COALESCE(EXCLUDED.vvv, tb_ultra_srt_ncst.vvv),
+            wsd = COALESCE(EXCLUDED.wsd, tb_ultra_srt_ncst.wsd)
     </insert>
 
+    <!-- 기존 VO/category 기반 공통코드·화면 처리를 유지한다. null은 미수신 항목이며 0과 구별한다. -->
+    <sql id="observationItems">
+        CROSS JOIN LATERAL (VALUES
+            ('PTY', weather.pty::numeric), ('REH', weather.reh),
+            ('RN1', weather.rn1), ('T1H', weather.t1h),
+            ('UUU', weather.uuu), ('VEC', weather.vec),
+            ('VVV', weather.vvv), ('WSD', weather.wsd)
+        ) AS item(category, obsr_value)
+    </sql>
+
     <select id="selectUltraSrtNcst" resultType="com.overview.service.UltraSrtNcstVO">
-        SELECT base_date, base_time, nx, ny, category, obsr_value, c_date
-        FROM public.tb_ultra_srt_ncst
-        WHERE nx = #{nx} AND ny = #{ny}
-          AND base_date = #{baseDate} AND base_time = #{baseTime}
-          AND category = #{category}
+        SELECT weather.base_date, weather.base_time, weather.nx, weather.ny,
+            item.category, item.obsr_value::text AS obsr_value, weather.c_date
+        FROM public.tb_ultra_srt_ncst weather
+        <include refid="observationItems"/>
+        WHERE weather.nx = #{nx} AND weather.ny = #{ny}
+          AND weather.base_date = #{baseDate} AND weather.base_time = #{baseTime}
+          AND item.category = #{category} AND item.obsr_value IS NOT NULL
     </select>
 
     <select id="selectUltraSrtNcstList" resultType="com.overview.service.UltraSrtNcstVO">
-        SELECT base_date, base_time, nx, ny, category, obsr_value, c_date
-        FROM public.tb_ultra_srt_ncst
-        WHERE nx = #{nx} AND ny = #{ny}
-          AND (base_date, base_time) = (
-              SELECT base_date, base_time FROM public.tb_ultra_srt_ncst
-              WHERE nx = #{nx} AND ny = #{ny}
-              ORDER BY base_date DESC, base_time DESC LIMIT 1
-          )
-        ORDER BY category
+        SELECT weather.base_date, weather.base_time, weather.nx, weather.ny,
+            item.category, item.obsr_value::text AS obsr_value, weather.c_date
+        FROM (
+            SELECT * FROM public.tb_ultra_srt_ncst
+            WHERE nx = #{nx} AND ny = #{ny}
+            ORDER BY base_date DESC, base_time DESC LIMIT 1
+        ) weather
+        <include refid="observationItems"/>
+        WHERE item.obsr_value IS NOT NULL
+        ORDER BY item.category
     </select>
 </mapper>
