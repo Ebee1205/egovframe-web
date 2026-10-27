@@ -29,20 +29,22 @@ public class ExtraController {
     @RequestMapping("/extra/list.do")
     public String extraList(Model model) throws Exception {
     	
-
     	
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
     
-    
-    /** 파일 저장이나 업무 매핑 없이 SAX 파싱 결과를 그대로 반환한다. */
+   
     @RequestMapping(value = "/extra/file/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> extraFileUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files) {
     	
         try {
             if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
-            return ResponseEntity.ok(ComResponseVO.success(excelFileParser.parse(files, null),
-                    messageSource.getMessage("success.request.msg", null, Locale.KOREAN)).toJson());
+            return ResponseEntity.ok(
+            	ComResponseVO.success(
+            		excelFileParser.parse(files, null),
+                    messageSource.getMessage("success.request.msg", null, Locale.KOREAN)
+                ).toJson());
+            
         } catch (Exception exception) {
             return FileMngUtil.errorResponse(exception, messageSource);
         }
@@ -53,4 +55,14 @@ public class ExtraController {
         return FileMngUtil.errorResponse(exception, messageSource);
     }
     
+    
+    // 오류 목록 다운로드
+    @RequestMapping("/extra/file/err/download.do")
+    public String extraFileErrDownload(Model model) throws Exception {
+    	
+    	
+        return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
+    }
+    
+
 }
