@@ -61,6 +61,20 @@ public class ExtraController {
         }
     }
 
+    @RequestMapping(value = {"/extra/file/insert.do", "/file/insert.do"}, method = RequestMethod.POST,
+            produces = "application/json;charset=UTF-8")
+    public ResponseEntity<String> extraFileInsert(@RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        try {
+            return ResponseEntity.status(201).body(ComResponseVO.success(extraFileService.insertExtraExcel(files), "대여이력이 일괄 등록되었습니다.").toJson());
+        
+        } catch (ExtraFileServiceImpl.InvalidExtraExcelException exception) {
+            return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_INVALID",
+                    exception.getMessage(), "files", "EXTRA_EXCEL_INVALID", exception.getMessage()).toJson());
+        } catch (Exception exception) {
+            return FileMngUtil.errorResponse(exception, messageSource);
+        }
+    }
+
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<String> extraFileUploadError(MultipartException exception) {
         return FileMngUtil.errorResponse(exception, messageSource);

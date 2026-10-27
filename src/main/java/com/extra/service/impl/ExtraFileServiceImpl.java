@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,17 +20,19 @@ import com.cmm.service.excel.impl.ExcelSaxFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
 import com.extra.service.ExtraVO;
 
-/** SAX 결과를 VO로 변환하고 빈 셀 경고 및 타입·DB 컬럼 규격 오류를 수집한다. DB는 변경하지 않는다. */
+/** SAX 파싱·검증 결과를 반환하고, 등록 요청 시 오류 없는 행을 일괄 저장한다. */
 @Service
 public class ExtraFileServiceImpl {
     private final ExcelSaxFileParser excelFileParser;
+    private final ExtraDAO extraDAO;
     private static final String[] DATE_PATTERNS = {
         "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm",
         "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy-MM-dd", "yyyy/MM/dd"
     };
 
-    public ExtraFileServiceImpl(ExcelSaxFileParser excelFileParser) {
+    public ExtraFileServiceImpl(ExcelSaxFileParser excelFileParser, ExtraDAO extraDAO) {
         this.excelFileParser = excelFileParser;
+        this.extraDAO = extraDAO;
     }
 
     public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
@@ -57,6 +61,28 @@ public class ExtraFileServiceImpl {
         result.put("extension", file.get("extension"));
         result.put("fileSize", file.get("fileSize"));
         result.put("originalName", file.get("originalName"));
+        return result;
+    }
+
+    /** 클라이언트의 검증 결과를 신뢰하지 않고 파일을 다시 파싱한 후 오류 없는 행을 등록한다. */
+    public Map<String, Object> insertExtraExcel(List<MultipartFile> files) {
+        Map<String, Object> parsed = parseExtraExcel(files);
+        @SuppressWarnings("unchecked")
+        List<ExtraVO> dataList = (List<ExtraVO>) parsed.get("dataList");
+        @SuppressWarnings("unchecked")
+        List<ExtraVO> errorList = (List<ExtraVO>) parsed.get("errorList");
+        Set<ExtraVO> errors = new HashSet<>(errorList);
+        List<ExtraVO> items = new ArrayList<>();
+        for (ExtraVO item : dataList) {
+            if (!errors.contains(item)) items.add(item);
+        }
+        if (items.isEmpty()) throw new InvalidExtraExcelException("등록할 정상 또는 경고 행이 없습니다.");
+        int inserted = extraDAO.insertExtraList(items);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("insertedCount", inserted);
+        result.put("totalCount", parsed.get("totalCount"));
+        result.put("errorCount", parsed.get("errorCount"));
+        result.put("warningCount", parsed.get("warningCount"));
         return result;
     }
 

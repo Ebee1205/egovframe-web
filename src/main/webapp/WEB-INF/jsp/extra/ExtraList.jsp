@@ -95,7 +95,7 @@
                                             <td><c:out value="${extra.birthYear}"/></td>
                                             <td><c:out value="${extra.rentStationId}"/></td>
                                             <td><c:out value="${extra.returnStationId}"/></td>
-                                            <td><fmt:formatDate value="${extra.cDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+                                            <td><fmt:formatDate value="${extra.CDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
                                         </tr>
                                     </c:forEach>
                                 </c:otherwise>

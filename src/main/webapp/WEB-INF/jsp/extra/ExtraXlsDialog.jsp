@@ -54,7 +54,8 @@
     }
 </style>
 
-<div class="modal fade" id="extraXlsModal" tabindex="-1" aria-labelledby="extraXlsTitle" aria-hidden="true">
+<div class="modal fade" id="extraXlsModal" tabindex="-1" aria-labelledby="extraXlsTitle" aria-hidden="true"
+     data-insert-url="<c:url value='/extra/file/insert.do'/>" data-list-url="<c:url value='/extra/list.do'/>">
     <div class="modal-dialog | modal-fullscreen | modal-dialog-centered | modal-dialog-scrollable">
         <div class="modal-content">
             
@@ -127,8 +128,9 @@
             </div>
 
             <div class="modal-footer">
+                <p id="extraExcelInsertStatus" class="me-auto mb-0" role="status" aria-live="polite"></p>
                 <button type="button" class="btn btn-outline-secondary" data-coreui-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary" disabled>등록</button>
+                <button id="extraExcelInsertButton" type="button" class="btn btn-primary" disabled>등록</button>
             </div>
         </div>
     </div>
@@ -140,6 +142,10 @@
     var table = document.getElementById('extraExcelTable');
     var count = document.getElementById('extraExcelTotalCount');
     var paging = document.getElementById('extraExcelPaging');
+    var modal = document.getElementById('extraXlsModal');
+    var insertButton = document.getElementById('extraExcelInsertButton');
+    var insertStatus = document.getElementById('extraExcelInsertStatus');
+    var saving = false;
     var rows = [];
     var columns = 16;
     var pageIndex = 1;
@@ -181,7 +187,58 @@
         document.getElementById('extraExcelValidCount').textContent = total - errors - warnings;
         document.getElementById('extraExcelErrorCount').textContent = errors;
         document.getElementById('extraExcelWarningCount').textContent = warnings;
+        var eligible = total - errors;
+        insertButton.disabled = saving || eligible <= 0;
+        insertButton.textContent = eligible > 0 ? (errors > 0 ? '오류 제외 ' : '') + eligible + '건 등록' : '등록';
+        insertStatus.textContent = errors > 0 ? '오류 ' + errors + '행을 제외하고 정상·경고 행을 등록합니다.' : '';
+        insertStatus.classList.remove('text-danger');
         renderPage();
+    });
+    modal.addEventListener('hide.coreui.modal', function (event) {
+        if (saving) event.preventDefault();
+    });
+    insertButton.addEventListener('click', async function () {
+        if (saving || box.getAttribute('aria-busy') === 'true') return;
+        var content = box.getFileContent();
+        var file = box.getFile();
+        if (!file || !content || content.totalCount - content.errorCount <= 0) return;
+        var body = new FormData();
+        body.append('files', file);
+        var csrf = document.querySelector('input[name="_csrf"]');
+        if (csrf) body.append(csrf.name, csrf.value);
+        saving = true;
+        box.setProcessing(true);
+        var closeButtons = Array.from(modal.querySelectorAll('[data-coreui-dismiss="modal"]'));
+        closeButtons.forEach(function (button) { button.disabled = true; });
+        insertButton.disabled = true;
+        insertButton.textContent = '등록 중...';
+        insertStatus.textContent = '파일을 확인하고 대여이력을 등록하고 있습니다.';
+        insertStatus.classList.remove('text-danger');
+        var complete = false;
+        try {
+            var response = await fetch(modal.getAttribute('data-insert-url'), {
+                method: 'POST', credentials: 'same-origin', body: body
+            });
+            var result = await response.json();
+            if (!response.ok || !result.code || result.code.resultCode !== 'SUCCESS') {
+                throw new Error(result.code && result.code.message || '일괄 등록에 실패했습니다.');
+            }
+            complete = true;
+            insertStatus.textContent = result.data.insertedCount + '건이 등록되었습니다. 목록을 새로 조회합니다.';
+            window.location.assign(modal.getAttribute('data-list-url'));
+        } catch (error) {
+            insertStatus.textContent = error.message || '등록 결과를 확인하지 못했습니다. 목록을 확인해주세요.';
+            insertStatus.classList.add('text-danger');
+        } finally {
+            if (!complete) {
+                saving = false;
+                box.setProcessing(false);
+                closeButtons.forEach(function (button) { button.disabled = false; });
+                insertButton.disabled = false;
+                insertButton.textContent = (content.errorCount > 0 ? '오류 제외 ' : '')
+                    + (content.totalCount - content.errorCount) + '건 등록';
+            }
+        }
     });
     function renderPage() {
         var body = table.tBodies[0];
