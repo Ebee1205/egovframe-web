@@ -67,14 +67,13 @@
                                 <th scope="col">생년</th>
                                 <th scope="col">대여대여소ID</th>
                                 <th scope="col">반납대여소ID</th>
-                                <th scope="col">자전거 구분</th>
                                 <th scope="col">등록일시</th>
                             </tr>
                         </thead>
                         <tbody>
                             <c:choose>
                                 <c:when test="${empty extras}">
-                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="19">조회된 데이터가 없습니다.</td></tr>
+                                    <tr><td class="text-center | text-body-secondary | py-4" colspan="18">조회된 데이터가 없습니다.</td></tr>
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="extra" items="${extras}" varStatus="rowStatus">
@@ -96,7 +95,6 @@
                                             <td><c:out value="${extra.birthYear}"/></td>
                                             <td><c:out value="${extra.rentStationId}"/></td>
                                             <td><c:out value="${extra.returnStationId}"/></td>
-                                            <td><c:out value="${extra.bikeSeCd}"/></td>
                                             <td><fmt:formatDate value="${extra.cDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
                                         </tr>
                                     </c:forEach>

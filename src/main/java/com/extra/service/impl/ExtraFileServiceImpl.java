@@ -81,7 +81,7 @@ public class ExtraFileServiceImpl {
             boolean hasError = false;
             boolean hasWarning = false;
             
-            for (int column = 0; column < 17; column++) {
+            for (int column = 0; column < 16; column++) {
                 String value = column < values.size() ? values.get(column) : "";
                 if (value == null || value.trim().isEmpty()) {
                     hasWarning = true;
@@ -107,7 +107,6 @@ public class ExtraFileServiceImpl {
                         case 13: item.setUsrClsCd((String) convert(value, String.class)); break;
                         case 14: item.setRentStationId((String) convert(value, String.class)); break;
                         case 15: item.setReturnStationId((String) convert(value, String.class)); break;
-                        case 16: item.setBikeSeCd((String) convert(value, String.class)); break;
                         default: break;
                     }
                 } catch (IllegalArgumentException exception) {
@@ -165,7 +164,7 @@ public class ExtraFileServiceImpl {
     private static void validateCell(int column, String value) {
         int maxLength;
         switch (column) {
-            case 0: case 2: case 6: case 13: case 14: case 15: case 16:
+            case 0: case 2: case 6: case 13: case 14: case 15:
                 maxLength = 50; break;
             case 3: case 7:
                 maxLength = 200; break;

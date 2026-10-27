@@ -18,17 +18,16 @@
         <result property="birthYear" column="birth_year" jdbcType="VARCHAR"/>
         <result property="rentStationId" column="rent_station_id" jdbcType="VARCHAR"/>
         <result property="returnStationId" column="return_station_id" jdbcType="VARCHAR"/>
-        <result property="bikeSeCd" column="bike_se_cd" jdbcType="VARCHAR"/>
         <result property="cDate" column="c_date" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="extraColumns">
-        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id, bike_se_cd, c_date
+        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id, c_date
     </sql>
 
     <!-- c_date는 DB 기본값으로 입력한다. -->
     <sql id="extraInsertColumns">
-        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id, bike_se_cd
+        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id
     </sql>
 
     <insert id="insertExtra">
@@ -39,7 +38,7 @@
          #{rtnId,jdbcType=VARCHAR}, #{rtnNm,jdbcType=VARCHAR}, #{rtnHold,jdbcType=VARCHAR},
          #{useMin,jdbcType=NUMERIC}, #{useDst,jdbcType=NUMERIC}, #{usrClsCd,jdbcType=VARCHAR},
          #{sexCd,jdbcType=VARCHAR}, #{birthYear,jdbcType=VARCHAR}, #{rentStationId,jdbcType=VARCHAR},
-         #{returnStationId,jdbcType=VARCHAR}, #{bikeSeCd,jdbcType=VARCHAR})
+         #{returnStationId,jdbcType=VARCHAR})
     </insert>
 
     <insert id="insertExtraList">
@@ -51,7 +50,7 @@
              #{item.rtnId,jdbcType=VARCHAR}, #{item.rtnNm,jdbcType=VARCHAR}, #{item.rtnHold,jdbcType=VARCHAR},
              #{item.useMin,jdbcType=NUMERIC}, #{item.useDst,jdbcType=NUMERIC}, #{item.usrClsCd,jdbcType=VARCHAR},
              #{item.sexCd,jdbcType=VARCHAR}, #{item.birthYear,jdbcType=VARCHAR}, #{item.rentStationId,jdbcType=VARCHAR},
-             #{item.returnStationId,jdbcType=VARCHAR}, #{item.bikeSeCd,jdbcType=VARCHAR})
+             #{item.returnStationId,jdbcType=VARCHAR})
         </foreach>
     </insert>
 
@@ -69,7 +68,7 @@
         <include refid="extraWhere"/>
         ORDER BY rent_dt DESC NULLS LAST, bike_id, rtn_dt DESC NULLS LAST,
             rent_id, rtn_id, rent_station_id, return_station_id, rent_nm, rtn_nm,
-            rent_hold, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, bike_se_cd, c_date
+            rent_hold, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, c_date
         <if test="pageSize > 0">
             LIMIT #{pageSize} OFFSET #{firstIndex}
         </if>

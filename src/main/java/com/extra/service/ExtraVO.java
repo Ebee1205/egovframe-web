@@ -25,7 +25,6 @@ public class ExtraVO implements Serializable {
     private String birthYear; // 생년
     private String rentStationId; // 대여대여소ID
     private String returnStationId; // 반납대여소ID
-    private String bikeSeCd; // 자전거 구분
     private Date cDate; // 등록일시
 
     public String getBikeId() {
@@ -154,14 +153,6 @@ public class ExtraVO implements Serializable {
 
     public void setReturnStationId(String returnStationId) {
         this.returnStationId = returnStationId;
-    }
-
-    public String getBikeSeCd() {
-        return bikeSeCd;
-    }
-
-    public void setBikeSeCd(String bikeSeCd) {
-        this.bikeSeCd = bikeSeCd;
     }
 
     public Date getCDate() {
