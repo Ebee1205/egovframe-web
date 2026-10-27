@@ -1,6 +1,7 @@
 package com.overview.service;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class UltraSrtNcstVO implements Serializable {
 
@@ -13,6 +14,15 @@ public class UltraSrtNcstVO implements Serializable {
     private Integer ny; // 예보지점 Y 격자 좌표
     private String category; // 자료구분코드
     private String obsrValue; // 실황값 (API 원문)
+    private Date cDate; // 최초 DB 저장일시
+
+    public Date getCDate() {
+        return cDate;
+    }
+
+    public void setCDate(Date cDate) {
+        this.cDate = cDate;
+    }
 
     public String getBaseDate() {
         return baseDate;

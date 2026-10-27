@@ -6,8 +6,14 @@ import com.cmm.service.ComResponseVO;
 
 public interface UltraSrtNcstService {
 
-    // API 응답 검증 및 공통코드를 반영한 화면용 데이터 구성
-    ComResponseVO<Map<String, Object>> fetchWeatherResponse() throws Exception;
+    // 실황 누적 저장 (동일 발표분은 유지)
+    void insertUltraSrtNcst(List<UltraSrtNcstVO> items) throws Exception;
+
+    // API 응답 검증 후 저장할 실황 목록 반환 (저장은 호출부에서 수행)
+    ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes() throws Exception;
+
+    // 기본 격자의 최신 DB 자료를 공통코드와 매핑해 화면용 응답으로 반환
+    ComResponseVO<Map<String, Object>> selectUltraSrtNcst() throws Exception;
 
     // API 오류 응답도 변형 없이 반환한다.
     String fetchUltraSrtNcstJson() throws Exception;

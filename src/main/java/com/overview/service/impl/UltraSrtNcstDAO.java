@@ -8,6 +8,11 @@ import com.overview.service.UltraSrtNcstVO;
 @Repository
 public class UltraSrtNcstDAO extends EgovAbstractMapper {
 
+    public void insertUltraSrtNcst(List<UltraSrtNcstVO> items) {
+        insert("ultraSrtNcstDAO.insertUltraSrtNcst", items);
+    }
+
+    /** 신규 데이터의 c_date는 DB 현재 시각으로 입력하고 중복 갱신 시 유지한다. */
     public void upsertUltraSrtNcstList(List<UltraSrtNcstVO> items) {
         insert("ultraSrtNcstDAO.upsertUltraSrtNcstList", items);
     }

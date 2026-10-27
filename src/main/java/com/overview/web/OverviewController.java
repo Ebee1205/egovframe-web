@@ -7,10 +7,12 @@ import com.event.service.EventService;
 import com.code.service.CodeFilterVO;
 import com.code.service.CodeService;
 import com.overview.service.UltraSrtNcstService;
+import com.overview.service.UltraSrtNcstVO;
 import com.cmm.service.ComResponseVO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.Map;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,9 +54,15 @@ public class OverviewController {
     @RequestMapping(value = "/overview/weather.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> mapWeatherService() {
         try {
-            ComResponseVO<Map<String, Object>> result = ultraSrtNcstService.fetchWeatherResponse();
+            ComResponseVO<List<UltraSrtNcstVO>> fetched = ultraSrtNcstService.fetchUltraSrtNcstRes();
+            if (!"SUCCESS".equals(fetched.getCode().getResultCode())) {
+                return ResponseEntity.status(502).body(fetched.toJson());
+            }
+            ultraSrtNcstService.insertUltraSrtNcst(fetched.getData());
+            ComResponseVO<Map<String, Object>> result = ultraSrtNcstService.selectUltraSrtNcst();
             
             int status = "SUCCESS".equals(result.getCode().getResultCode()) ? 200 : 502;
+           
             return ResponseEntity.status(status).body(result.toJson());
             
         } catch (Exception ex) {
