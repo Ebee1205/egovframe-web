@@ -32,6 +32,9 @@ export function gridToLonLat(x, y) {
 export function createMapWeatherGrid(map, options = {}) {
   // ----- 선언부 ----- //
   const ol = window.ol;
+  const primaryColor = window.getComputedStyle(map.getTargetElement())
+    .getPropertyValue('--cui-primary').trim() || '#5856d6';
+  const primaryRgb = ol.color.asArray(primaryColor).slice(0, 3);
   const view = map.getView();
   const projection = view.getProjection();
   const selected = new ol.Feature();
@@ -43,22 +46,22 @@ export function createMapWeatherGrid(map, options = {}) {
   // ----- 격자 스타일 생성 ----- //
   const lineStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({
-      color: 'rgba(0, 100, 180, 0.55)',
+      color: [...primaryRgb, 0.55],
       width: 1,
     }),
   });
   const centerStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({
-      color: '#0077cc',
+      color: primaryColor,
       width: 2,
     }),
     fill: new ol.style.Fill({
-      color: 'rgba(0, 119, 204, 0.14)',
+      color: [...primaryRgb, 0.14],
     }),
     text: new ol.style.Text({
       font: 'bold 13px sans-serif',
       fill: new ol.style.Fill({
-        color: '#005a9c',
+        color: primaryColor,
       }),
       stroke: new ol.style.Stroke({
         color: '#fff',

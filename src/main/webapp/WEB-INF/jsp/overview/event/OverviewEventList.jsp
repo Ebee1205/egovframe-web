@@ -4,7 +4,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <section class="p-2 | overview-events" aria-labelledby="serviceEventHeading" data-viewport-events>
-    <header class="d-flex | p-2 | align-items-start | justify-content-between | gap-2 | mb-4">
+    <header class="d-flex | p-2 | align-items-start | justify-content-between | gap-2">
         <div>
             <h2 id="serviceEventHeading" class="h5 | fw-semibold | mb-1">주변</h2>
             <p class="text-body-secondary | small | mb-0">최신순</p>
@@ -12,7 +12,6 @@
     </header>
 
     <c:choose>
-    
         <c:when test="${empty events}">
             <div class="card | border-0 | bg-transparent | text-center">
                 <div class="card-body | py-5">

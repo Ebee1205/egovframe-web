@@ -15,7 +15,6 @@
     
     
     <div id="overviewSearchEvents" hidden></div>
-    <p id="overviewSearchStatus" class="p-2 | text-body-secondary | small" role="status" aria-live="polite" hidden></p>
     <button id="overviewSearchRetry" type="button" class="btn btn-outline-secondary | m-2" hidden>다시 불러오기</button>
 </div>
 
@@ -27,7 +26,6 @@
   const searchInput = document.getElementById('overviewEventTitle');
   const recentEvents = document.getElementById('overviewRecentEvents');
   const searchEvents = document.getElementById('overviewSearchEvents');
-  const searchStatus = document.getElementById('overviewSearchStatus');
   const retryButton = document.getElementById('overviewSearchRetry');
   
   const mapMetaKey = '__openlayers_tile_meta_data';
@@ -53,17 +51,9 @@
   retryButton.addEventListener('click', handleRetryClick);
   document.addEventListener('overview:bounds-changed', refreshBounds);
 
-  // 지도가 실제 초기 영역을 전달한 뒤 조회한다.
-  showStatus('지도 영역을 확인하고 있습니다.');
-
   // ----- 함수 정의 ----- //
   function notifyListChange() {
     document.dispatchEvent(new Event('overview:events-changed'));
-  }
-
-  function showStatus(message) {
-    searchStatus.hidden = false;
-    searchStatus.textContent = message;
   }
 
   function readBounds() {
@@ -122,7 +112,6 @@
     retryButton.hidden = true;
 
     if (!searchTitle && !bounds) {
-      showStatus('지도 영역을 확인하고 있습니다.');
       return;
     }
 
@@ -135,7 +124,6 @@
     requestController = controller;
     requestedBounds = bounds;
     target.setAttribute('aria-busy', 'true');
-    showStatus('이벤트를 불러오는 중입니다.');
 
     try {
       const response = await fetch(url, {
@@ -158,12 +146,10 @@
       target.replaceChildren(section);
       if (!searchTitle) loadedBounds = bounds;
 
-      searchStatus.hidden = true;
       notifyListChange();
     } catch (error) {
       if (currentRevision !== requestRevision || error.name === 'AbortError') return;
 
-      showStatus('이벤트를 불러오지 못했습니다. 다시 시도해 주세요.');
       retryButton.hidden = false;
     } finally {
       if (currentRevision === requestRevision) {

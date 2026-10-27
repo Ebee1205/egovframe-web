@@ -6,6 +6,8 @@ export function createMapDraw(map, options = {}) {
 
   // ----- 선언부----- //
   const ol = window.ol;
+  const primaryColor = window.getComputedStyle(map.getTargetElement())
+    .getPropertyValue('--cui-primary').trim() || '#5856d6';
   const toolbar = options.toolbar;
   const status = options.status;
   const projection = map.getView().getProjection();
@@ -28,17 +30,17 @@ export function createMapDraw(map, options = {}) {
       msg: '지도를 드래그해 이동하세요.'
     },
     LineString: {
-      color: '#F10000',
+      color: primaryColor,
       label: '거리',
       msg: '지점을 차례로 클릭하고 더블클릭으로 거리 측정을 마칩니다.'
     },
     Polygon: {
-      color: '#4C50E8',
+      color: primaryColor,
       label: '면적',
       msg: '꼭짓점을 클릭하고 시작점 클릭 또는 더블클릭으로 면적 측정을 마칩니다.'
     },
     Circle: {
-      color: '#FF4DEC',
+      color: primaryColor,
       label: '반경',
       msg: '중심점을 클릭한 뒤 반경 끝점을 클릭하세요.'
     },
@@ -282,7 +284,7 @@ export function createMapDraw(map, options = {}) {
       const color = tools[type].color;
       shapeStyles[type] = new ol.style.Style({
         fill: new ol.style.Fill({
-          color: color + '26'
+          color: [...ol.color.asArray(color).slice(0, 3), 0.15]
         }),
         stroke: new ol.style.Stroke({
           color,

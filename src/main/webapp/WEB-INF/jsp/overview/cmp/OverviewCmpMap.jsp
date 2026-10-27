@@ -61,10 +61,10 @@
     </div>
 </div>
 <script type="module">
-import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js?v=20261027-grid2"/>';
+import { mapMeta, MAP_TYPE } from '<c:url value="/resources/js/MapMeta.js?v=20261027-primary1"/>';
 import { createMapMarker } from '<c:url value="/resources/js/MapMarker.js"/>';
-import { createMapDraw } from '<c:url value="/resources/js/MapDraw.js?v=20261027-toolbox1"/>';
-import { createMapWeatherGrid } from '<c:url value="/resources/js/MapWeatherGrid.js?v=20261027-grid2"/>';
+import { createMapDraw } from '<c:url value="/resources/js/MapDraw.js?v=20261027-primary1"/>';
+import { createMapWeatherGrid } from '<c:url value="/resources/js/MapWeatherGrid.js?v=20261027-primary1"/>';
 
 // ----- 지도 설정 ----- //
 const meta = mapMeta.get();

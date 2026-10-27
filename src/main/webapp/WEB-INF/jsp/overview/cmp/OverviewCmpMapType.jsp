@@ -26,7 +26,7 @@
     border-right: 0;
 }
 .map-type-control button.active {
-    background: #127ab7;
+    background: var(--cui-primary);
     color: #fff;
 }
 </style>

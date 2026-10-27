@@ -1,4 +1,4 @@
-import { lonLatToGrid } from './MapWeatherGrid.js?v=20261027-grid2';
+import { lonLatToGrid } from './MapWeatherGrid.js?v=20261027-primary1';
 
 const MAP_META_KEY = '__openlayers_tile_meta_data';
 export const VWORLD_API_KEY =

@@ -56,9 +56,9 @@
 .map-draw-tools .map-tool-button:last-child { border-bottom: 0; border-radius: 0 0 4px 4px; }
 .map-draw-tools .map-tool-button .mdi { font-size: 20px; line-height: 1; }
 .map-draw-tools .map-tool-label { font-size: 10px; line-height: 1.2; }
-.map-draw-tools .map-tool-button:hover { background: #f1f7fc; }
-.map-draw-tools .map-tool-button[aria-pressed="true"] { background: #127ab7; color: #fff; }
-.map-draw-tools .map-tool-button:focus-visible { outline: 2px solid #127ab7; outline-offset: 2px; z-index: 1; }
+.map-draw-tools .map-tool-button:hover { background: rgba(var(--cui-primary-rgb), .08); }
+.map-draw-tools .map-tool-button[aria-pressed="true"] { background: var(--cui-primary); color: #fff; }
+.map-draw-tools .map-tool-button:focus-visible { outline: 2px solid var(--cui-primary); outline-offset: 2px; z-index: 1; }
 .map-draw-tools .map-tool-clear { color: #d34a43; }
 .map-draw-tools .map-tool-chip {
     position: absolute;
