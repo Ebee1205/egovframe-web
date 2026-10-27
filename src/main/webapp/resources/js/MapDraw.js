@@ -22,7 +22,6 @@ export function createMapDraw(map, options = {}) {
   let disposed = false;
   const buttons = toolbar ? Array.from(toolbar.querySelectorAll('[data-draw-mode]')) : [];
   const clearButton = toolbar && toolbar.querySelector('[data-draw-clear]');
-  const segmentInput = toolbar && toolbar.querySelector('[data-draw-segments]');
   const tools = {
     None: {
       cursor: 'grab',
@@ -80,9 +79,6 @@ export function createMapDraw(map, options = {}) {
   }
   if (clearButton) {
     clearButton.addEventListener('click', clear);
-  }
-  if (segmentInput) {
-    segmentInput.addEventListener('change', refreshSegments);
   }
 
   const container = options.keyboardTarget || map.getTargetElement();
@@ -177,7 +173,7 @@ export function createMapDraw(map, options = {}) {
         break;
     }
 
-    if (line && segmentInput && segmentInput.checked) {
+    if (line) {
       line.forEachSegment(function (a, b) {
         const segment = new ol.geom.LineString([a, b]);
         styles.push(label(new ol.geom.Point(segment.getCoordinateAt(0.5)), lengthText(ol.sphere.getLength(segment, metricOptions)), color, true));
@@ -259,13 +255,6 @@ export function createMapDraw(map, options = {}) {
     toggleMode(button.dataset.drawMode);
   }
 
-  function refreshSegments() {
-    layer.changed();
-    if (draw) {
-      draw.getOverlay().changed();
-    }
-  }
-
   function handleKey(event) {
     if (event.key !== 'Escape' || mode === 'None' || /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable) {
       return;
@@ -337,9 +326,6 @@ export function createMapDraw(map, options = {}) {
     }
     if (clearButton) {
       clearButton.removeEventListener('click', clear);
-    }
-    if (segmentInput) {
-      segmentInput.removeEventListener('change', refreshSegments);
     }
     container.removeEventListener('keydown', handleKey);
   }
