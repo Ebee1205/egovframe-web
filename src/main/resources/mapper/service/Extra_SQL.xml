@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="extraDAO">
+    <resultMap id="extraResultMap" type="com.extra.service.ExtraVO">
+        <result property="bikeId" column="bike_id" jdbcType="VARCHAR"/>
+        <result property="rentDt" column="rent_dt" jdbcType="TIMESTAMP"/>
+        <result property="rentId" column="rent_id" jdbcType="VARCHAR"/>
+        <result property="rentNm" column="rent_nm" jdbcType="VARCHAR"/>
+        <result property="rentHold" column="rent_hold" jdbcType="VARCHAR"/>
+        <result property="rtnDt" column="rtn_dt" jdbcType="TIMESTAMP"/>
+        <result property="rtnId" column="rtn_id" jdbcType="VARCHAR"/>
+        <result property="rtnNm" column="rtn_nm" jdbcType="VARCHAR"/>
+        <result property="rtnHold" column="rtn_hold" jdbcType="VARCHAR"/>
+        <result property="useMin" column="use_min" jdbcType="NUMERIC"/>
+        <result property="useDst" column="use_dst" jdbcType="NUMERIC"/>
+        <result property="usrClsCd" column="usr_cls_cd" jdbcType="VARCHAR"/>
+        <result property="sexCd" column="sex_cd" jdbcType="VARCHAR"/>
+        <result property="birthYear" column="birth_year" jdbcType="VARCHAR"/>
+        <result property="rentStationId" column="rent_station_id" jdbcType="VARCHAR"/>
+        <result property="returnStationId" column="return_station_id" jdbcType="VARCHAR"/>
+        <result property="bikeSeCd" column="bike_se_cd" jdbcType="VARCHAR"/>
+        <result property="cDate" column="c_date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="extraColumns">
+        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id, bike_se_cd, c_date
+    </sql>
+
+    <!-- c_date는 DB 기본값으로 입력한다. -->
+    <sql id="extraInsertColumns">
+        bike_id, rent_dt, rent_id, rent_nm, rent_hold, rtn_dt, rtn_id, rtn_nm, rtn_hold, use_min, use_dst, usr_cls_cd, sex_cd, birth_year, rent_station_id, return_station_id, bike_se_cd
+    </sql>
+
+    <insert id="insertExtra">
+        INSERT INTO public.tb_extra (<include refid="extraInsertColumns"/>)
+        VALUES
+        (#{bikeId,jdbcType=VARCHAR}, #{rentDt,jdbcType=TIMESTAMP}, #{rentId,jdbcType=VARCHAR},
+         #{rentNm,jdbcType=VARCHAR}, #{rentHold,jdbcType=VARCHAR}, #{rtnDt,jdbcType=TIMESTAMP},
+         #{rtnId,jdbcType=VARCHAR}, #{rtnNm,jdbcType=VARCHAR}, #{rtnHold,jdbcType=VARCHAR},
+         #{useMin,jdbcType=NUMERIC}, #{useDst,jdbcType=NUMERIC}, #{usrClsCd,jdbcType=VARCHAR},
+         #{sexCd,jdbcType=VARCHAR}, #{birthYear,jdbcType=VARCHAR}, #{rentStationId,jdbcType=VARCHAR},
+         #{returnStationId,jdbcType=VARCHAR}, #{bikeSeCd,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="insertExtraList">
+        INSERT INTO public.tb_extra (<include refid="extraInsertColumns"/>)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.bikeId,jdbcType=VARCHAR}, #{item.rentDt,jdbcType=TIMESTAMP}, #{item.rentId,jdbcType=VARCHAR},
+             #{item.rentNm,jdbcType=VARCHAR}, #{item.rentHold,jdbcType=VARCHAR}, #{item.rtnDt,jdbcType=TIMESTAMP},
+             #{item.rtnId,jdbcType=VARCHAR}, #{item.rtnNm,jdbcType=VARCHAR}, #{item.rtnHold,jdbcType=VARCHAR},
+             #{item.useMin,jdbcType=NUMERIC}, #{item.useDst,jdbcType=NUMERIC}, #{item.usrClsCd,jdbcType=VARCHAR},
+             #{item.sexCd,jdbcType=VARCHAR}, #{item.birthYear,jdbcType=VARCHAR}, #{item.rentStationId,jdbcType=VARCHAR},
+             #{item.returnStationId,jdbcType=VARCHAR}, #{item.bikeSeCd,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <sql id="extraWhere">
+        <where>
+            <if test="bikeId != null and bikeId != ''">AND bike_id = #{bikeId}</if>
+            <if test="rentId != null and rentId != ''">AND rent_id = #{rentId}</if>
+            <if test="rtnId != null and rtnId != ''">AND rtn_id = #{rtnId}</if>
+        </where>
+    </sql>
+
+    <select id="selectExtraList" parameterType="com.extra.service.ExtraVO" resultMap="extraResultMap">
+        SELECT <include refid="extraColumns"/>
+        FROM public.tb_extra
+        <include refid="extraWhere"/>
+        ORDER BY rent_dt DESC NULLS LAST, bike_id, rtn_dt DESC NULLS LAST
+    </select>
+
+    <select id="selectExtraListCnt" parameterType="com.extra.service.ExtraVO" resultType="long">
+        SELECT COUNT(*) FROM public.tb_extra
+        <include refid="extraWhere"/>
+    </select>
+</mapper>
