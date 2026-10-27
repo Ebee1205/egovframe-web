@@ -2,6 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <style>
+    #extraXlsModal .extra-excel-valid {
+        color: #6610f2;
+    }
+    #extraXlsModal .extra-excel-error {
+        color: #dc3545;
+    }
+    #extraXlsModal .extra-excel-warning {
+        color: #fd7e14;
+    }
     #extraXlsModal .modal-content {
         height: 100%;
     }
@@ -69,9 +78,9 @@
                 <div class="table-info | d-flex | justify-content-between | align-items-center | flex-wrap | gap-2">
                     <div class="d-flex | align-items-center | flex-wrap | gap-3">
                         <p class="table-info-text | mb-0">총 <span id="extraExcelTotalCount">0</span>건</p>
-                        <p class="table-info-text | mb-0">정상 <span id="extraExcelValidCount">0</span>건</p>
-                        <p class="table-info-text | mb-0">오류 <span id="extraExcelErrorCount">0</span>건</p>
-                        <p class="table-info-text | mb-0">경고 <span id="extraExcelWarningCount">0</span>건</p>
+                        <p class="table-info-text | mb-0">정상 <span id="extraExcelValidCount" class="extra-excel-valid">0</span>건</p>
+                        <p class="table-info-text | mb-0">오류 <span id="extraExcelErrorCount" class="extra-excel-error">0</span>건</p>
+                        <p class="table-info-text | mb-0">경고 <span id="extraExcelWarningCount" class="extra-excel-warning">0</span>건</p>
                     </div>
                     <a href="<c:url value='/extra/file/err/download.do'/>" class="ms-auto | flex-shrink-0 | btn | btn-sm | btn-outline-secondary">
                         오류 목록 다운로드
@@ -151,7 +160,15 @@
         rows = [];
         pageIndex = 1;
         (content ? content.dataList : []).forEach(function (item, index) {
-            rows.push({rowNumber: index + 1, cells: fields.map(function (field) { return cellText(item, field); })});
+            rows.push({rowNumber: index + 1, cells: fields.map(function (field) { return cellText(item, field); }), issues: []});
+        });
+        (content && content.cellIssues || []).forEach(function (issue) {
+            var row = rows[issue.rowIndex];
+            if (row && issue.columnIndex >= 0 && issue.columnIndex < columns) {
+                row.issues[issue.columnIndex] = issue;
+                // 변환 실패로 VO에 null이 들어간 셀도 원본 입력값을 보여준다.
+                row.cells[issue.columnIndex] = issue.value == null ? '' : issue.value;
+            }
         });
         var total = content ? content.totalCount : 0;
         var errors = content ? content.errorCount : 0;
@@ -175,6 +192,14 @@
                 for (var index = 0; index < columns; index++) {
                     var cell = document.createElement('td');
                     cell.textContent = row.cells[index] == null ? '' : row.cells[index];
+                    var issue = row.issues[index];
+                    if (issue) {
+                        var isError = issue.status === 'ERROR';
+                        cell.className = isError ? 'extra-excel-error' : 'extra-excel-warning';
+                        cell.title = issue.message;
+                        cell.setAttribute('aria-label', (cell.textContent || '빈 값') + ' / '
+                            + (isError ? '오류: ' : '경고: ') + issue.message);
+                    }
                     tr.appendChild(cell);
                 }
                 body.appendChild(tr);

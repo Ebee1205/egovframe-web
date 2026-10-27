@@ -34,19 +34,23 @@ public class ExtraFileServiceImpl {
     public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
         if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
         Map<String, Object> file = excelFileParser.parse(files, null).get(0);
+        
         @SuppressWarnings("unchecked")
         Map<String, Object> content = (Map<String, Object>) file.get("fileContent");
+        
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> sheets = (List<Map<String, Object>>) content.get("sheets");
         List<ExtraVO> dataList = new ArrayList<>();
         List<ExtraVO> errorList = new ArrayList<>();
         List<ExtraVO> warningList = new ArrayList<>();
-        for (Map<String, Object> sheet : sheets) parseSheet(sheet, dataList, errorList, warningList);
+        List<Map<String, Object>> cellIssues = new ArrayList<>();
+        for (Map<String, Object> sheet : sheets) parseSheet(sheet, dataList, errorList, warningList, cellIssues);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("dataList", dataList);
         result.put("errorList", errorList);
         result.put("warningList", warningList);
+        result.put("cellIssues", cellIssues);
         result.put("errorCount", errorList.size());
         result.put("warningCount", warningList.size());
         result.put("totalCount", dataList.size());
@@ -62,7 +66,7 @@ public class ExtraFileServiceImpl {
     }
 
     private void parseSheet(Map<String, Object> sheet, List<ExtraVO> dataList,
-            List<ExtraVO> errorList, List<ExtraVO> warningList) {
+            List<ExtraVO> errorList, List<ExtraVO> warningList, List<Map<String, Object>> cellIssues) {
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> rows = (List<Map<String, Object>>) sheet.get("rows");
         if (rows.isEmpty()) return;
@@ -76,10 +80,12 @@ public class ExtraFileServiceImpl {
 
             boolean hasError = false;
             boolean hasWarning = false;
+            
             for (int column = 0; column < 17; column++) {
                 String value = column < values.size() ? values.get(column) : "";
                 if (value == null || value.trim().isEmpty()) {
                     hasWarning = true;
+                    cellIssues.add(cellIssue(dataList.size(), column, "WARNING", value, "비어 있는 셀입니다."));
                     continue;
                 }
                 try {
@@ -106,6 +112,7 @@ public class ExtraFileServiceImpl {
                     }
                 } catch (IllegalArgumentException exception) {
                     hasError = true;
+                    cellIssues.add(cellIssue(dataList.size(), column, "ERROR", value, exception.getMessage()));
                 }
             }
             // 전체 행을 유지하고, 오류가 있는 행은 경고 목록에 중복으로 넣지 않는다.
@@ -118,6 +125,18 @@ public class ExtraFileServiceImpl {
     @SuppressWarnings("unchecked")
     private static List<String> cells(Map<String, Object> row) {
         return (List<String>) row.get("cells");
+    }
+
+    /** 행·열 인덱스는 0부터 시작하며, 행은 전체 dataList 기준이다. */
+    private static Map<String, Object> cellIssue(int rowIndex, int columnIndex, String status,
+            String value, String message) {
+        Map<String, Object> issue = new LinkedHashMap<>();
+        issue.put("rowIndex", rowIndex);
+        issue.put("columnIndex", columnIndex);
+        issue.put("status", status);
+        issue.put("value", value);
+        issue.put("message", message);
+        return issue;
     }
 
     private static Object convert(String value, Class<?> type) {
