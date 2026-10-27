@@ -65,6 +65,11 @@
         </div>
 
     </div>
+    
+    
+    <div class="map-bottom-left">
+    	<jsp:include page="/WEB-INF/jsp/overview/cmp/OverviewCmpRtHud.jsp" />
+    </div>
 
 </div>
 <script type="module">
@@ -159,6 +164,7 @@ zoomSlider.value = view.getZoom();
 zoomSlider.addEventListener('input', (event) => setZoom(event.target.value));
 zoomInButton.addEventListener('click', () => zoomBy(1));
 zoomOutButton.addEventListener('click', () => zoomBy(-1));
+
 view.on('change:resolution', () => {
   zoomSlider.value = view.getZoom();
 });

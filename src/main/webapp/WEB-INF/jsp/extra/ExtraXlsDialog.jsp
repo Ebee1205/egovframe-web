@@ -35,7 +35,7 @@
                 </div>
 
                 <!-- 테이블 본문 -->
-                <div class="table-responsive">
+                <div class="table-responsive extra-excel-scroll" tabindex="0" role="region" aria-label="엑셀 데이터 스크롤 영역">
                     <table id="extraExcelTable" class="table | table-hover | table-bordered | align-middle">
                         <thead class="table-light | text-center">
                             <tr>
@@ -48,6 +48,10 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- 테이블 페이징 -->
+                <nav id="extraExcelPaging" aria-label="엑셀 파싱 결과 페이징" hidden>
+                    <ul class="pagination | justify-content-center"></ul>
+                </nav>
             </div>
 
             <div class="modal-footer">
@@ -63,6 +67,12 @@
     var box = document.getElementById('extraExcelAttachment');
     var table = document.getElementById('extraExcelTable');
     var count = document.getElementById('extraExcelTotalCount');
+    var paging = document.getElementById('extraExcelPaging');
+    var rows = [];
+    var columns = 0;
+    var pageIndex = 1;
+    var pageSize = 20;
+    var pageCount = 10;
     function columnName(index) {
         var name = '';
         for (index++; index > 0; index = Math.floor((index - 1) / 26)) {
@@ -73,13 +83,16 @@
     box.addEventListener('file-input-box:change', function (event) {
         var content = event.detail.fileContent;
         var sheets = content ? content.sheets : [];
-        var columns = 0;
-        var total = 0;
+        columns = 0;
+        rows = [];
+        pageIndex = 1;
         sheets.forEach(function (sheet) {
-            total += sheet.rows.length;
-            sheet.rows.forEach(function (row) { columns = Math.max(columns, row.cells.length); });
+            sheet.rows.forEach(function (row) {
+                columns = Math.max(columns, row.cells.length);
+                rows.push({sheetName: sheet.sheetName, rowNumber: row.rowNumber, cells: row.cells});
+            });
         });
-        count.textContent = total;
+        count.textContent = rows.length;
         var header = table.tHead.rows[0];
         while (header.cells.length > 2) header.deleteCell(2);
         for (var column = 0; column < columns; column++) {
@@ -88,13 +101,16 @@
             th.textContent = columnName(column);
             header.appendChild(th);
         }
+        renderPage();
+    });
+    function renderPage() {
         var body = table.tBodies[0];
         body.textContent = '';
-        sheets.forEach(function (sheet) {
-            sheet.rows.forEach(function (row) {
+        var start = (pageIndex - 1) * pageSize;
+        rows.slice(start, start + pageSize).forEach(function (row) {
                 var tr = document.createElement('tr');
                 var name = document.createElement('td');
-                name.textContent = sheet.sheetName;
+                name.textContent = row.sheetName;
                 tr.appendChild(name);
                 var number = document.createElement('td');
                 number.className = 'text-center';
@@ -107,14 +123,42 @@
                     tr.appendChild(cell);
                 }
                 body.appendChild(tr);
-            });
         });
-        if (!total) {
+        if (!rows.length) {
             var empty = body.insertRow().insertCell();
             empty.className = 'text-center | text-body-secondary | py-4';
             empty.colSpan = columns + 2;
             empty.textContent = '조회된 데이터가 없습니다.';
         }
-    });
+        var totalPage = Math.ceil(rows.length / pageSize);
+        var list = paging.querySelector('ul');
+        list.textContent = '';
+        paging.hidden = totalPage <= 1;
+        var first = Math.floor((pageIndex - 1) / pageCount) * pageCount + 1;
+        var last = Math.min(first + pageCount - 1, totalPage);
+        function addPage(label, page, active) {
+            var item = document.createElement('li');
+            item.className = 'page-item' + (active ? ' active' : '');
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'page-link';
+            button.textContent = label;
+            if (active) button.setAttribute('aria-current', 'page');
+            button.addEventListener('click', function () {
+                pageIndex = page;
+                renderPage();
+                var current = paging.querySelector('[aria-current="page"]');
+                if (current) current.focus({preventScroll: true});
+                table.parentElement.scrollTop = 0;
+            });
+            item.appendChild(button);
+            list.appendChild(item);
+        }
+        if (first > 1) addPage('처음', 1, false);
+        if (first > 1) addPage('이전', first - 1, false);
+        for (var page = first; page <= last; page++) addPage(String(page), page, page === pageIndex);
+        if (last < totalPage) addPage('다음', last + 1, false);
+        if (last < totalPage) addPage('마지막', totalPage, false);
+    }
 })();
 </script>

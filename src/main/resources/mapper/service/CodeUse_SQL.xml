@@ -9,11 +9,12 @@
 		<result property="parentName" column="p_name"/>
 		<result property="code" column="code"/>
 		<result property="name" column="name"/>
+        <result property="dsc" column="dsc"/>
 	</resultMap>
 
 	<!-- parentCode(예: STORE_CTG_ROOT)를 기준으로 그 하위 코드 전체를 조회 -->
 	<select id="selectCmmCodeDetail" parameterType="CodeFilterVO" resultMap="codeFilterResultMap">
-		SELECT c.cid, c.p_cid, c.code, c.name,
+		SELECT c.cid, c.p_cid, c.code, c.name, c.dsc,
 			p.code AS p_code, p.name AS p_name
 		FROM tb_cmn_code c
 		JOIN tb_cmn_code p ON p.cid = c.p_cid

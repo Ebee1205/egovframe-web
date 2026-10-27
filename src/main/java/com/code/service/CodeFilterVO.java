@@ -13,6 +13,15 @@ public class CodeFilterVO implements Serializable {
 	private String parentName; // 상위 코드명
 	private String code; // 코드
 	private String name; // 코드명
+    private String dsc; // 코드 설명 (강수형태 하위 코드에서는 이모티콘)
+
+    public String getDsc() {
+        return dsc;
+    }
+
+    public void setDsc(String dsc) {
+        this.dsc = dsc;
+    }
 	private String haveFilter; // 상세 조건 여부
 	private String filter = ""; // 상세조건
 

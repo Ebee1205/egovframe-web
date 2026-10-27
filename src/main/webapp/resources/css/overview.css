@@ -144,9 +144,17 @@
     line-height: inherit;
     overflow-wrap: anywhere;
 }
+.overview-map-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+}
 .overview-weather-hud {
     position: absolute;
-    right: 80px;
+    left: 16px;
     top: 16px;
     z-index: 10;
     width: 260px;

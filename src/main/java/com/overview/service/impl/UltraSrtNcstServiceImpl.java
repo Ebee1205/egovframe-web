@@ -2,6 +2,12 @@ package com.overview.service.impl;
 
 import java.io.StringReader;
 import java.net.URI;
+import java.math.BigDecimal;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import com.cmm.service.ComResponseVO;
+import com.code.service.CodeService;
+import com.code.service.CodeFilterVO;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,18 +36,20 @@ import com.overview.service.UltraSrtNcstVO;
 public class UltraSrtNcstServiceImpl implements UltraSrtNcstService {
 
     private final UltraSrtNcstDAO dao;
+    private final CodeService codeService;
     private final String serviceKey;
     private final String endpoint;
     private final int defaultNx;
     private final int defaultNy;
     private final RestTemplate restTemplate;
 
-    public UltraSrtNcstServiceImpl(UltraSrtNcstDAO dao,
+    public UltraSrtNcstServiceImpl(UltraSrtNcstDAO dao, CodeService codeService,
             @Value("${Globals.dataGo.serviceKey}") String serviceKey,
             @Value("${Globals.dataGo.Endpoint}") String endpoint,
             @Value("${Globals.dataGo.nx:57}") int defaultNx,
             @Value("${Globals.dataGo.ny:127}") int defaultNy) {
         this.dao = dao;
+        this.codeService = codeService;
         this.serviceKey = serviceKey;
         this.endpoint = endpoint;
         this.defaultNx = defaultNx;
@@ -50,6 +58,100 @@ public class UltraSrtNcstServiceImpl implements UltraSrtNcstService {
         factory.setConnectTimeout(5000);
         factory.setReadTimeout(10000);
         this.restTemplate = new RestTemplate(factory);
+    }
+
+    @Override
+    public ComResponseVO<Map<String, Object>> fetchWeatherResponse() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+        	
+            // API응답 가져오기
+            Map<?, ?> root = jsonb.fromJson(fetchUltraSrtNcstJson(), Map.class);
+            Map<?, ?> response = (Map<?, ?>) root.get("response");
+            Map<?, ?> header = (Map<?, ?>) response.get("header");
+            String resultCode = (String) header.get("resultCode");
+            String resultMsg = (String) header.get("resultMsg");
+            if (resultCode == null || resultMsg == null) {
+                throw new IllegalStateException("기상청 API 응답 헤더 누락");
+            }
+            if (!"00".equals(resultCode)) {
+                return ComResponseVO.fail(resultCode, resultMsg);
+            }
+
+            Map<?, ?> body = (Map<?, ?>) response.get("body");
+            Map<?, ?> items = (Map<?, ?>) body.get("items");
+            UltraSrtNcstVO[] observations = jsonb.fromJson(jsonb.toJson(items.get("item")), UltraSrtNcstVO[].class);
+            UltraSrtNcstVO first = observations != null && observations.length > 0 ? observations[0] : null;
+            List<Map<String, Object>> values = new ArrayList<>();
+
+            if (first != null) {
+                // 공통코드 맵핑
+                Map<String, String> categoryNames = weatherCodeNames("NCST_CTG_ROOT");
+                Map<String, String> units = weatherCodeNames("NCST_UNT_ROOT");
+                Map<String, String> descriptions = weatherCodeNames("NCST_DSC_ROOT");
+                CodeFilterVO precipitationFilter = new CodeFilterVO();
+                precipitationFilter.setParentCode("NCST_CTG_PTY");
+                Map<String, CodeFilterVO> precipitationCodes = new LinkedHashMap<>();
+                for (CodeFilterVO code : codeService.selectCmmCodeDetail(precipitationFilter)) {
+                    precipitationCodes.put(code.getCode(), code);
+                }
+
+                for (UltraSrtNcstVO observation : observations) {
+                    if (!java.util.Objects.equals(first.getBaseDate(), observation.getBaseDate())
+                            || !java.util.Objects.equals(first.getBaseTime(), observation.getBaseTime())
+                            || !java.util.Objects.equals(first.getNx(), observation.getNx())
+                            || !java.util.Objects.equals(first.getNy(), observation.getNy())) {
+                        throw new IllegalStateException("실황 자료의 발표일시 또는 격자가 일치하지 않습니다.");
+                    }
+
+                    // 하위 항목 공통코드~~
+                    String category = observation.getCategory();
+                    BigDecimal obsrValue = observation.getObsrValue() == null
+                            ? null : new BigDecimal(observation.getObsrValue());
+                    String categoryName = categoryNames.getOrDefault("NCST_CTG_" + category, category);
+                    String unit = units.getOrDefault("NCST_UNT_" + category, "");
+                    String description = descriptions.getOrDefault("NCST_DSC_" + category, "");
+                    CodeFilterVO precipitation = null;
+                    if ("PTY".equals(category) && obsrValue != null) {
+                        String suffix = obsrValue.stripTrailingZeros().toPlainString();
+                        precipitation = precipitationCodes.get("NCST_CTG_PTY_" + suffix);
+                    }
+
+                    // item 하위 응답 필드
+                    Map<String, Object> value = new LinkedHashMap<>();
+                    value.put("category", category);
+                    value.put("obsrValue", obsrValue);
+                    value.put("categoryName", categoryName);
+                    value.put("unit", unit);
+                    value.put("description", description);
+                    if (precipitation != null) {
+                        value.put("valueName", precipitation.getName());
+                        value.put("emoji", precipitation.getDsc());
+                    }
+                    values.add(value);
+                }
+            }
+            
+            // data 필드
+            Map<String, Object> data = new LinkedHashMap<>();
+            if (first != null) {
+                data.put("baseDate", first.getBaseDate());
+                data.put("baseTime", first.getBaseTime());
+                data.put("nx", first.getNx());
+                data.put("ny", first.getNy());
+            }
+            data.put("items", values);
+            return ComResponseVO.success(data, resultMsg);
+        }
+    }
+
+    private Map<String, String> weatherCodeNames(String parentCode) throws Exception {
+        CodeFilterVO filter = new CodeFilterVO();
+        filter.setParentCode(parentCode);
+        Map<String, String> names = new LinkedHashMap<>();
+        for (CodeFilterVO code : codeService.selectCmmCodeDetail(filter)) {
+            names.put(code.getCode(), code.getName());
+        }
+        return names;
     }
 
     @Override

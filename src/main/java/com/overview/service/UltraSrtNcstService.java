@@ -1,8 +1,13 @@
 package com.overview.service;
 
 import java.util.List;
+import java.util.Map;
+import com.cmm.service.ComResponseVO;
 
 public interface UltraSrtNcstService {
+
+    // API 응답 검증 및 공통코드를 반영한 화면용 데이터 구성
+    ComResponseVO<Map<String, Object>> fetchWeatherResponse() throws Exception;
 
     // API 오류 응답도 변형 없이 반환한다.
     String fetchUltraSrtNcstJson() throws Exception;

@@ -61,4 +61,5 @@ public class UltraSrtNcstVO implements Serializable {
     public void setObsrValue(String obsrValue) {
         this.obsrValue = obsrValue;
     }
+
 }
