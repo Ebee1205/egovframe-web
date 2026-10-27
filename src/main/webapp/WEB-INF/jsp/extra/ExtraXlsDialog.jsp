@@ -33,16 +33,11 @@
         width: max-content;
         min-width: 100%;
         table-layout: auto;
-        border-collapse: separate;
-        border-spacing: 0;
     }
     #extraExcelTable thead {
         position: sticky;
         top: 0;
         z-index: 1;
-    }
-    #extraExcelTable thead th {
-        background-color: var(--cui-tertiary-bg, #f3f4f7);
     }
 </style>
 
@@ -86,9 +81,9 @@
                 <!-- 테이블 본문 -->
                 <div class="table-responsive extra-excel-scroll" tabindex="0" role="region" aria-label="엑셀 데이터 스크롤 영역">
                     <table id="extraExcelTable" class="table | table-hover | table-bordered | align-middle">
-                        <thead class="table-light | text-center">
+                        <thead class="table-light | text-center | text-nowrap">
                             <tr>
-                                <th scope="col" style="width: 45px;">NO</th>
+                                <th scope="col">NO</th>
                                 <th scope="col">자전거번호</th>
                                 <th scope="col">대여일시</th>
                                 <th scope="col">대여 대여소번호</th>
@@ -179,7 +174,6 @@
                 tr.appendChild(number);
                 for (var index = 0; index < columns; index++) {
                     var cell = document.createElement('td');
-                    cell.style.whiteSpace = 'pre-wrap';
                     cell.textContent = row.cells[index] == null ? '' : row.cells[index];
                     tr.appendChild(cell);
                 }
