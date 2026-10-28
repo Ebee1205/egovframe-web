@@ -11,8 +11,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartException;
-import com.extra.service.impl.ExtraFileServiceImpl;
+import com.extra.service.ExtraFileService;
 import com.cmm.service.file.impl.FileMngUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.extra.service.ExtraFilterVO;
@@ -20,11 +19,11 @@ import com.extra.service.ExtraService;
 
 @Controller
 public class ExtraController {
-    private final ExtraFileServiceImpl extraFileService;
+    private final ExtraFileService extraFileService;
     private final MessageSource messageSource;
     private final ExtraService extraService;
 
-    public ExtraController(ExtraFileServiceImpl extraFileService, MessageSource messageSource, ExtraService extraService) {
+    public ExtraController(ExtraFileService extraFileService, MessageSource messageSource, ExtraService extraService) {
         this.extraFileService = extraFileService;
         this.messageSource = messageSource;
         this.extraService = extraService;
@@ -35,50 +34,28 @@ public class ExtraController {
     	
         model.addAttribute("extras", extraService.selectExtraList(filterVO));
         model.addAttribute("filterVO", filterVO);
-        model.addAttribute("totalPage", 
-        		filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
-        		: (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
+        model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0 : (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
         
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
-    
-   
+       
     @RequestMapping(value = "/extra/file/upload.do", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> extraFileUpload(@RequestParam(value = "files", required = false) List<MultipartFile> files) {
     	
-        try {
-            if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
-            
-            return ResponseEntity.ok(
-            	ComResponseVO.success(
-            		extraFileService.parseExtraExcel(files),
-                    messageSource.getMessage("success.request.msg", null, Locale.KOREAN)
-                ).toJson());
-            
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_PARSE_FAILED", exception.getMessage(), "files", "EXTRA_EXCEL_PARSE_FAILED", exception.getMessage()).toJson());
-        
-        } catch (Exception exception) {
-            return FileMngUtil.errorResponse(exception, messageSource);
-        }
+        return ResponseEntity.ok(
+            ComResponseVO.success(
+                extraFileService.parseExtraExcel(files),
+                messageSource.getMessage("success.request.msg", null, Locale.KOREAN)
+            ).toJson());
     }
 
-    @RequestMapping(value = {"/extra/file/insert.do", "/file/insert.do"}, method = RequestMethod.POST,
-            produces = "application/json;charset=UTF-8")
+    @RequestMapping(value = {"/extra/file/insert.do", "/file/insert.do"}, method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> extraFileInsert(@RequestParam(value = "files", required = false) List<MultipartFile> files) {
-        try {
-            return ResponseEntity.status(201).body(ComResponseVO.success(extraFileService.insertExtraExcel(files), "대여이력이 일괄 등록되었습니다.").toJson());
-        
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_INVALID",
-                    exception.getMessage(), "files", "EXTRA_EXCEL_INVALID", exception.getMessage()).toJson());
-        } catch (Exception exception) {
-            return FileMngUtil.errorResponse(exception, messageSource);
-        }
+        return ResponseEntity.status(201).body(ComResponseVO.success(extraFileService.insertExtraExcel(files), "대여이력이 일괄 등록되었습니다.").toJson());
     }
 
-    @ExceptionHandler(MultipartException.class)
-    public ResponseEntity<String> extraFileUploadError(MultipartException exception) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> extraFileError(Exception exception) {
         return FileMngUtil.errorResponse(exception, messageSource);
     }
    
@@ -88,6 +65,4 @@ public class ExtraController {
     	
     	return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
-    
-
 }

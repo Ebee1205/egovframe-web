@@ -70,7 +70,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
         try (InputStream input = new BufferedInputStream(upload.getInputStream())) {
             readWorkbook(input, null, true, consumer);
             return metadata;
-        } catch (IOException | RuntimeException exception) {
+        } catch (IOException exception) {
             throw new FileMngUtil.FileException(400, "EXCEL_PARSE_FAILED", "files", exception);
         }
     }
@@ -113,7 +113,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
                 }
             }
             return result;
-        } catch (OpenXML4JException | SAXException | IllegalArgumentException exception) {
+        } catch (OpenXML4JException | SAXException exception) {
             throw new IOException("XLSX 파일을 SAX 방식으로 읽을 수 없습니다.", exception);
         }
     }
@@ -243,6 +243,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             if (column < 0 || column >= SpreadsheetVersion.EXCEL2007.getMaxColumns()) {
                 throw new IllegalArgumentException("잘못된 열 번호");
             }
+            
             inCell = true;
             wanted = sheet.keep(row, column);
             formula = false;
@@ -270,6 +271,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             } catch (RuntimeException exception) {
                 throw new SAXException("셀 값을 읽을 수 없습니다: " + new CellReference(row, column).formatAsString(), exception);
             }
+            
             inCell = false;
             wanted = false;
             inText = false;
@@ -286,14 +288,18 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             NavigableMap<Integer, CellData> cells = sheet.rows.get(row);
             try {
                 if (cells == null || cells.isEmpty()) return;
+                
                 List<String> values = new ArrayList<>(Collections.nCopies(cells.lastKey() + 1, ""));
                 boolean hasValue = false;
+                
                 for (Map.Entry<Integer, CellData> cell : cells.entrySet()) {
                     String text = cell.getValue().getFormatted();
                     values.set(cell.getKey(), text);
                     hasValue |= !text.trim().isEmpty();
                 }
+                
                 if (hasValue) consumer.accept(sheetName, row + 1, values);
+                
             } finally {
                 sheet.rows.clear(); // 다음 행을 읽기 전에 현재 행의 원본 셀을 해제한다.
             }

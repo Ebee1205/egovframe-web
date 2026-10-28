@@ -253,7 +253,10 @@ public class FileMngUtil {
             this(status, code, field, null);
         }
         public FileException(int status, String code, String field, Throwable cause) {
-            super(code, cause); this.status = status; this.code = code; this.field = field;
+            this(status, code, field, code, cause);
+        }
+        public FileException(int status, String code, String field, String message, Throwable cause) {
+            super(message, cause); this.status = status; this.code = code; this.field = field;
         }
     }
 }

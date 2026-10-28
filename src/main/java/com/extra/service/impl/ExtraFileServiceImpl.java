@@ -10,21 +10,23 @@ import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cmm.service.excel.impl.ExcelSaxFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
 import com.extra.service.ExtraVO;
+import com.extra.service.ExtraFileService;
 import com.cmm.service.file.FileVO;
 
 /** SAX 파싱·검증 결과를 반환하고, 등록 요청 시 오류 없는 행을 일괄 저장한다. */
 @Service
-public class ExtraFileServiceImpl {
-    private static final int PARSE_BATCH_SIZE = 100;
+public class ExtraFileServiceImpl implements ExtraFileService {
+    private static final int PARSE_BATCH_SIZE = 1000;
     private final ExcelSaxFileParser excelFileParser;
     private final ExtraDAO extraDAO;
     private static final String[] DATE_PATTERNS = {
@@ -37,11 +39,13 @@ public class ExtraFileServiceImpl {
         this.extraDAO = extraDAO;
     }
 
-    // 엑셀 파싱
+    // 엑셀 파일 파싱
     // SAX 원본 행은 최대 100행만 모아서 처리하고 비운다.
     // 배치 단위로 validation check > 정상/error/warning 구분해서 json에 add하기
+    @Override
     public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
-        if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
+        
+    	if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
 
         List<ExtraVO> dataList = new ArrayList<>();
         List<ExtraVO> errorList = new ArrayList<>();
@@ -63,7 +67,9 @@ public class ExtraFileServiceImpl {
                     header = false;
                     return;
                 }
+                
                 batch.add(values);
+                
                 if (batch.size() >= PARSE_BATCH_SIZE) {
                     parseBatch(batch, dataList, errorList, warningList, cellIssues);
                 }
@@ -72,7 +78,7 @@ public class ExtraFileServiceImpl {
         
         // 남은 행 처리... 
         parseBatch(batch, dataList, errorList, warningList, cellIssues);
-
+                
         Map<String, Object> result = new LinkedHashMap<>();
         
         result.put("dataList", dataList);
@@ -91,32 +97,69 @@ public class ExtraFileServiceImpl {
         return result;
     }
 
-    // 파싱 + 오류 결과 제외 등록
+    // 100행씩 파싱·검증 후 바로 등록/ 실패시 먼저 실행된 배치도 롤백
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> insertExtraExcel(List<MultipartFile> files) {
-        Map<String, Object> parsed = parseExtraExcel(files);
-
-        @SuppressWarnings("unchecked")
-        List<ExtraVO> dataList = (List<ExtraVO>) parsed.get("dataList");
-
-        @SuppressWarnings("unchecked")
-        List<ExtraVO> errorList = (List<ExtraVO>) parsed.get("errorList");
-        Set<ExtraVO> errors = new HashSet<>(errorList);
-        List<ExtraVO> items = new ArrayList<>();
-
-        for (ExtraVO item : dataList) {
-            if (!errors.contains(item)) items.add(item);
-        }
-
-        if (items.isEmpty()) throw new IllegalArgumentException("등록할 정상 또는 경고 행이 없습니다.");
-
-        int inserted = extraDAO.insertExtraList(items);
         
+    	if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
+
+        List<List<String>> batch = new ArrayList<>(PARSE_BATCH_SIZE);
+        List<ExtraVO> dataList = new ArrayList<>(PARSE_BATCH_SIZE);
+        List<ExtraVO> errorList = new ArrayList<>();
+        List<ExtraVO> warningList = new ArrayList<>();
+        List<Map<String, Object>> cellIssues = new ArrayList<>();
+        int[] counts = new int[4]; // 등록, 전체, 오류, 경고 행 수
+
+        Consumer<List<List<String>>> insertBatch = rows -> {
+            if (rows.isEmpty()) return;
+            
+            parseBatch(rows, dataList, errorList, warningList, cellIssues);
+            
+            counts[1] += dataList.size();
+            counts[2] += errorList.size();
+            counts[3] += warningList.size();
+            dataList.removeAll(errorList);
+            
+            if (!dataList.isEmpty()) counts[0] += extraDAO.insertExtraList(dataList);
+            
+            // ㅋㅋ 왜 굳이,, 걍 첨부터 만들지 말지
+            dataList.clear();
+            errorList.clear();
+            warningList.clear();
+            cellIssues.clear();
+        };
+
+        excelFileParser.parseRows(files.get(0), new ExcelSaxFileParser.RowConsumer() {
+            private boolean header;
+
+            @Override
+            public void startSheet(String sheetName) {
+                header = true;
+            }
+
+            @Override
+            public void accept(String sheetName, int rowNumber, List<String> values) {
+                if (header) {
+                    header = false;
+                    return;
+                }
+                batch.add(values);
+                if (batch.size() >= PARSE_BATCH_SIZE) insertBatch.accept(batch);
+            }
+        });
+        
+        insertBatch.accept(batch); // 남은 데이터 insert
+        
+        if (counts[0] == 0) throw FileMngUtil.bad("EXTRA_EXCEL_NO_INSERTABLE_ROWS", "files");
+
         Map<String, Object> result = new LinkedHashMap<>();
         
-        result.put("insertedCount", inserted);
-        result.put("totalCount", parsed.get("totalCount"));
-        result.put("errorCount", parsed.get("errorCount"));
-        result.put("warningCount", parsed.get("warningCount"));
+        result.put("insertedCount", counts[0]);
+        result.put("totalCount", counts[1]);
+        result.put("errorCount", counts[2]);
+        result.put("warningCount", counts[3]);
+        
         return result;
     }
 
@@ -158,7 +201,7 @@ public class ExtraFileServiceImpl {
                         case 15: item.setReturnStationId((String) convert(value, String.class)); break;
                         default: break;
                     }
-                } catch (IllegalArgumentException exception) {
+                } catch (FileMngUtil.FileException exception) {
                     hasError = true;
                     cellIssues.add(cellIssue(dataList.size(), column, "ERROR", value, exception.getMessage()));
                 }
@@ -192,7 +235,7 @@ public class ExtraFileServiceImpl {
         if (type == BigDecimal.class) {
             if (text.matches("[+-]?\\d{1,3}(,\\d{3})+(\\.\\d+)?")) text = text.replace(",", "");
             try { return new BigDecimal(text); }
-            catch (NumberFormatException exception) { throw new IllegalArgumentException("숫자 형식으로 읽을 수 없습니다."); }
+            catch (NumberFormatException exception) { throw invalidCell("숫자 형식으로 읽을 수 없습니다."); }
         }
         if (type == Date.class) {
             for (String pattern : DATE_PATTERNS) {
@@ -202,7 +245,7 @@ public class ExtraFileServiceImpl {
                 Date date = format.parse(text, position);
                 if (date != null && position.getIndex() == text.length()) return date;
             }
-            throw new IllegalArgumentException("날짜 형식으로 읽을 수 없습니다. 예: 2026-10-27 16:00:00");
+            throw invalidCell("날짜 형식으로 읽을 수 없습니다. 예: 2026-10-27 16:00:00");
         }
         throw new IllegalArgumentException("지원하지 않는 컬럼 타입입니다.");
     }
@@ -222,19 +265,22 @@ public class ExtraFileServiceImpl {
                 BigDecimal number = (BigDecimal) convert(value, BigDecimal.class);
                 try { number = number.setScale(2, RoundingMode.UNNECESSARY); }
                 catch (ArithmeticException exception) {
-                    throw new IllegalArgumentException("소수점 이하 두 자리까지 입력할 수 있습니다.");
+                    throw invalidCell("소수점 이하 두 자리까지 입력할 수 있습니다.");
                 }
                 int integerDigits = column == 9 ? 10 : 13;
                 if (number.abs().compareTo(BigDecimal.TEN.pow(integerDigits)) >= 0) {
-                    throw new IllegalArgumentException("정수부는 " + integerDigits + "자리까지 입력할 수 있습니다.");
+                    throw invalidCell("정수부는 " + integerDigits + "자리까지 입력할 수 있습니다.");
                 }
                 return;
             default:
                 return; // 일시의 타입 검사는 convert에서 처리한다.
         }
         if (value.codePointCount(0, value.length()) > maxLength) {
-            throw new IllegalArgumentException("최대 " + maxLength + "자까지 입력할 수 있습니다.");
+            throw invalidCell("최대 " + maxLength + "자까지 입력할 수 있습니다.");
         }
     }
 
+    private static FileMngUtil.FileException invalidCell(String message) {
+        return new FileMngUtil.FileException(400, "EXTRA_EXCEL_INVALID", "files", message, null);
+    }
 }
