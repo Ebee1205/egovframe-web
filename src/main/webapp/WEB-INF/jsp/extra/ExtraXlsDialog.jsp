@@ -80,6 +80,7 @@
                         
             <div class="table-container">
                 <!-- 테이블 상단 정보 -->
+				<label class="form-label | fw-semibold | upload-label">미리보기는 1000건만 제공됩니다.</label>
                 <div class="table-info | d-flex | justify-content-between | align-items-center | flex-wrap | gap-2">
                     <div class="d-flex | align-items-center | flex-wrap | gap-3">
                         <p class="table-info-text | mb-0">총 <span id="extraExcelTotalCount">0</span>건</p>
@@ -91,7 +92,6 @@
                         오류 목록 다운로드
                     </a>
                 </div>
-
                 <!-- 테이블 본문 -->
                 <div class="table-responsive extra-excel-scroll" tabindex="0" role="region" aria-label="엑셀 데이터 스크롤 영역">
                     <table id="extraExcelTable" class="table | table-hover | table-bordered | align-middle">

@@ -171,8 +171,7 @@
                 throw new Error(errorMessage(result));
             }
             var data = result.data;
-            if (data && !Array.isArray(data) && Array.isArray(data.dataList)
-                    && Array.isArray(data.errorList) && Array.isArray(data.warningList)) {
+            if (data && !Array.isArray(data) && Array.isArray(data.dataList)) {
                 fileContent = data;
             } else if (Array.isArray(data) && data.length === 1 && data[0]
                     && data[0].fileContent && Array.isArray(data[0].fileContent.sheets)) {
