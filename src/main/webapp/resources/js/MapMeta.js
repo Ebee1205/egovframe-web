@@ -32,12 +32,13 @@ const DEFAULT_MAP_META = {
 
     terrain: {
       type: 'XYZ',
-      url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
-      minZoom: 0,
-      maxZoom: 17,
+      url: `https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_API_KEY}/midnight/{z}/{y}/{x}.png`,
+      minZoom: 6,
+      maxZoom: 19,
       attributions: '© <a href="https://www.vworld.kr/">공간정보 오픈플랫폼 VWorld</a>',
     },
   },
+
 
   view: {
     cenLat: 37.5665,
