@@ -58,16 +58,16 @@ public class OverviewController {
             return ResponseEntity.status(400).body(ComResponseVO.fail("INVALID_GRID", "기상청 격자 영역 밖입니다.").toJson());
         }
         try {
-            ComResponseVO<List<UltraSrtNcstVO>> fetched = ultraSrtNcstService.fetchUltraSrtNcstRes(nx, ny);
-            if (!"SUCCESS".equals(fetched.getCode().getResultCode())) {
-                return ResponseEntity.status(502).body(fetched.toJson());
+            ComResponseVO<List<UltraSrtNcstVO>> resFetched = ultraSrtNcstService.fetchUltraSrtNcstRes(nx, ny);
+            if (!"SUCCESS".equals(resFetched.getCode().getResultCode())) {
+                return ResponseEntity.status(502).body(resFetched.toJson());
             }
-            ultraSrtNcstService.insertUltraSrtNcst(fetched.getData());
-            ComResponseVO<Map<String, Object>> result = ultraSrtNcstService.selectUltraSrtNcst(nx, ny);
+            ultraSrtNcstService.insertUltraSrtNcst(resFetched.getData());
+            ComResponseVO<Map<String, Object>> res = ultraSrtNcstService.selectUltraSrtNcst(nx, ny);
             
-            int status = "SUCCESS".equals(result.getCode().getResultCode()) ? 200 : 502;
+            int status = "SUCCESS".equals(res.getCode().getResultCode()) ? 200 : 502;
            
-            return ResponseEntity.status(status).body(result.toJson());
+            return ResponseEntity.status(status).body(res.toJson());
             
         } catch (Exception ex) {
             LOGGER.warn("날씨 조회 실패 (예외 유형): {}", ex.getClass().getSimpleName());

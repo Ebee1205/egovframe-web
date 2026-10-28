@@ -30,20 +30,6 @@
         ON CONFLICT (nx, ny, base_date, base_time) DO NOTHING
     </insert>
 
-    <insert id="upsertUltraSrtNcstList">
-        <include refid="pivotObservations"/>
-        ON CONFLICT (nx, ny, base_date, base_time)
-        DO UPDATE SET
-            pty = COALESCE(EXCLUDED.pty, tb_ultra_srt_ncst.pty),
-            reh = COALESCE(EXCLUDED.reh, tb_ultra_srt_ncst.reh),
-            rn1 = COALESCE(EXCLUDED.rn1, tb_ultra_srt_ncst.rn1),
-            t1h = COALESCE(EXCLUDED.t1h, tb_ultra_srt_ncst.t1h),
-            uuu = COALESCE(EXCLUDED.uuu, tb_ultra_srt_ncst.uuu),
-            vec = COALESCE(EXCLUDED.vec, tb_ultra_srt_ncst.vec),
-            vvv = COALESCE(EXCLUDED.vvv, tb_ultra_srt_ncst.vvv),
-            wsd = COALESCE(EXCLUDED.wsd, tb_ultra_srt_ncst.wsd)
-    </insert>
-
     <!-- 기존 VO/category 기반 공통코드·화면 처리를 유지한다. null은 미수신 항목이며 0과 구별한다. -->
     <sql id="observationItems">
         CROSS JOIN LATERAL (VALUES
@@ -53,16 +39,6 @@
             ('VVV', weather.vvv), ('WSD', weather.wsd)
         ) AS item(category, obsr_value)
     </sql>
-
-    <select id="selectUltraSrtNcst" resultType="com.overview.service.UltraSrtNcstVO">
-        SELECT weather.base_date, weather.base_time, weather.nx, weather.ny,
-            item.category, item.obsr_value::text AS obsr_value, weather.c_date
-        FROM public.tb_ultra_srt_ncst weather
-        <include refid="observationItems"/>
-        WHERE weather.nx = #{nx} AND weather.ny = #{ny}
-          AND weather.base_date = #{baseDate} AND weather.base_time = #{baseTime}
-          AND item.category = #{category} AND item.obsr_value IS NOT NULL
-    </select>
 
     <select id="selectUltraSrtNcstList" resultType="com.overview.service.UltraSrtNcstVO">
         SELECT weather.base_date, weather.base_time, weather.nx, weather.ny,
