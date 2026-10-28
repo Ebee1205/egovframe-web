@@ -53,20 +53,25 @@ public class OverviewController {
     }
 
     @RequestMapping(value = "/overview/weather.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
-    public ResponseEntity<String> mapWeatherService(@RequestParam("nx") int nx, @RequestParam("ny") int ny) {
-        if (nx < 1 || nx > 149 || ny < 1 || ny > 253) {
+    public ResponseEntity<String> mapWeatherService(
+            @RequestParam(value = "nx", required = false) Integer nx,
+            @RequestParam(value = "ny", required = false) Integer ny) {
+        if ((nx != null && (nx < 1 || nx > 149)) || (ny != null && (ny < 1 || ny > 253))) {
             return ResponseEntity.status(400).body(ComResponseVO.fail("INVALID_GRID", "기상청 격자 영역 밖입니다.").toJson());
         }
         try {
+        	
             ComResponseVO<List<UltraSrtNcstVO>> resFetched = ultraSrtNcstService.fetchUltraSrtNcstRes(nx, ny);
+            
             if (!"SUCCESS".equals(resFetched.getCode().getResultCode())) {
                 return ResponseEntity.status(502).body(resFetched.toJson());
             }
+            
             ultraSrtNcstService.insertUltraSrtNcst(resFetched.getData());
             ComResponseVO<Map<String, Object>> res = ultraSrtNcstService.selectUltraSrtNcst(nx, ny);
             
             int status = "SUCCESS".equals(res.getCode().getResultCode()) ? 200 : 502;
-           
+            
             return ResponseEntity.status(status).body(res.toJson());
             
         } catch (Exception ex) {

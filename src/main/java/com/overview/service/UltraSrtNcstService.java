@@ -7,11 +7,11 @@ import com.cmm.service.ComResponseVO;
 public interface UltraSrtNcstService {
 
     // API 조회 및 응답 검증
-    ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes(int nx, int ny) throws Exception;
+    ComResponseVO<List<UltraSrtNcstVO>> fetchUltraSrtNcstRes(Integer Nx, Integer Ny) throws Exception;
 
     // 실황 누적 저장 (동일 발표분은 유지)
     void insertUltraSrtNcst(List<UltraSrtNcstVO> items) throws Exception;
 
     // 해당 격자의 최신 DB 자료를 공통코드와 매핑해 화면용 응답으로 반환
-    ComResponseVO<Map<String, Object>> selectUltraSrtNcst(int nx, int ny) throws Exception;
+    ComResponseVO<Map<String, Object>> selectUltraSrtNcst(Integer Nx, Integer Ny) throws Exception;
 }
