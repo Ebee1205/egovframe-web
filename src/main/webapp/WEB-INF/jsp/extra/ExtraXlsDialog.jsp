@@ -193,6 +193,7 @@
         insertStatus.textContent = errors > 0 ? '오류 ' + errors + '행을 제외하고 정상·경고 행을 등록합니다.' : '';
         insertStatus.classList.remove('text-danger');
         renderPage();
+        
     });
     modal.addEventListener('hide.coreui.modal', function (event) {
         if (saving) event.preventDefault();

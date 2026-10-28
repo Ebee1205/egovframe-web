@@ -38,6 +38,7 @@ public class ExtraController {
         model.addAttribute("totalPage", 
         		filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0
         		: (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
+        
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
     
@@ -56,6 +57,7 @@ public class ExtraController {
             
         } catch (ExtraFileServiceImpl.InvalidExtraExcelException exception) {
             return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_PARSE_FAILED", exception.getMessage(), "files", "EXTRA_EXCEL_PARSE_FAILED", exception.getMessage()).toJson());
+        
         } catch (Exception exception) {
             return FileMngUtil.errorResponse(exception, messageSource);
         }
@@ -84,8 +86,7 @@ public class ExtraController {
     @RequestMapping("/extra/file/err/download.do")
     public String extraFileErrDownload(Model model) throws Exception {
     	
-    	
-        return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
+    	return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";
     }
     
 

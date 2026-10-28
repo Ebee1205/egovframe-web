@@ -25,18 +25,22 @@ public abstract class ExcelFileParser {
     protected String extensionError(String extension) {
         return "xls".equals(extension) || "xlsx".equals(extension) ? null : "EXCEL_EXTENSION_NOT_ALLOWED";
     }
-    private FileVO validate(MultipartFile upload) {
+    
+    protected final FileVO validate(MultipartFile upload) {
         FileVO file = fileMngUtil.validate(upload);
         String error = extensionError(file.getFileExtsn());
         if (error != null) throw FileMngUtil.bad(error, "files");
         return file;
     }
+    
     public List<Map<String, Object>> parse(List<MultipartFile> files, String description) {
         return parseFiles(files, null);
     }
+    
     public List<Map<String, Object>> parseXml(List<MultipartFile> files, String description, String resource) throws IOException {
         return parseFiles(files, excelTemplate.load(resource));
     }
+    
     private List<Map<String, Object>> parseFiles(List<MultipartFile> files, Definition template) {
         fileMngUtil.validateCount(files == null ? 0 : files.size());
         List<FileVO> metadata = new ArrayList<>();
@@ -47,11 +51,20 @@ public abstract class ExcelFileParser {
             try (InputStream input = new BufferedInputStream(files.get(index).getInputStream())) {
                 ReadResult workbook = read(input, template, true);
                 Map<String, Object> content = new LinkedHashMap<>();
+                
                 content.put("sheets", workbook.preview());
+                
                 if (template != null) content.put("data", workbook.mapped(template));
+                
                 Map<String, Object> data = new LinkedHashMap<>();
-                data.put("originalName", file.getOrignlFileNm()); data.put("extension", file.getFileExtsn());
-                data.put("fileSize", file.getFileSize()); data.put("fileContent", content); result.add(data);
+                
+                data.put("originalName", file.getOrignlFileNm()); 
+                data.put("extension", file.getFileExtsn());
+                data.put("fileSize", file.getFileSize()); 
+                data.put("fileContent", content); 
+                
+                result.add(data);
+                
             } catch (IOException | RuntimeException exception) {
                 logger.warn("Excel upload parsing failed: file={}", file.getOrignlFileNm(), exception);
                 throw new FileMngUtil.FileException(400, "EXCEL_PARSE_FAILED", "files", exception);
@@ -86,6 +99,7 @@ public abstract class ExcelFileParser {
             public CellData(Object value, String formatted, boolean error) {
                 this.value = value; this.formatted = formatted; this.error = error;
             }
+            public String getFormatted() { return formatted; }
         }
     
         public static final class SheetData {

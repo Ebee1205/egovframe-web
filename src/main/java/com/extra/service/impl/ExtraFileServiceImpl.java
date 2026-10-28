@@ -19,10 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cmm.service.excel.impl.ExcelSaxFileParser;
 import com.cmm.service.file.impl.FileMngUtil;
 import com.extra.service.ExtraVO;
+import com.cmm.service.file.FileVO;
 
 /** SAX 파싱·검증 결과를 반환하고, 등록 요청 시 오류 없는 행을 일괄 저장한다. */
 @Service
 public class ExtraFileServiceImpl {
+    private static final int PARSE_BATCH_SIZE = 100;
     private final ExcelSaxFileParser excelFileParser;
     private final ExtraDAO extraDAO;
     private static final String[] DATE_PATTERNS = {
@@ -35,48 +37,78 @@ public class ExtraFileServiceImpl {
         this.extraDAO = extraDAO;
     }
 
+    // 엑셀 파싱
+    // SAX 원본 행은 최대 100행만 모아서 처리하고 비운다.
+    // 배치 단위로 validation check > 정상/error/warning 구분해서 json에 add하기
     public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
         if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
-        Map<String, Object> file = excelFileParser.parse(files, null).get(0);
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> content = (Map<String, Object>) file.get("fileContent");
-        
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> sheets = (List<Map<String, Object>>) content.get("sheets");
+
         List<ExtraVO> dataList = new ArrayList<>();
         List<ExtraVO> errorList = new ArrayList<>();
         List<ExtraVO> warningList = new ArrayList<>();
         List<Map<String, Object>> cellIssues = new ArrayList<>();
-        for (Map<String, Object> sheet : sheets) parseSheet(sheet, dataList, errorList, warningList, cellIssues);
+        List<List<String>> batch = new ArrayList<>(PARSE_BATCH_SIZE);
+
+        FileVO file = excelFileParser.parseRows(files.get(0), new ExcelSaxFileParser.RowConsumer() {
+            private boolean header;
+
+            @Override
+            public void startSheet(String sheetName) {
+                header = true;
+            }
+
+            @Override
+            public void accept(String sheetName, int rowNumber, List<String> values) {
+                if (header) {
+                    header = false;
+                    return;
+                }
+                batch.add(values);
+                if (batch.size() >= PARSE_BATCH_SIZE) {
+                    parseBatch(batch, dataList, errorList, warningList, cellIssues);
+                }
+            }
+        });
+        
+        // 남은 행 처리... 
+        parseBatch(batch, dataList, errorList, warningList, cellIssues);
 
         Map<String, Object> result = new LinkedHashMap<>();
+        
         result.put("dataList", dataList);
         result.put("errorList", errorList);
         result.put("warningList", warningList);
         result.put("cellIssues", cellIssues);
+        
         result.put("errorCount", errorList.size());
         result.put("warningCount", warningList.size());
         result.put("totalCount", dataList.size());
-        result.put("extension", file.get("extension"));
-        result.put("fileSize", file.get("fileSize"));
-        result.put("originalName", file.get("originalName"));
+        
+        result.put("extension", file.getFileExtsn());
+        result.put("fileSize", file.getFileSize());
+        result.put("originalName", file.getOrignlFileNm());
+
         return result;
     }
 
-    /** 클라이언트의 검증 결과를 신뢰하지 않고 파일을 다시 파싱한 후 오류 없는 행을 등록한다. */
+    // 파싱 + 오류 결과 제외 등록
     public Map<String, Object> insertExtraExcel(List<MultipartFile> files) {
         Map<String, Object> parsed = parseExtraExcel(files);
+
         @SuppressWarnings("unchecked")
         List<ExtraVO> dataList = (List<ExtraVO>) parsed.get("dataList");
+
         @SuppressWarnings("unchecked")
         List<ExtraVO> errorList = (List<ExtraVO>) parsed.get("errorList");
         Set<ExtraVO> errors = new HashSet<>(errorList);
         List<ExtraVO> items = new ArrayList<>();
+
         for (ExtraVO item : dataList) {
             if (!errors.contains(item)) items.add(item);
         }
+
         if (items.isEmpty()) throw new InvalidExtraExcelException("등록할 정상 또는 경고 행이 없습니다.");
+
         int inserted = extraDAO.insertExtraList(items);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("insertedCount", inserted);
@@ -91,22 +123,16 @@ public class ExtraFileServiceImpl {
         public InvalidExtraExcelException(String message) { super(message); }
     }
 
-    private void parseSheet(Map<String, Object> sheet, List<ExtraVO> dataList,
+    private void parseBatch(List<List<String>> batch, List<ExtraVO> dataList,
             List<ExtraVO> errorList, List<ExtraVO> warningList, List<Map<String, Object>> cellIssues) {
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> rows = (List<Map<String, Object>>) sheet.get("rows");
-        if (rows.isEmpty()) return;
-
-        for (int index = 1; index < rows.size(); index++) {
-            Map<String, Object> row = rows.get(index);
-            List<String> values = cells(row);
+        for (List<String> values : batch) {
             ExtraVO item = new ExtraVO();
 
-            // 양식의 고정 열 순서로 매핑한다. 첫 행은 헤더로 건너뛴다.
+            // 양식의 고정 열 순서로 현재 행만 변환·검증한다.
 
             boolean hasError = false;
             boolean hasWarning = false;
-            
+
             for (int column = 0; column < 16; column++) {
                 String value = column < values.size() ? values.get(column) : "";
                 if (value == null || value.trim().isEmpty()) {
@@ -145,11 +171,7 @@ public class ExtraFileServiceImpl {
             if (hasError) errorList.add(item);
             else if (hasWarning) warningList.add(item);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<String> cells(Map<String, Object> row) {
-        return (List<String>) row.get("cells");
+        batch.clear();
     }
 
     /** 행·열 인덱스는 0부터 시작하며, 행은 전체 dataList 기준이다. */
