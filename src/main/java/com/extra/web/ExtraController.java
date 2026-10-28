@@ -55,7 +55,7 @@ public class ExtraController {
                     messageSource.getMessage("success.request.msg", null, Locale.KOREAN)
                 ).toJson());
             
-        } catch (ExtraFileServiceImpl.InvalidExtraExcelException exception) {
+        } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_PARSE_FAILED", exception.getMessage(), "files", "EXTRA_EXCEL_PARSE_FAILED", exception.getMessage()).toJson());
         
         } catch (Exception exception) {
@@ -69,7 +69,7 @@ public class ExtraController {
         try {
             return ResponseEntity.status(201).body(ComResponseVO.success(extraFileService.insertExtraExcel(files), "대여이력이 일괄 등록되었습니다.").toJson());
         
-        } catch (ExtraFileServiceImpl.InvalidExtraExcelException exception) {
+        } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(ComResponseVO.fieldFailure("EXTRA_EXCEL_INVALID",
                     exception.getMessage(), "files", "EXTRA_EXCEL_INVALID", exception.getMessage()).toJson());
         } catch (Exception exception) {

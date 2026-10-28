@@ -107,20 +107,17 @@ public class ExtraFileServiceImpl {
             if (!errors.contains(item)) items.add(item);
         }
 
-        if (items.isEmpty()) throw new InvalidExtraExcelException("등록할 정상 또는 경고 행이 없습니다.");
+        if (items.isEmpty()) throw new IllegalArgumentException("등록할 정상 또는 경고 행이 없습니다.");
 
         int inserted = extraDAO.insertExtraList(items);
+        
         Map<String, Object> result = new LinkedHashMap<>();
+        
         result.put("insertedCount", inserted);
         result.put("totalCount", parsed.get("totalCount"));
         result.put("errorCount", parsed.get("errorCount"));
         result.put("warningCount", parsed.get("warningCount"));
         return result;
-    }
-
-    public static class InvalidExtraExcelException extends IllegalArgumentException {
-        private static final long serialVersionUID = 1L;
-        public InvalidExtraExcelException(String message) { super(message); }
     }
 
     private void parseBatch(List<List<String>> batch, List<ExtraVO> dataList,
@@ -174,15 +171,16 @@ public class ExtraFileServiceImpl {
         batch.clear();
     }
 
-    /** 행·열 인덱스는 0부터 시작하며, 행은 전체 dataList 기준이다. */
-    private static Map<String, Object> cellIssue(int rowIndex, int columnIndex, String status,
-            String value, String message) {
+    // 경고/오류 셀 양식
+    private static Map<String, Object> cellIssue(int rowIndex, int columnIndex, String status, String value, String message) {
         Map<String, Object> issue = new LinkedHashMap<>();
+        
         issue.put("rowIndex", rowIndex);
         issue.put("columnIndex", columnIndex);
         issue.put("status", status);
         issue.put("value", value);
         issue.put("message", message);
+        
         return issue;
     }
 

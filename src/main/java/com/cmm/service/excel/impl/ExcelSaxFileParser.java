@@ -97,12 +97,17 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             boolean date1904 = readDateSystem(reader);
             XSSFReader.SheetIterator sheets = (XSSFReader.SheetIterator) reader.getSheetsData();
             while (sheets.hasNext()) {
+            	
                 try (InputStream inputSheet = sheets.next()) {
+                	
                     String name = sheets.getSheetName();
                     SheetMapping definition = ReadResult.find(template, name);
+                    
                     if (!preview && definition == null) continue;
+                    
                     SheetData sheet = new SheetData(name, preview, definition);
                     if (consumer != null) consumer.startSheet(name);
+                    
                     parseXml(inputSheet, new SheetHandler(sheet, strings, styles, date1904, name, consumer));
                     if (consumer == null) result.sheets.add(sheet);
                 }
@@ -208,8 +213,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
             else if ("mergeCells".equals(name)) inMerges = false;
         }
 
-        private SheetHandler(SheetData sheet, SharedStrings strings, StylesTable styles, boolean date1904,
-                String sheetName, RowConsumer consumer) {
+        private SheetHandler(SheetData sheet, SharedStrings strings, StylesTable styles, boolean date1904, String sheetName, RowConsumer consumer) {
             this.sheet = sheet;
             this.strings = strings;
             this.styles = styles;
@@ -297,6 +301,7 @@ public class ExcelSaxFileParser extends ExcelFileParser {
 
         private CellData readCellValue() {
             String text = raw.toString();
+            
             if ("inlineStr".equals(type)) return textCell(new XSSFRichTextString(inline.toString()).getString());
             if ("s".equals(type)) return textCell(hasValue ? strings.getItemAt(Integer.parseInt(text)).getString() : "");
             if ("str".equals(type)) return textCell(text);
