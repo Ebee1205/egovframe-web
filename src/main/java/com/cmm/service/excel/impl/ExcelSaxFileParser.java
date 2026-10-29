@@ -1,8 +1,11 @@
 package com.cmm.service.excel.impl;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -26,7 +30,10 @@ import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.Attributes;
@@ -48,14 +55,22 @@ import com.cmm.service.file.impl.FileMngUtil;
 /** XLSX 시트 XML을 SAX로 읽는다. 전체 수집과 행 콜백이 같은 셀 해석 로직을 사용한다. */
 @Component
 public class ExcelSaxFileParser extends ExcelFileParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelSaxFileParser.class);
+    private final Path tempDirectory;
 
     public ExcelSaxFileParser(FileMngUtil fileMngUtil) {
         this(fileMngUtil, new ExcelTemplate());
     }
 
-    @Autowired
     public ExcelSaxFileParser(FileMngUtil fileMngUtil, ExcelTemplate template) {
+        this(fileMngUtil, template, "files");
+    }
+
+    @Autowired
+    public ExcelSaxFileParser(FileMngUtil fileMngUtil, ExcelTemplate template,
+            @Value("${Globals.File.LocalPath:files}") String fileRoot) {
         super(fileMngUtil, template);
+        this.tempDirectory = Paths.get(fileRoot).toAbsolutePath().normalize().resolve("temp");
     }
 
     /** 행 콜백은 원본 행 전체를 보관하지 않는다. */
@@ -66,13 +81,12 @@ public class ExcelSaxFileParser extends ExcelFileParser {
 
     public FileVO parseRows(MultipartFile upload, RowConsumer consumer) {
         if (consumer == null) throw new IllegalArgumentException("행 처리기가 필요합니다.");
-        FileVO metadata = validate(upload);
-        try (InputStream input = new BufferedInputStream(upload.getInputStream())) {
-            readWorkbook(input, null, true, consumer);
-            return metadata;
-        } catch (IOException exception) {
-            throw new FileMngUtil.FileException(400, "EXCEL_PARSE_FAILED", "files", exception);
-        }
+        return readRows(upload, consumer, validate(upload));
+    }
+
+    public FileVO parseRows(MultipartFile upload, RowConsumer consumer, long maxFileSize) {
+        if (consumer == null) throw new IllegalArgumentException("행 처리기가 필요합니다.");
+        return readRows(upload, consumer, validate(upload, maxFileSize));
     }
 
     @Override
@@ -85,12 +99,51 @@ public class ExcelSaxFileParser extends ExcelFileParser {
         return readWorkbook(input, template, preview, null);
     }
 
+    private FileVO readRows(MultipartFile upload, RowConsumer consumer, FileVO metadata) {
+        try (InputStream input = upload.getInputStream()) {
+            readWorkbook(input, null, true, consumer);
+            return metadata;
+        } catch (IOException exception) {
+            throw new FileMngUtil.FileException(400, "EXCEL_PARSE_FAILED", "files", exception);
+        }
+    }
+
     /** 파일 열기 → 통합문서 설정 → 시트별 SAX 처리. */
     private ReadResult readWorkbook(InputStream input, Definition template, boolean preview, RowConsumer consumer) throws IOException {
-        
-    	ReadResult result = new ReadResult();
-        
-        try (OPCPackage pkg = OPCPackage.open(input)) {
+        Path tempFile;
+        try {
+            Files.createDirectories(tempDirectory);
+            tempFile = Files.createTempFile(tempDirectory, "excel-", ".xlsx");
+        } catch (IOException exception) {
+            throw new FileMngUtil.FileException(503, "FILE_STORAGE_UNAVAILABLE", "files", exception);
+        }
+        Throwable failure = null;
+        try {
+            try {
+                long fileSize = Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                LOGGER.info("Excel temp file saved: path={}, bytes={}", tempFile, fileSize);
+            } catch (IOException exception) {
+                throw new FileMngUtil.FileException(503, "FILE_STORAGE_UNAVAILABLE", "files", exception);
+            }
+            return readWorkbook(tempFile, template, preview, consumer);
+        } catch (IOException | RuntimeException | Error exception) {
+            failure = exception;
+            throw exception;
+        } finally {
+            try {
+                if (Files.deleteIfExists(tempFile)) {
+                    LOGGER.info("Excel temp file deleted: path={}", tempFile);
+                }
+            } catch (IOException exception) {
+                if (failure != null) failure.addSuppressed(exception);
+                else throw new FileMngUtil.FileException(503, "FILE_STORAGE_UNAVAILABLE", "files", exception);
+            }
+        }
+    }
+
+    private ReadResult readWorkbook(Path file, Definition template, boolean preview, RowConsumer consumer) throws IOException {
+        ReadResult result = new ReadResult();
+        try (OPCPackage pkg = OPCPackage.open(file.toFile(), PackageAccess.READ)) {
             XSSFReader reader = new XSSFReader(pkg);
             SharedStrings strings = new ReadOnlySharedStringsTable(pkg, false);
             StylesTable styles = reader.getStylesTable();

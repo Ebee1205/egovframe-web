@@ -1,6 +1,7 @@
 package com.extra.web;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import com.cmm.service.ComResponseVO;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import com.extra.service.ExtraService;
 
 @Controller
 public class ExtraController {
+    @Value("${Globals.extra.fileUpload.MaxSizePerFile:-1}")
+    private long extraFileMaxSize = -1;
     private final ExtraFileService extraFileService;
     private final MessageSource messageSource;
     private final ExtraService extraService;
@@ -34,6 +37,7 @@ public class ExtraController {
     	
         model.addAttribute("extras", extraService.selectExtraList(filterVO));
         model.addAttribute("filterVO", filterVO);
+        model.addAttribute("fileMaxSize", extraFileMaxSize);
         model.addAttribute("totalPage", filterVO.getPageSize() <= 0 || filterVO.getTotalCnt() == 0 ? 0 : (filterVO.getTotalCnt() - 1) / filterVO.getPageSize() + 1);
         
         return "forward:/WEB-INF/jsp/extra/ExtraList.jsp";

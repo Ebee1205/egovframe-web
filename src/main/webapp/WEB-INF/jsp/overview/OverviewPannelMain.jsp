@@ -49,6 +49,7 @@
   searchInput.addEventListener('keydown', handleSearchKeydown);
   searchForm.addEventListener('submit', handleSearchSubmit);
   retryButton.addEventListener('click', handleRetryClick);
+  
   document.addEventListener('overview:bounds-changed', refreshBounds);
 
   // ----- 함수 정의 ----- //

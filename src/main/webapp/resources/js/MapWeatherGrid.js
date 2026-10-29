@@ -31,6 +31,7 @@ export function gridToLonLat(x, y) {
  */
 export function createMapWeatherGrid(map, options = {}) {
   // ----- 선언부 ----- //
+
   const ol = window.ol;
   const primaryColor = window.getComputedStyle(map.getTargetElement())
     .getPropertyValue('--cui-primary').trim() || '#5856d6';
@@ -42,6 +43,7 @@ export function createMapWeatherGrid(map, options = {}) {
   let isInitialized = false;
   let selectedKey = '';
   let isDisposed = false;
+
 
   // ----- 격자 스타일 생성 ----- //
   const lineStyle = new ol.style.Style({
@@ -69,18 +71,24 @@ export function createMapWeatherGrid(map, options = {}) {
       }),
     }),
   });
+
+
+
   // ----- 격자 레이어 생성 및 지도 등록 ----- //
   const source = new ol.source.Vector({
     wrapX: false,
   });
+
   const layer = new ol.layer.Vector({
     source,
     visible: options.visible ?? false,
     zIndex: 5,
     style: (feature) => feature === selected ? centerStyle : lineStyle,
   });
+
   layer.set('name', 'weatherGrid');
   map.addLayer(layer);
+
 
   // ----- 이벤트 등록 및 초기화 ----- //
   map.on('moveend', refresh);
@@ -100,8 +108,10 @@ export function createMapWeatherGrid(map, options = {}) {
 
   function initialize() {
     if (isInitialized) return;
+
     isInitialized = true;
     const features = [];
+
     // 정수 좌표인 예보 지점을 중심으로 반 격자 간격에 경계선을 그린다.
     for (let x = 0.5; x <= 149.5; x++) {
       const points = [];
@@ -110,6 +120,7 @@ export function createMapWeatherGrid(map, options = {}) {
       }
       features.push(new ol.Feature(new ol.geom.LineString(points)));
     }
+
     for (let y = 0.5; y <= 253.5; y++) {
       const points = [];
       for (let x = 0.5; x <= 149.5; x++) {
@@ -117,6 +128,7 @@ export function createMapWeatherGrid(map, options = {}) {
       }
       features.push(new ol.Feature(new ol.geom.LineString(points)));
     }
+    
     source.addFeatures([...features, selected]);
   }
 
@@ -124,23 +136,30 @@ export function createMapWeatherGrid(map, options = {}) {
     if (isDisposed || !layer.getVisible()) return;
     initialize();
     const center = view.getCenter();
+    
     if (!center) return;
+
     const grid = lonLatToGrid(...ol.proj.toLonLat(center, projection));
     const key = [grid.nx, grid.ny, grid.inRange].join(',');
+
     if (key === selectedKey) return;
+
     selectedKey = key;
     selected.setGeometry(grid.inRange ? new ol.geom.Polygon([[
       project(grid.nx - 0.5, grid.ny - 0.5), project(grid.nx + 0.5, grid.ny - 0.5),
       project(grid.nx + 0.5, grid.ny + 0.5), project(grid.nx - 0.5, grid.ny + 0.5),
       project(grid.nx - 0.5, grid.ny - 0.5),
     ]]) : undefined);
+
     centerStyle.getText().setText(grid.nx + ', ' + grid.ny);
     layer.changed();
   }
 
   function setVisible(visible) {
     if (isDisposed) return;
+
     layer.setVisible(Boolean(visible));
+
     refresh();
   }
 

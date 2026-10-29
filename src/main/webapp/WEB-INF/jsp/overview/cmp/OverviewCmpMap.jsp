@@ -111,33 +111,43 @@ const map = new ol.Map({
     projection: meta.projection,
   }),
 });
+
 const view = map.getView();
-const weatherGridVisible = meta.weatherGrid?.visible === true;
-const weatherGrid = createMapWeatherGrid(map, { visible: weatherGridVisible });
+
+// 기상청 격자 레이어 추가
+const weatherGridVisible = meta.weatherGridLayer?.visible === true;
+const weatherGridLayer = createMapWeatherGrid(map, { visible: weatherGridVisible });
 const weatherGridToggle = document.getElementById('map-weather-grid');
+
 weatherGridToggle.checked = weatherGridVisible;
+
 weatherGridToggle.addEventListener('change', () => {
-  weatherGrid.setVisible(weatherGridToggle.checked);
+  weatherGridLayer.setVisible(weatherGridToggle.checked);
   mapMeta.setWeatherGridVisible(weatherGridToggle.checked);
 });
 
-// ----- 측정 레이어 추가 ----- //
-const mapDraw = createMapDraw(map, {
+
+// 그리기 레이어 추가
+const mapDrawLayer = createMapDraw(map, {
+
   toolbar: document.getElementById('map-draw-tools'),
   status: document.getElementById('map-draw-status'),
+
   cursors: {
     LineString: '<c:url value="/resources/distance.cur.ico"/>',
     Polygon: '<c:url value="/resources/area.cur.ico"/>',
     Circle: '<c:url value="/resources/point_radius.cur.ico"/>',
   },
+
   keyboardTarget: document.querySelector('.map-body'),
 });
 
-// ----- 이벤트 목록 상태 ----- //
+
+  
+// 이벤트 마커 레이어 추가
 let eventCards = Array.from(document.querySelectorAll('[data-overview-event]'));
 
-// ----- 이벤트 마커 레이어 추가 ----- //
-const eventMarkers = createMapMarker(map, {
+const eventMarkersLayer = createMapMarker(map, {
   icon: {
     src: '<c:url value="/resources/place-mark.svg"/>',
     anchor: [0.5, 28 / 32],
@@ -153,12 +163,15 @@ const eventMarkers = createMapMarker(map, {
   onSelect: handleEventSelect,
 });
 
-// ----- 이벤트 연결 및 초기화 ----- //
+// ----- L/C, init ----- //
 bindEventCards();
+
 document.addEventListener('overview:events-changed', refreshEventMarkers);
+
 zoomSlider.min = view.getMinZoom();
 zoomSlider.max = view.getMaxZoom();
 zoomSlider.value = view.getZoom();
+
 zoomSlider.addEventListener('input', (event) => setZoom(event.target.value));
 zoomInButton.addEventListener('click', () => zoomBy(1));
 zoomOutButton.addEventListener('click', () => zoomBy(-1));
@@ -215,7 +228,7 @@ function saveMapBounds() {
   document.dispatchEvent(new Event('overview:bounds-changed'));
 
   const gridCenterElement = document.getElementById('map-weather-grid-center');
-  const grid = updatedMeta.weatherGrid;
+  const grid = updatedMeta.weatherGridLayer;
   if (gridCenterElement && grid) {
     gridCenterElement.textContent = grid.inRange
       ? '중심 격자: ' + grid.nx + ', ' + grid.ny
@@ -237,7 +250,7 @@ function refreshEventMarkers() {
   eventCards = Array.from(document.querySelectorAll('[data-overview-event]'))
     .filter((card) => !card.closest('[hidden]'));
 
-  eventMarkers.setItems(eventCards.map(createEventMarkerItem));
+  eventMarkersLayer.setItems(eventCards.map(createEventMarkerItem));
   bindEventCards();
 }
 
@@ -261,16 +274,21 @@ function handleEventSelect(item, selection) {
   });
 }
 
+
+// 배경 타일 소스 교체
 function handleMapTypeChange(event) {
   const button = event.target.closest('[data-map-type]');
-  if (!button || !mapTypeControl.contains(button)) return;
   const nextMapType = button.dataset.mapType;
-  if (!Object.values(MAP_TYPE).includes(nextMapType) || nextMapType === currentMapType) return;
   const nextSource = meta.tileSources[nextMapType];
+
+  if (!button || !mapTypeControl.contains(button)) return;
+
+  if (!Object.values(MAP_TYPE).includes(nextMapType) || nextMapType === currentMapType) return;
 
   if (!nextSource) return;
 
   baseTileLayer.setSource(createTileSource(nextSource));
+
   currentMapType = nextMapType;
   mapMeta.setMapType(currentMapType);
   refreshMapTypeButtons();
@@ -295,8 +313,8 @@ function createTileSource(source) {
 
 function bindEventCards() {
   eventCards.forEach((card) => {
-    const isActive = eventMarkers.isSelected(card.dataset.overviewEvent);
-    const hasLocation = eventMarkers.has(card.dataset.overviewEvent);
+    const isActive = eventMarkersLayer.isSelected(card.dataset.overviewEvent);
+    const hasLocation = eventMarkersLayer.has(card.dataset.overviewEvent);
 
     card.classList.toggle('is-map-selected', isActive);
     card.setAttribute('aria-pressed', String(isActive));
@@ -311,21 +329,21 @@ function bindEventCards() {
     boundEventCards.add(card);
     card.addEventListener('click', () => {
       if (hasLocation) {
-        eventMarkers.select(card.dataset.overviewEvent);
+        eventMarkersLayer.select(card.dataset.overviewEvent);
       }
     });
     card.addEventListener('mouseenter', () => {
       if (hasLocation) {
-        eventMarkers.hover(card.dataset.overviewEvent);
+        eventMarkersLayer.hover(card.dataset.overviewEvent);
       }
     });
     card.addEventListener('mouseleave', () => {
-      eventMarkers.hover(null);
+      eventMarkersLayer.hover(null);
     });
     card.addEventListener('keydown', (event) => {
       if (hasLocation && (event.key === 'Enter' || event.key === ' ')) {
         event.preventDefault();
-        eventMarkers.select(card.dataset.overviewEvent);
+        eventMarkersLayer.select(card.dataset.overviewEvent);
       }
     });
   });

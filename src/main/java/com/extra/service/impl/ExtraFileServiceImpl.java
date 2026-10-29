@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,9 +24,10 @@ import com.extra.service.ExtraVO;
 /** 전체 파일을 검증하되 미리보기와 등록용 목록은 각각 상한 안에서만 보관한다. */
 @Service
 public class ExtraFileServiceImpl implements ExtraFileService {
+    @Value("${Globals.extra.fileUpload.MaxSizePerFile:-1}")
+    private long extraFileMaxSize = -1;
     private static final int PARSE_BATCH_SIZE = 1000;
     private static final int PREVIEW_LIMIT = 1000;
-    private static final int CELL_ISSUE_LIMIT = 1000;
     private static final String[] DATE_PATTERNS = {
         "yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm",
         "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy-MM-dd", "yyyy/MM/dd"
@@ -38,14 +40,13 @@ public class ExtraFileServiceImpl implements ExtraFileService {
         this.extraDAO = extraDAO;
     }
 
-    // SAX 원본은 최대 1,000행씩 처리하고, 미리보기는 파일 앞부분 1,000행만 유지한다.
     @Override
     public Map<String, Object> parseExtraExcel(List<MultipartFile> files) {
         if (files == null || files.size() != 1) throw FileMngUtil.bad("FILE_COUNT_INVALID", "files");
 
         List<ExtraVO> dataList = new ArrayList<>(PREVIEW_LIMIT);
         
-        // 기존 전체 목록 수집: 전체 VO를 오류/경고 목록에 중복 보관하지 않는다.
+        // 기존 - 전체 오류/경고목록 수집
 	    List<ExtraVO> errorList = new ArrayList<>();
 	    List<ExtraVO> warningList = new ArrayList<>();
 	    
@@ -68,7 +69,7 @@ public class ExtraFileServiceImpl implements ExtraFileService {
                 batch.add(values);
                 if (batch.size() >= PARSE_BATCH_SIZE) parseBatch(batch, dataList, cellIssues, counts);
             }
-        });
+        }, extraFileMaxSize);
         parseBatch(batch, dataList, cellIssues, counts);
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -77,10 +78,11 @@ public class ExtraFileServiceImpl implements ExtraFileService {
 		result.put("warningList", warningList);
         result.put("cellIssues", cellIssues);
         
-        // 기존 목록 크기 기준 집계: 미리보기 상한과 관계없이 파일 전체를 집계한다.
+        // 기존 - 전체 집계
         // result.put("errorCount", errorList.size());
         // result.put("warningCount", warningList.size());
         // result.put("totalCount", dataList.size());
+        
         result.put("errorCount", counts.errorCount);
         result.put("warningCount", counts.warningCount);
         result.put("totalCount", counts.totalCount);
@@ -88,10 +90,11 @@ public class ExtraFileServiceImpl implements ExtraFileService {
         result.put("extension", file.getFileExtsn());
         result.put("fileSize", file.getFileSize());
         result.put("originalName", file.getOrignlFileNm());
+        
         return result;
     }
 
-    // 1,000행씩 검증 후 정상·경고 행만 등록한다. 실패하면 이전 배치까지 롤백한다.
+    // 1,000행씩 검증, 오류빼고 등록, 실패시 전체 롤백
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> insertExtraExcel(List<MultipartFile> files) {
@@ -113,9 +116,12 @@ public class ExtraFileServiceImpl implements ExtraFileService {
                 batch.add(values);
                 if (batch.size() >= PARSE_BATCH_SIZE) parseBatch(batch, null, null, counts);
             }
-        });
+        }, extraFileMaxSize);
+        
         parseBatch(batch, null, null, counts);
+        
         if (counts.insertedCount == 0) throw FileMngUtil.bad("EXTRA_EXCEL_NO_INSERTABLE_ROWS", "files");
+        
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("insertedCount", counts.insertedCount);
         result.put("totalCount", counts.totalCount);
@@ -125,17 +131,20 @@ public class ExtraFileServiceImpl implements ExtraFileService {
     }
 
     // dataList가 null이면 등록 모드: 미리보기/셀 오류 목록을 만들지 않는다.
-    private void parseBatch(List<List<String>> batch, List<ExtraVO> dataList,
-            List<Map<String, Object>> cellIssues, ParseCounts counts) {
+    private void parseBatch(List<List<String>> batch, List<ExtraVO> dataList, List<Map<String, Object>> cellIssues, ParseCounts counts) {
         if (batch.isEmpty()) return;
         boolean inserting = dataList == null;
         List<ExtraVO> items = inserting ? new ArrayList<>(batch.size()) : null;
         for (List<String> values : batch) {
+        	
             int rowIndex = counts.totalCount++;
             boolean preview = !inserting && dataList.size() < PREVIEW_LIMIT;
+            
             ExtraVO item = inserting || preview ? new ExtraVO() : null;
+            
             boolean hasError = false;
             boolean hasWarning = false;
+            
             for (int column = 0; column < 16; column++) {
                 String value = column < values.size() ? values.get(column) : "";
                 boolean empty = value == null || value.trim().isEmpty();
@@ -144,7 +153,8 @@ public class ExtraFileServiceImpl implements ExtraFileService {
                     if (empty) hasWarning = true;
                     else hasError = true;
                     // rowIndex는 기존 화면과 같은 0부터 시작하는 데이터 행 위치다.
-                    if (preview && cellIssues.size() < CELL_ISSUE_LIMIT) {
+                    // 미리보기 1,000행의 셀 문제는 모두 전달한다. 최대 16,000개다.
+                    if (preview) {
                         cellIssues.add(cellIssue(rowIndex, column, empty ? "WARNING" : "ERROR", value, message));
                     }
                     continue;
@@ -189,7 +199,7 @@ public class ExtraFileServiceImpl implements ExtraFileService {
         return issue;
     }
 
-    // 정상은 null, 입력 오류는 안내 메시지를 반환한다. 검증 실패를 예외로 던지지 않는다.
+    // 정상은 null, 입력 오류는 안내 메시지를 반환한다. 
     private static String checkCell(int column, String value) {
         int maxLength;
         switch (column) {

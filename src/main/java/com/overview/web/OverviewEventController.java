@@ -35,6 +35,7 @@ public class OverviewEventController {
             @RequestParam("maxLat") BigDecimal maxLat,
             @RequestParam("maxLon") BigDecimal maxLon,
             Model model) throws Exception {
+
         if (minLat.compareTo(BigDecimal.valueOf(-90)) < 0
                 || maxLat.compareTo(BigDecimal.valueOf(90)) > 0
                 || minLon.compareTo(BigDecimal.valueOf(-180)) < 0
@@ -42,13 +43,17 @@ public class OverviewEventController {
                 || minLat.compareTo(maxLat) > 0 || minLon.compareTo(maxLon) > 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 지도 영역입니다.");
         }
+
         OverviewEventFilterVO filter = new OverviewEventFilterVO();
+
         filter.setPageIndex(1);
         filter.setPageSize(0);
+        
         filter.setMinLat(minLat);
         filter.setMinLon(minLon);
         filter.setMaxLat(maxLat);
         filter.setMaxLon(maxLon);
+
         model.addAttribute("events", overviewEventService.selectEventList(filter));
         model.addAttribute("viewportLoaded", true);
 

@@ -32,6 +32,13 @@ public abstract class ExcelFileParser {
         if (error != null) throw FileMngUtil.bad(error, "files");
         return file;
     }
+
+    protected final FileVO validate(MultipartFile upload, long maxFileSize) {
+        FileVO file = fileMngUtil.validate(upload, maxFileSize);
+        String error = extensionError(file.getFileExtsn());
+        if (error != null) throw FileMngUtil.bad(error, "files");
+        return file;
+    }
     
     public List<Map<String, Object>> parse(List<MultipartFile> files, String description) {
         return parseFiles(files, null);

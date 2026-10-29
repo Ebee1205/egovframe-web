@@ -7,6 +7,8 @@
         </Console>
     </Appenders>
     <Loggers>
+        <!-- 일괄 등록 SQL과 전체 파라미터의 DEBUG 출력을 생략한다. -->
+        <Logger name="extraDAO.insertExtraList" level="INFO"/>
         <Logger name="java.sql" level="DEBUG" additivity="false">
             <AppenderRef ref="console" />
         </Logger>

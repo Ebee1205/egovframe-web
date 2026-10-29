@@ -142,6 +142,12 @@ public class FileMngUtil {
     }
 
     public FileVO validate(MultipartFile upload) {
+        return validate(upload, maxSize);
+    }
+
+    /** 별도 업로드 정책이 있는 업무에서만 사용한다. -1은 용량 제한 없음이다. */
+    public FileVO validate(MultipartFile upload, long maxFileSize) {
+        if (maxFileSize < -1 || maxFileSize == 0) throw new IllegalArgumentException("Invalid upload size limit.");
         if (upload == null || upload.isEmpty()) { throw bad("FILE_EMPTY", "files"); }
         String name = upload.getOriginalFilename();
 
@@ -161,7 +167,7 @@ public class FileMngUtil {
             throw bad("FILE_EXTENSION_NOT_ALLOWED", "files");
         }
         
-        if (upload.getSize() > maxSize) { throw new FileException(413, "FILE_TOO_LARGE", "files"); }
+        if (maxFileSize >= 0 && upload.getSize() > maxFileSize) { throw new FileException(413, "FILE_TOO_LARGE", "files"); }
         
         FileVO file = new FileVO();
         file.setOrignlFileNm(name);

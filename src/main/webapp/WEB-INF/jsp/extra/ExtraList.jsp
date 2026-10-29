@@ -209,8 +209,8 @@
 
 
 
+    <jsp:include page="/WEB-INF/jsp/cmp/CmpYNDialog.jsp" />
     <jsp:include page="/WEB-INF/jsp/extra/ExtraXlsDialog.jsp" />
-    <script src="<c:url value='/resources/coreui-5.8.0-dist/js/coreui.bundle.min.js'/>"></script>
 
 </body>
 </html>
